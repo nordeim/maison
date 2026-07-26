@@ -2,6 +2,8 @@
  * Maison — Instagram grid (6-col)
  */
 
+import Image from "next/image";
+
 const IMAGES = [
   "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80",
   "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&q=80",
@@ -27,8 +29,7 @@ export function InstagramGrid() {
         <div className="ig-grid" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.5rem" }}>
           {IMAGES.map((src, i) => (
             <a key={i} href="https://instagram.com/maisonliving" target="_blank" rel="noopener noreferrer" aria-label={`View Instagram post ${i + 1}`} style={{ position: "relative", aspectRatio: "1 / 1", overflow: "hidden", display: "block" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.8s var(--ease-maison)" }} />
+              <Image src={src} alt="" fill sizes="(max-width: 768px) 33vw, 16vw" loading="lazy" style={{ objectFit: "cover", transition: "transform 0.8s var(--ease-maison)" }} />
               <div style={{ position: "absolute", inset: 0, background: "rgba(168, 107, 74, 0)", transition: "background 0.45s var(--ease-maison)", display: "flex", alignItems: "center", justifyContent: "center" }} className="ig-overlay">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" style={{ opacity: 0, transition: "opacity 0.45s var(--ease-maison)" }} className="ig-icon">
                   <rect x="3" y="3" width="18" height="18" rx="5" />

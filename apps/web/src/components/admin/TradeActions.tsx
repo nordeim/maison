@@ -11,15 +11,16 @@ export function TradeActions({ applicationId, defaultDiscount }: { applicationId
   const [discount, setDiscount] = useState(defaultDiscount);
   const approve = trpc.trade.approve.useMutation();
   const reject = trpc.trade.reject.useMutation();
+  const utils = trpc.useUtils();
 
   const handleApprove = async () => {
     await approve.mutateAsync({ applicationId, discountPercent: discount });
-    window.location.reload();
+    utils.trade.list.invalidate();
   };
 
   const handleReject = async () => {
     await reject.mutateAsync({ applicationId });
-    window.location.reload();
+    utils.trade.list.invalidate();
   };
 
   return (

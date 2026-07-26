@@ -10,7 +10,8 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { carts, cartItems, products } from "@maison/db";
 import { router, publicProcedure } from "../trpc";
 
@@ -71,7 +72,7 @@ export const cartRouter = router({
         .limit(1);
 
       if (!product) {
-        throw new Error("Product not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
       }
 
       // Get or create cart
@@ -94,7 +95,7 @@ export const cartRouter = router({
             eq(cartItems.productId, product.id),
             input.variantId
               ? eq(cartItems.variantId, input.variantId)
-              : eq(cartItems.variantId, null as unknown as string),
+              : isNull(cartItems.variantId),
           ),
         )
         .limit(1);

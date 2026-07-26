@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import { eq, desc, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import {
   customers,
   orders,
@@ -282,7 +283,7 @@ export const accountRouter = router({
           .insert(customers)
           .values({ userId: ctx.session.user.id })
           .returning({ id: customers.id });
-        if (!newCustomer) throw new Error("Failed to create customer record");
+        if (!newCustomer) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create customer record" });
 
         // If setting as default, unset other defaults first
         if (input.isDefaultShipping || input.isDefaultBilling) {
@@ -299,7 +300,15 @@ export const accountRouter = router({
           .insert(addresses)
           .values({
             customerId: newCustomer.id,
-            ...input,
+            label: input.label,
+            line1: input.line1,
+            line2: input.line2,
+            city: input.city,
+            region: input.region,
+            postalCode: input.postalCode,
+            country: input.country,
+            isDefaultShipping: input.isDefaultShipping,
+            isDefaultBilling: input.isDefaultBilling,
           })
           .returning({ id: addresses.id });
         return { id: addr!.id };
@@ -338,7 +347,15 @@ export const accountRouter = router({
         .insert(addresses)
         .values({
           customerId: customer.id,
-          ...input,
+          label: input.label,
+          line1: input.line1,
+          line2: input.line2,
+          city: input.city,
+          region: input.region,
+          postalCode: input.postalCode,
+          country: input.country,
+          isDefaultShipping: input.isDefaultShipping,
+          isDefaultBilling: input.isDefaultBilling,
         })
         .returning({ id: addresses.id });
       return { id: addr!.id };
@@ -408,7 +425,7 @@ async function toggleWishlistInternal(
     .where(eq(products.slug, productSlug))
     .limit(1);
 
-  if (!product) throw new Error("Product not found");
+  if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
 
   // Check if already in wishlist
   const [existing] = await db

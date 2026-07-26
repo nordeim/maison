@@ -10,7 +10,7 @@
 
 import { z } from "zod";
 import { eq, desc } from "drizzle-orm";
-import { loyaltyAccounts, loyaltyTransactions, customers } from "@maison/db";
+import { loyaltyAccounts, loyaltyTransactions, customers, users } from "@maison/db";
 import { router, protectedProcedure, adminProcedure } from "../trpc";
 import { sql } from "drizzle-orm";
 
@@ -132,10 +132,11 @@ export const loyaltyRouter = router({
         lifetimePoints: loyaltyAccounts.lifetimePoints,
         tier: loyaltyAccounts.tier,
         joinedAt: loyaltyAccounts.joinedAt,
-        customerEmail: customers.id, // join placeholder — Phase 3.1: proper join
+        customerEmail: users.email,
       })
       .from(loyaltyAccounts)
       .leftJoin(customers, eq(loyaltyAccounts.customerId, customers.id))
+      .leftJoin(users, eq(customers.userId, users.id))
       .orderBy(desc(loyaltyAccounts.lifetimePoints));
 
     return accounts;

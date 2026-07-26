@@ -74,9 +74,8 @@ export default function AccountSettingsPage() {
     );
     if (!confirmed) return;
 
-    // Phase 2.1: implement account.deleteAccount tRPC mutation
-    // For now, sign out the user
-    alert("Account deletion is not yet implemented in this phase. Please contact hello@maison-living.com to request deletion.");
+    // Phase 3.1: implement account.deleteAccount tRPC mutation
+    setError("Account deletion is not yet available. Please contact hello@maison-living.com to request deletion.");
   };
 
   if (isLoading) {

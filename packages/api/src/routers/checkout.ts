@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import {
   carts,
   cartItems,
@@ -79,7 +80,7 @@ export const checkoutRouter = router({
         .where(eq(cartItems.cartId, input.cartId));
 
       if (cartItemsList.length === 0) {
-        throw new Error("Cart is empty");
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Cart is empty" });
       }
 
       // 2. Calculate totals
@@ -213,7 +214,7 @@ export const checkoutRouter = router({
         if (existing) {
           return { orderNumber: existing.orderNumber };
         }
-        throw new Error("Order not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
       }
 
       // Clear the cart (mark items as converted — for now, just delete them)

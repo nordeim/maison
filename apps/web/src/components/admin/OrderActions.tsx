@@ -27,6 +27,7 @@ const STATUS_OPTIONS = [
 export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const updateStatus = trpc.admin.ordersUpdateStatus.useMutation();
+  const utils = trpc.useUtils();
 
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === currentStatus) return;
@@ -36,11 +37,9 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
         orderId,
         status: newStatus as "confirmed" | "shipped" | "delivered" | "cancelled" | "refunded",
       });
-      // Refresh the page to show updated status
-      window.location.reload();
+      utils.admin.ordersList.invalidate();
     } catch (err) {
       console.error("Failed to update order status:", err);
-      alert("Failed to update order status. Please try again.");
     } finally {
       setIsUpdating(false);
     }

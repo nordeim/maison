@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { trpc } from "@/lib/trpc/client";
 import { formatPrice } from "@/lib/utils";
 
@@ -172,8 +173,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 {product.primaryImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.primaryImage} alt="" style={{ width: 48, height: 60, objectFit: "cover" }} />
+                  <div style={{ width: 48, height: 60, position: "relative", flexShrink: 0 }}>
+                    <Image src={product.primaryImage} alt="" fill sizes="48px" style={{ objectFit: "cover" }} />
+                  </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", fontWeight: 500, color: "var(--ink)" }}>{product.name}</p>

@@ -9,10 +9,10 @@
  */
 
 import { z } from "zod";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { tradeApplications, customers, users } from "@maison/db";
 import { router, protectedProcedure, adminProcedure, adminWriteProcedure } from "../trpc";
-import { sql } from "drizzle-orm";
 
 export const tradeRouter = router({
   /**
@@ -39,13 +39,15 @@ export const tradeRouter = router({
         .limit(1);
 
       if (existing) {
-        throw new Error(
-          existing.status === "pending"
-            ? "You already have a pending application."
-            : existing.status === "approved"
-              ? "Your trade application has already been approved."
-              : "Your previous application was rejected. Please contact us.",
-        );
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            existing.status === "pending"
+              ? "You already have a pending application."
+              : existing.status === "approved"
+                ? "Your trade application has already been approved."
+                : "Your previous application was rejected. Please contact us.",
+        });
       }
 
       const [application] = await ctx.db

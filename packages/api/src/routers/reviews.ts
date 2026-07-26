@@ -8,6 +8,7 @@
 
 import { z } from "zod";
 import { eq, and, desc, sql, avg } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { productReviews, products, orders, lineItems } from "@maison/db";
 import { router, publicProcedure, protectedProcedure, adminProcedure, adminWriteProcedure } from "../trpc";
 
@@ -75,7 +76,7 @@ export const reviewsRouter = router({
         .where(eq(products.slug, input.productSlug))
         .limit(1);
 
-      if (!product) throw new Error("Product not found");
+      if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
 
       // Check if user is a customer
       const customerResult = await ctx.db.execute(sql`

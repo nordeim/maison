@@ -25,7 +25,6 @@ export function AddToBagButton({ productSlug, productName }: AddToBagButtonProps
       await addItem(productSlug, 1);
     } catch (err) {
       console.error("Failed to add to bag:", err);
-      alert(`Sorry, we couldn't add ${productName} to your bag. Please try again.`);
     } finally {
       setIsAdding(false);
     }

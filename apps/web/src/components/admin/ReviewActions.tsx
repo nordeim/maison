@@ -9,16 +9,17 @@ import { trpc } from "@/lib/trpc/client";
 export function ReviewActions({ reviewId }: { reviewId: string }) {
   const approve = trpc.reviews.approve.useMutation();
   const reject = trpc.reviews.reject.useMutation();
+  const utils = trpc.useUtils();
 
   const handleApprove = async () => {
     await approve.mutateAsync({ reviewId });
-    window.location.reload();
+    utils.reviews.pendingList.invalidate();
   };
 
   const handleReject = async () => {
     if (!confirm("Reject (delete) this review?")) return;
     await reject.mutateAsync({ reviewId });
-    window.location.reload();
+    utils.reviews.pendingList.invalidate();
   };
 
   return (
