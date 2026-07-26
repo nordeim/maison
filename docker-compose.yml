@@ -1,0 +1,92 @@
+# ══════════════════════════════════════════════════════════════════
+# Maison — Local Development Services
+# ══════════════════════════════════════════════════════════════════
+# Usage:
+#   Start:   docker compose up -d
+#   Stop:    docker compose down
+#   Reset:   docker compose down -v  (WARNING: deletes all data)
+#   Logs:    docker compose logs -f postgres
+# ══════════════════════════════════════════════════════════════════
+
+services:
+
+  # ─── PostgreSQL 17 ───────────────────────────────────────────────
+  postgres:
+    image: postgres:17-alpine
+    container_name: maison_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: maison_dev
+      POSTGRES_USER: maison
+      POSTGRES_PASSWORD: maison_local_dev
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maison -d maison_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - maison_net
+
+  # ─── Redis 7 (rate limiting, idempotency keys) ───────────────────
+  # Note: In production, use Upstash Redis (serverless). This is for local dev.
+  redis:
+    image: redis:7-alpine
+    container_name: maison_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass maison_redis_dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "maison_redis_dev", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - maison_net
+
+  # ─── Stripe CLI (webhook forwarding to local) ────────────────────
+  # Usage: docker compose --profile stripe up -d stripe
+  # Then: docker exec -it maison_stripe stripe listen --forward-to host.docker.internal:3000/api/webhooks/stripe
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: maison_stripe
+    profiles: ["stripe"]
+    network_mode: host
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+    command: listen --forward-to localhost:3000/api/webhooks/stripe
+
+  # ─── Adminer (lightweight DB GUI — dev only) ─────────────────────
+  adminer:
+    image: adminer:latest
+    container_name: maison_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - maison_net
+    profiles: ["tools"]
+
+# ─── Named Volumes ─────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ─── Networks ──────────────────────────────────────────────────────
+networks:
+  maison_net:
+    driver: bridge

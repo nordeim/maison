@@ -126,3 +126,38 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg-link
+
+# ─── Next.js 16 (Turborepo monorepo) ──────────────────────────────
+.next/
+out/
+next-env.d.ts
+.vercel/
+.turbo/
+*.tsbuildinfo
+next-stats/
+
+# ─── Drizzle ORM (generated artifacts — keep migrations, ignore meta caches) ──
+packages/db/drizzle/meta/
+packages/db/.drizzle/
+
+# ─── Playwright ───────────────────────────────────────────────────
+playwright-report/
+test-results/
+playwright/.cache/
+
+# ─── Vitest ───────────────────────────────────────────────────────
+coverage/
+*.lcov
+
+# ─── Sentry config (local) ────────────────────────────────────────
+.sentryclirc
+
+# ─── Sanity (local studio state) ──────────────────────────────────
+.sanity/
+apps/studio/dist/
+
+# ─── Trigger.dev (local state) ────────────────────────────────────
+.trigger/
+
+# ─── Keep .env.example explicit (must be committed) ───────────────
+!.env.example

@@ -1,0 +1,50 @@
+{
+  "name": "maison",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Maison — Curated Scandinavian home goods e-commerce platform",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "start": "pnpm --filter=@maison/web start",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,css}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,css}\" --ignore-path .gitignore",
+    "check-types": "turbo check-types",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "test:coverage": "turbo test -- --coverage",
+    "clean": "turbo clean && rm -rf node_modules",
+    "db:generate": "turbo db:generate --filter=@maison/db",
+    "db:setup": "bash scripts/db-setup.sh",
+    "db:migrate": "turbo db:migrate --filter=@maison/db",
+    "db:push": "turbo db:push --filter=@maison/db",
+    "db:seed": "turbo db:seed --filter=@maison/db",
+    "db:studio": "turbo db:studio --filter=@maison/db",
+    "db:reset": "turbo db:reset --filter=@maison/db",
+    "jobs:dev": "turbo dev --filter=@maison/workers",
+    "jobs:deploy": "turbo deploy --filter=@maison/workers",
+    "lighthouse": "lhci",
+    "lighthouse:ci": "lhci autorun",
+    "bundle-size": "ANALYZE=true pnpm --filter=@maison/web build",
+    "audit": "pnpm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "@maison/eslint-config": "workspace:*",
+    "@maison/typescript-config": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.4",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "turbo": "^2.10.4",
+    "typescript": "^5.9.0"
+  }
+}
