@@ -1364,15 +1364,18 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | ~~CRITICAL~~ | ~~Application code not yet scaffolded (Phase 0)~~ | ~~Cannot run the storefront~~ | ✅ Resolved — Phase 0 scaffold complete |
 | ~~HIGH~~ | ~~GitHub Actions CI workflow not yet created~~ | ~~No automated quality gates~~ | ✅ Resolved — `.github/workflows/ci.yml` created |
 | ~~HIGH~~ | ~~Drizzle schema not yet written~~ | ~~No DB layer~~ | ✅ Resolved — 16 tables in `packages/db/src/schema/`, migration `0000_initial.sql` |
-| ~~HIGH~~ | ~~tRPC routers not yet implemented~~ | ~~No API layer~~ | ✅ Resolved — 8 routers in `packages/api/src/routers/` (products, collections, cart, account, checkout, admin, newsletter, contact) |
-| MEDIUM | Sanity Studio schemas not yet defined | No CMS content management | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings) |
-| MEDIUM | Playwright E2E test suite not yet written | No automated user journey tests | ✅ Resolved — `e2e/smoke.spec.ts` + `e2e/accessibility.spec.ts` + `playwright.config.ts` |
-| HIGH | Homepage renders only Phase 0 hero + 4 products (not full 15 sections from landing_page_unified.html) | Brand experience incomplete | Open — Phase 1 |
-| HIGH | Stripe webhook handler returns 200 but doesn't update order status | Cannot process payments end-to-end | Open — Phase 1 |
-| HIGH | Cart router creates carts but no cart drawer UI | No add-to-cart from PDP | Open — Phase 1 |
-| HIGH | Checkout page is a stub (no Stripe Elements, no order creation) | Cannot complete purchases | Open — Phase 1 |
-| HIGH | Account dashboard is a stub (no order history, no wishlist UI) | Account section non-functional | Open — Phase 1 |
-| HIGH | Admin dashboard is a stub (no KPI queries, no product table) | Admin section non-functional | Open — Phase 1 |
+| ~~HIGH~~ | ~~tRPC routers not yet implemented~~ | ~~No API layer~~ | ✅ Resolved — 8 routers in `packages/api/src/routers/` |
+| ~~MEDIUM~~ | ~~Sanity Studio schemas not yet defined~~ | ~~No CMS content management~~ | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings) |
+| ~~MEDIUM~~ | ~~Playwright E2E test suite not yet written~~ | ~~No automated user journey tests~~ | ✅ Resolved — 16 smoke tests + accessibility tests |
+| ~~HIGH~~ | ~~Homepage renders only Phase 0 hero + 4 products~~ | ~~Brand experience incomplete~~ | ✅ Resolved — Full 15-section homepage with real data |
+| ~~HIGH~~ | ~~Stripe webhook handler returns 200 but doesn't update order status~~ | ~~Cannot process payments end-to-end~~ | ✅ Resolved — Webhook updates order to "confirmed" + sends OrderConfirmation email |
+| ~~HIGH~~ | ~~Cart router creates carts but no cart drawer UI~~ | ~~No add-to-cart from PDP~~ | ✅ Resolved — CartProvider + CartDrawer + AddToBagButton on PDP |
+| ~~HIGH~~ | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~ | ~~Cannot complete purchases~~ | ✅ Resolved — Multi-step checkout with real order creation + Stripe Payment Intents |
+| ~~HIGH~~ | ~~Account dashboard is a stub (no order history, no wishlist UI)~~ | ~~Account section non-functional~~ | ✅ Resolved — Dashboard with order count + wishlist count, order history, wishlist grid |
+| ~~HIGH~~ | ~~Admin dashboard is a stub (no KPI queries, no product table)~~ | ~~Admin section non-functional~~ | ✅ Resolved — Dashboard with KPIs + recent orders + low-stock alerts, product table, order fulfillment, customer directory, inventory management |
+| MEDIUM | Stripe Elements not rendering card input (checkout uses demo mode) | No real card payments in dev | Open — Phase 2 (requires Stripe account config) |
+| MEDIUM | Wishlist toggle on ProductCard is client-side only (not persisted to DB) | Wishlist lost on page refresh | Open — Phase 2 (wire to account.toggleWishlist mutation) |
+| MEDIUM | No product image upload in admin | Admin can't add images to new products | Open — Phase 2 (Cloudflare Images integration) |
 | LOW | OAuth providers (Google, Apple) not configured | Email/password only in v1 | Phase 2 |
 | LOW | Multi-region (EU/UK) not implemented | US-only in v1 | Phase 2 |
 | LOW | Product reviews not implemented | No social proof on PDP | Phase 3 |

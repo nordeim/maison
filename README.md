@@ -438,11 +438,11 @@ REFACTOR → Clean up the code while keeping the test green
 | Phase | Status | Key Deliverables |
 |-------|--------|------------------|
 | Phase 0 — Foundation | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (16 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (8), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml` |
-| Phase 1 — MVP | 🟡 In progress | Full homepage (15 sections), PLP + PDP with gallery, cart drawer, Stripe checkout, customer account, admin dashboard |
-| Phase 2 — Growth | ⚪ Not started | OAuth, search, promo codes, multi-region, CMS full integration |
-| Phase 3 — Optimisation | ⚪ Not started | Reviews, A/B testing, trade program, gift cards, loyalty |
+| Phase 1 — MVP | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
+| Phase 2 — Growth | ⚪ Not started | OAuth (Google, Apple), magic link sign-in, search, promo codes, multi-region (EU/UK), Sanity CMS full integration, Klaviyo newsletter, abandoned cart emails |
+| Phase 3 — Optimisation | ⚪ Not started | Reviews, A/B testing, trade program, gift cards, loyalty/rewards, Instagram shop |
 
-**Current progress:** Phase 0 scaffold complete. The monorepo installs and builds; `pnpm dev` starts the Next.js app at `:3000`; `pnpm db:seed` loads the initial catalog. Phase 1 feature implementation per `docs/PRD_unified.md` §18 to commence.
+**Current progress:** Phase 1 MVP complete. The full storefront is functional: browse products, add to cart, checkout, view order history, manage wishlist. Admin can view products, fulfill orders, and monitor inventory. Phase 2 growth features per `docs/PRD_unified.md` §18 to commence.
 
 ---
 

@@ -3,16 +3,20 @@
  *
  * Public procedures for cart management (anonymous + authenticated).
  * Per PRD §10.1.
+ *
+ * The addItem mutation accepts a productSlug (not UUID) for convenience —
+ * the ProductCard and PDP pass slugs. The router resolves the slug to a
+ * productId server-side.
  */
 
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
-import { carts, cartItems, products, productVariants } from "@maison/db";
+import { carts, cartItems, products } from "@maison/db";
 import { router, publicProcedure } from "../trpc";
 
 export const cartRouter = router({
   /**
-   * Get cart contents by cartId (anonymous) or session user's cart.
+   * Get cart contents by cartId.
    */
   get: publicProcedure
     .input(z.object({ cartId: z.string().uuid().optional() }))
@@ -47,22 +51,23 @@ export const cartRouter = router({
 
   /**
    * Add item to cart. Creates a cart if none exists.
+   * Accepts productSlug (resolved to productId server-side).
    */
   addItem: publicProcedure
     .input(
       z.object({
         cartId: z.string().uuid().optional(),
-        productId: z.string().uuid(),
+        productSlug: z.string().min(1),
         variantId: z.string().uuid().optional(),
-        quantity: z.number().min(1).max(99),
+        quantity: z.number().min(1).max(99).default(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Validate product exists + is active
+      // Resolve product slug to ID
       const [product] = await ctx.db
         .select({ id: products.id, priceCents: products.priceCents })
         .from(products)
-        .where(eq(products.id, input.productId))
+        .where(and(eq(products.slug, input.productSlug), eq(products.isActive, true)))
         .limit(1);
 
       if (!product) {
@@ -79,12 +84,35 @@ export const cartRouter = router({
         cartId = newCart!.id;
       }
 
-      // Insert cart item
+      // Check if item already exists in cart (same product + variant) — if so, increment quantity
+      const [existingItem] = await ctx.db
+        .select()
+        .from(cartItems)
+        .where(
+          and(
+            eq(cartItems.cartId, cartId),
+            eq(cartItems.productId, product.id),
+            input.variantId
+              ? eq(cartItems.variantId, input.variantId)
+              : eq(cartItems.variantId, null as unknown as string),
+          ),
+        )
+        .limit(1);
+
+      if (existingItem) {
+        await ctx.db
+          .update(cartItems)
+          .set({ quantity: existingItem.quantity + input.quantity })
+          .where(eq(cartItems.id, existingItem.id));
+        return { cartId: cartId!, itemId: existingItem.id };
+      }
+
+      // Insert new cart item
       const [item] = await ctx.db
         .insert(cartItems)
         .values({
           cartId,
-          productId: input.productId,
+          productId: product.id,
           variantId: input.variantId,
           quantity: input.quantity,
         })
@@ -115,6 +143,23 @@ export const cartRouter = router({
           .set({ quantity: input.quantity })
           .where(and(eq(cartItems.id, input.itemId), eq(cartItems.cartId, input.cartId)));
       }
+      return { success: true };
+    }),
+
+  /**
+   * Remove item from cart (deletes the row regardless of quantity).
+   */
+  removeItem: publicProcedure
+    .input(
+      z.object({
+        cartId: z.string().uuid(),
+        itemId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db
+        .delete(cartItems)
+        .where(and(eq(cartItems.id, input.itemId), eq(cartItems.cartId, input.cartId)));
       return { success: true };
     }),
 });

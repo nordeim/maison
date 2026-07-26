@@ -9,6 +9,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { TRPCProvider } from "@/lib/trpc/client";
+import { CartProvider } from "@/components/shop/CartProvider";
+import { CartDrawer } from "@/components/shop/CartDrawer";
 import { site } from "@maison/config";
 import "./globals.css";
 
@@ -76,7 +78,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
       <body>
-        <TRPCProvider>{children}</TRPCProvider>
+        <TRPCProvider>
+          <CartProvider>
+            {children}
+            <CartDrawer />
+          </CartProvider>
+        </TRPCProvider>
       </body>
     </html>
   );
