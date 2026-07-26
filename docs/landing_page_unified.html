@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAISON — Objects of Quiet Beauty | Scandinavian Home & Lifestyle</title>
+  <meta name="description" content="Handcrafted home goods, sculptural lighting, and tactile lifestyle pieces — curated for considered living. Made by Nordic artisans from solid oak, linen, and clay." />
+  <meta name="theme-color" content="#faf8f5" />
+  <meta property="og:title" content="MAISON — Objects of Quiet Beauty" />
+  <meta property="og:description" content="Curated home objects and lifestyle pieces designed to bring warmth and intention to everyday moments." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts: distinctive editorial pairing (Cormorant Garamond display + Inter body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       Luxury/Refined + Organic/Natural — warm cream base,
+       terracotta accent, charcoal ink. Radical departure from
+       generic SaaS blue/indigo.
+       ============================================================ */
+    :root {
+      /* Backgrounds */
+      --bg: #faf8f5;            /* warm cream */
+      --bg-2: #f3efe8;          /* linen */
+      --bg-3: #ece5d8;          /* deeper linen */
+      --bg-card: #ffffff;
+      --bg-dark: #1f1b17;       /* warm charcoal */
+
+      /* Ink */
+      --ink: #1f1b17;
+      --ink-2: #4a433b;
+      --muted: #8a8178;
+      --line: #e5ddd1;
+      --line-soft: #efe9df;
+
+      /* Accents */
+      --clay: #a86b4a;          /* terracotta primary */
+      --clay-dark: #8a5538;
+      --clay-light: #c17d52;
+      --gold: #c4a265;          /* secondary accent */
+      --sage: #8b9a82;          /* tertiary muted green */
+
+      /* Effects */
+      --shadow-sm: 0 1px 3px rgba(31,27,23,0.04);
+      --shadow-md: 0 8px 24px rgba(31,27,23,0.06);
+      --shadow-lg: 0 24px 60px rgba(31,27,23,0.10);
+      --shadow-xl: 0 32px 80px rgba(31,27,23,0.14);
+
+      /* Layout */
+      --container: 1280px;
+      --container-narrow: 760px;
+      --gutter: clamp(20px, 5vw, 64px);
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 8px;
+
+      /* Motion */
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --dur-fast: 0.25s;
+      --dur: 0.45s;
+      --dur-slow: 0.8s;
+
+      /* Type */
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Subtle paper-grain noise overlay — tactile, organic, non-digital */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    input { font: inherit; }
+    ul { list-style: none; }
+    em { font-style: italic; }
+
+    ::selection { background: var(--clay); color: var(--bg); }
+
+    /* Focus visibility — accessibility */
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--clay);
+      outline-offset: 3px;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+       ============================================================ */
+    h1, h2, h3, h4 {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.012em;
+      color: var(--ink);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--clay);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      font-weight: 500;
+    }
+
+    .section-title em { color: var(--clay); font-weight: 400; }
+
+    .lede {
+      font-size: clamp(1rem, 1.15vw, 1.125rem);
+      line-height: 1.7;
+      color: var(--ink-2);
+      max-width: 60ch;
+    }
+
+    /* ============================================================
+       LAYOUT PRIMITIVES
+       ============================================================ */
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+    }
+    .container-narrow {
+      max-width: var(--container-narrow);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+    }
+    .section {
+      padding: clamp(64px, 9vw, 120px) 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-bottom: clamp(40px, 5vw, 64px);
+      flex-wrap: wrap;
+    }
+    .section-head .head-text { max-width: 36ch; }
+    .section-head .link {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 2px;
+      transition: color var(--dur-fast), border-color var(--dur-fast);
+      white-space: nowrap;
+    }
+    .section-head .link:hover { color: var(--clay); border-color: var(--clay); }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.95rem 1.75rem;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .btn svg { width: 14px; height: 14px; transition: transform var(--dur) var(--ease); }
+    .btn:hover svg { transform: translateX(4px); }
+
+    .btn-primary {
+      background: var(--clay);
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      background: var(--clay-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+    .btn-outline:hover {
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+      padding: 0.75rem 0;
+    }
+    .btn-ghost:hover { color: var(--clay); border-color: var(--clay); }
+
+    /* ============================================================
+       ANNOUNCEMENT BAR
+       ============================================================ */
+    .announcement {
+      background: var(--ink);
+      color: var(--bg);
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.7rem var(--gutter);
+      font-weight: 400;
+    }
+    .announcement span { color: var(--gold); font-weight: 500; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250, 248, 245, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .header.scrolled {
+      background: rgba(250, 248, 245, 0.98);
+      box-shadow: var(--shadow-sm);
+    }
+    .header__inner {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 1.1rem var(--gutter);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .header__logo {
+      font-family: var(--font-serif);
+      font-size: 1.65rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--ink);
+    }
+    .header__logo em { color: var(--clay); font-style: italic; font-weight: 500; }
+
+    .header__nav {
+      display: flex;
+      gap: 2.25rem;
+      align-items: center;
+    }
+    .header__link {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--ink-2);
+      position: relative;
+      padding: 0.25rem 0;
+      transition: color var(--dur-fast);
+    }
+    .header__link::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -2px;
+      height: 1px;
+      background: var(--clay);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur) var(--ease);
+    }
+    .header__link:hover { color: var(--ink); }
+    .header__link:hover::after { transform: scaleX(1); }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .header__icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: var(--ink);
+      transition: background var(--dur-fast), color var(--dur-fast);
+      position: relative;
+    }
+    .header__icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .header__icon:hover { background: var(--bg-2); color: var(--clay); }
+    .header__cart-count {
+      position: absolute;
+      top: 4px; right: 4px;
+      background: var(--clay);
+      color: var(--bg);
+      font-size: 10px;
+      font-weight: 600;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+    }
+
+    .header__menu-btn {
+      display: none;
+      width: 40px; height: 40px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+    .header__menu-btn span {
+      display: block;
+      width: 22px; height: 1.5px;
+      background: var(--ink);
+      transition: transform var(--dur) var(--ease), opacity var(--dur-fast);
+    }
+    .header__menu-btn.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .header__menu-btn.active span:nth-child(2) { opacity: 0; }
+
+    /* Mobile nav drawer */
+    .mobile-nav {
+      position: fixed;
+      top: 0; right: -100%;
+      width: min(85vw, 380px);
+      height: 100vh;
+      background: var(--bg);
+      z-index: 200;
+      padding: 5rem 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      transition: right var(--dur) var(--ease);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+    }
+    .mobile-nav.open { right: 0; }
+    .mobile-nav a {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: var(--ink);
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .mobile-nav a:hover { color: var(--clay); }
+    .mobile-nav__close {
+      position: absolute;
+      top: 1.25rem; right: 1.25rem;
+      font-size: 2rem;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .mobile-nav__eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(31,27,23,0.4);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur) var(--ease);
+    }
+    .mobile-overlay.show { opacity: 1; pointer-events: auto; }
+
+    /* ============================================================
+       HERO — Full-bleed editorial (NOT predictable L/R split)
+       Massive serif headline over warm photographic backdrop.
+       ============================================================ */
+    .hero {
+      position: relative;
+      height: 92vh;
+      min-height: 620px;
+      max-height: 920px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      color: var(--bg);
+    }
+    .hero__bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .hero__bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      animation: kenBurns 24s ease-in-out infinite alternate;
+    }
+    @keyframes kenBurns {
+      0%   { transform: scale(1.08) translate(-1%, -1%); }
+      100% { transform: scale(1.18) translate(1.5%, 1%); }
+    }
+    .hero__overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(180deg, rgba(31,27,23,0.35) 0%, rgba(31,27,23,0.15) 35%, rgba(31,27,23,0.55) 100%);
+    }
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      width: 100%;
+    }
+    .hero__eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(250,248,245,0.85);
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 32px; height: 1px;
+      background: var(--gold);
+    }
+    .hero__title {
+      font-family: var(--font-serif);
+      font-size: clamp(3rem, 8.5vw, 7.5rem);
+      font-weight: 400;
+      line-height: 0.98;
+      letter-spacing: -0.02em;
+      color: var(--bg);
+      margin-bottom: 1.75rem;
+      max-width: 14ch;
+    }
+    .hero__title em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gold);
+    }
+    .hero__desc {
+      font-size: clamp(1rem, 1.2vw, 1.125rem);
+      line-height: 1.7;
+      color: rgba(250,248,245,0.92);
+      max-width: 52ch;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+    .hero__actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .hero .btn-primary {
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .hero .btn-primary:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .hero .btn-outline {
+      border-color: rgba(250,248,245,0.5);
+      color: var(--bg);
+    }
+    .hero .btn-outline:hover {
+      background: var(--bg);
+      color: var(--ink);
+      border-color: var(--bg);
+    }
+
+    .hero__scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(250,248,245,0.7);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    .hero__scroll svg {
+      width: 14px; height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      animation: scrollHint 2.4s ease-in-out infinite;
+    }
+    @keyframes scrollHint {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50%      { transform: translateY(6px); opacity: 1; }
+    }
+
+    /* ============================================================
+       MARQUEE — Brand promises strip
+       ============================================================ */
+    .marquee {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 1.1rem 0;
+      overflow: hidden;
+      border-top: 1px solid var(--bg-dark);
+    }
+    .marquee__track {
+      display: flex;
+      gap: 3rem;
+      white-space: nowrap;
+      animation: marquee 38s linear infinite;
+      width: max-content;
+    }
+    .marquee__item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.875rem;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 400;
+      color: rgba(250,248,245,0.85);
+    }
+    .marquee__item span {
+      color: var(--gold);
+      font-size: 8px;
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ============================================================
+       FEATURED COLLECTION — Editorial split spotlight
+       ============================================================ */
+    .featured {
+      padding: clamp(64px, 9vw, 120px) 0;
+      background: var(--bg-2);
+    }
+    .featured__grid {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 6rem);
+      align-items: center;
+    }
+    .featured__image {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 5;
+    }
+    .featured__image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 1.2s var(--ease);
+    }
+    .featured__image:hover img { transform: scale(1.04); }
+    .featured__image-tag {
+      position: absolute;
+      top: 1.5rem; left: 1.5rem;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 0.5rem 1rem;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .featured__text h2 {
+      font-size: clamp(2.25rem, 5vw, 3.75rem);
+      margin-bottom: 1.5rem;
+      line-height: 1.05;
+    }
+    .featured__text h2 em { color: var(--clay); font-weight: 400; }
+    .featured__text p {
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: var(--ink-2);
+      margin-bottom: 2rem;
+      max-width: 48ch;
+    }
+    .featured__detail {
+      display: flex;
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--line);
+    }
+    .featured__detail-item span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .featured__detail-item strong {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* ============================================================
+       CATEGORIES — Image cards with overlay
+       ============================================================ */
+    .categories__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+    .category-card {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      display: block;
+    }
+    .category-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 1s var(--ease);
+    }
+    .category-card:hover img { transform: scale(1.08); }
+    .category-card__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(31,27,23,0.7) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+      color: var(--bg);
+    }
+    .category-card__name {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .category-card__count {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(250,248,245,0.8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .category-card__count::after {
+      content: '→';
+      font-family: var(--font-sans);
+      transition: transform var(--dur) var(--ease);
+    }
+    .category-card:hover .category-card__count::after { transform: translateX(4px); }
+
+    /* ============================================================
+       PRODUCTS — Cards with hover-swap, badges, wishlist
+       ============================================================ */
+    .products__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.75rem 1.25rem;
+    }
+    .product-card {
+      position: relative;
+      cursor: pointer;
+    }
+    .product-card__image-wrap {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: var(--bg-2);
+      margin-bottom: 1rem;
+    }
+    .product-card__image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: opacity 0.6s var(--ease), transform 1s var(--ease);
+    }
+    .product-card__image-wrap img.alt {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+    .product-card:hover .product-card__image-wrap img.alt { opacity: 1; }
+    .product-card:hover .product-card__image-wrap img { transform: scale(1.04); }
+
+    .product-card__badge {
+      position: absolute;
+      top: 1rem; left: 1rem;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 0.35rem 0.75rem;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 500;
+      z-index: 2;
+    }
+    .product-card__badge.bestseller { background: var(--clay); color: var(--bg); }
+    .product-card__badge.new { background: var(--ink); color: var(--bg); }
+
+    .product-card__wishlist {
+      position: absolute;
+      top: 0.75rem; right: 0.75rem;
+      width: 36px; height: 36px;
+      background: rgba(250,248,245,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity var(--dur-fast), transform var(--dur-fast), background var(--dur-fast);
+      z-index: 2;
+    }
+    .product-card:hover .product-card__wishlist { opacity: 1; transform: translateY(0); }
+    .product-card__wishlist:hover { background: var(--bg); }
+    .product-card__wishlist svg { width: 16px; height: 16px; stroke: var(--ink); fill: none; stroke-width: 1.5; transition: fill var(--dur-fast); }
+    .product-card__wishlist.active svg { fill: var(--clay); stroke: var(--clay); }
+
+    .product-card__quick-add {
+      position: absolute;
+      bottom: 1rem; left: 1rem; right: 1rem;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 0.75rem;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--dur-fast), transform var(--dur-fast), background var(--dur-fast);
+      z-index: 2;
+    }
+    .product-card:hover .product-card__quick-add { opacity: 1; transform: translateY(0); }
+    .product-card__quick-add:hover { background: var(--ink); color: var(--bg); }
+
+    .product-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .product-card__category {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .product-card__name {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--ink);
+      transition: color var(--dur-fast);
+    }
+    .product-card:hover .product-card__name { color: var(--clay); }
+    .product-card__material {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .product-card__price {
+      font-size: 0.95rem;
+      color: var(--ink);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    /* ============================================================
+       PHILOSOPHY / BRAND STORY — Asymmetric editorial narrative
+       ============================================================ */
+    .philosophy {
+      background: var(--bg-2);
+      padding: clamp(80px, 11vw, 140px) 0;
+    }
+    .philosophy__grid {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: clamp(3rem, 7vw, 6rem);
+      align-items: center;
+    }
+    .philosophy__images {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 1rem;
+      aspect-ratio: 1 / 1;
+    }
+    .philosophy__images img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 1.2s var(--ease);
+    }
+    .philosophy__images img:nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+    .philosophy__images img:nth-child(2) { grid-column: 2; grid-row: 1; }
+    .philosophy__images img:nth-child(3) { grid-column: 2; grid-row: 2; }
+    .philosophy__images img:hover { transform: scale(1.04); }
+
+    .philosophy__content h2 {
+      font-size: clamp(1.875rem, 3.6vw, 2.875rem);
+      line-height: 1.15;
+      margin-bottom: 1.75rem;
+      max-width: 22ch;
+    }
+    .philosophy__content h2 em { color: var(--clay); font-weight: 400; }
+    .philosophy__content p {
+      font-size: 1.0625rem;
+      line-height: 1.75;
+      color: var(--ink-2);
+      margin-bottom: 1.25rem;
+      max-width: 52ch;
+    }
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.75rem 0;
+      color: var(--gold);
+      font-size: 1.25rem;
+    }
+    .ornament::before, .ornament::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+      max-width: 60px;
+    }
+    .ornament span { font-size: 0.875rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin: 2rem 0;
+      padding: 1.75rem 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .stat__num {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 500;
+      color: var(--clay);
+      display: block;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat__label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       MATERIALS — Three materials with custom SVG icons
+       ============================================================ */
+    .materials__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .material {
+      padding: 2.5rem 2rem;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+    .material::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--clay);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur) var(--ease);
+    }
+    .material:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: transparent;
+    }
+    .material:hover::before { transform: scaleX(1); }
+    .material__icon {
+      width: 48px; height: 48px;
+      color: var(--clay);
+      margin-bottom: 1.5rem;
+    }
+    .material__icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.25; }
+    .material h3 {
+      font-family: var(--font-serif);
+      font-size: 1.625rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+    .material p {
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: var(--ink-2);
+    }
+    .material__origin {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--line-soft);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .material__origin strong { color: var(--ink-2); font-weight: 500; }
+
+    /* ============================================================
+       EDITORIAL — The Hygge Edit, full-bleed image + text
+       ============================================================ */
+    .editorial {
+      position: relative;
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      color: var(--bg);
+      overflow: hidden;
+    }
+    .editorial__bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .editorial__bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .editorial__overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(135deg, rgba(31,27,23,0.65) 0%, rgba(31,27,23,0.35) 60%, rgba(31,27,23,0.5) 100%);
+    }
+    .editorial__content {
+      position: relative;
+      z-index: 2;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 4rem var(--gutter);
+      width: 100%;
+    }
+    .editorial__inner {
+      max-width: 540px;
+    }
+    .editorial .eyebrow { color: var(--gold); }
+    .editorial h2 {
+      font-size: clamp(2.25rem, 5.5vw, 4rem);
+      color: var(--bg);
+      margin-bottom: 1.5rem;
+      line-height: 1.05;
+    }
+    .editorial h2 em { color: var(--gold); font-weight: 300; }
+    .editorial p {
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: rgba(250,248,245,0.9);
+      margin-bottom: 2rem;
+      font-weight: 300;
+      max-width: 48ch;
+    }
+    .editorial .btn-primary { background: var(--gold); color: var(--ink); }
+    .editorial .btn-primary:hover { background: var(--bg); color: var(--ink); }
+
+    /* ============================================================
+       TESTIMONIALS
+       ============================================================ */
+    .testimonials__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .testimonial {
+      padding: 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      position: relative;
+    }
+    .testimonial:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .testimonial__quote-mark {
+      font-family: var(--font-serif);
+      font-size: 4rem;
+      line-height: 0.6;
+      color: var(--clay);
+      opacity: 0.3;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .testimonial__stars {
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+    .testimonial blockquote {
+      font-family: var(--font-serif);
+      font-size: 1.1875rem;
+      line-height: 1.5;
+      color: var(--ink);
+      margin-bottom: 1.75rem;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .testimonial cite {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-style: normal;
+    }
+    .testimonial cite strong {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 0.95rem;
+    }
+    .testimonial cite span {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .testimonial cite::before {
+      content: '';
+      width: 24px; height: 1px;
+      background: var(--clay);
+    }
+
+    /* ============================================================
+       JOURNAL
+       ============================================================ */
+    .journal__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .journal-card {
+      display: block;
+      transition: transform var(--dur) var(--ease);
+    }
+    .journal-card:hover { transform: translateY(-4px); }
+    .journal-card__img {
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      background: var(--bg-2);
+    }
+    .journal-card__img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 1s var(--ease);
+    }
+    .journal-card:hover .journal-card__img img { transform: scale(1.05); }
+    .journal-card__meta {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .journal-card__meta span { color: var(--clay); }
+    .journal-card h3 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      transition: color var(--dur-fast);
+    }
+    .journal-card:hover h3 { color: var(--clay); }
+    .journal-card p {
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--ink-2);
+    }
+
+    /* ============================================================
+       INSTAGRAM
+       ============================================================ */
+    .instagram__grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+    }
+    .instagram__item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      display: block;
+    }
+    .instagram__item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s var(--ease);
+    }
+    .instagram__item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(168, 107, 74, 0);
+      transition: background var(--dur) var(--ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .instagram__item:hover::after { background: rgba(168, 107, 74, 0.4); }
+    .instagram__item:hover img { transform: scale(1.1); }
+    .instagram__item-icon {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+      color: var(--bg);
+      z-index: 2;
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .instagram__item:hover .instagram__item-icon {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .instagram__item-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+    /* ============================================================
+       NEWSLETTER — "Letters from Maison"
+       ============================================================ */
+    .newsletter {
+      background: var(--ink);
+      color: var(--bg);
+      padding: clamp(64px, 9vw, 110px) 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .newsletter::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23c4a265' fill-opacity='0.04' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .newsletter__inner {
+      max-width: var(--container-narrow);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .newsletter .eyebrow { color: var(--gold); }
+    .newsletter h2 {
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      color: var(--bg);
+      margin-bottom: 1.25rem;
+      line-height: 1.05;
+    }
+    .newsletter h2 em { color: var(--gold); font-weight: 300; }
+    .newsletter p {
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: rgba(250,248,245,0.75);
+      margin-bottom: 2.5rem;
+      max-width: 50ch;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 300;
+    }
+    .newsletter__form {
+      display: flex;
+      max-width: 480px;
+      margin: 0 auto 1.25rem;
+      border-bottom: 1px solid rgba(250,248,245,0.3);
+      transition: border-color var(--dur) var(--ease);
+    }
+    .newsletter__form:focus-within { border-color: var(--gold); }
+    .newsletter__form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 1rem 0;
+      color: var(--bg);
+      font-size: 1rem;
+      outline: none;
+    }
+    .newsletter__form input::placeholder { color: rgba(250,248,245,0.5); }
+    .newsletter__form button {
+      background: transparent;
+      color: var(--gold);
+      padding: 0 1.25rem;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color var(--dur-fast);
+    }
+    .newsletter__form button:hover { color: var(--bg); }
+    .newsletter__note {
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: rgba(250,248,245,0.5);
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .footer {
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      padding: clamp(56px, 7vw, 88px) 0 2rem;
+    }
+    .footer__top {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 3rem;
+      padding-bottom: 3.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .footer__brand {
+      font-family: var(--font-serif);
+      font-size: 1.85rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .footer__brand em { color: var(--clay); font-style: italic; font-weight: 500; }
+    .footer__tagline {
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--ink-2);
+      max-width: 38ch;
+      margin-bottom: 1.75rem;
+    }
+    .footer__socials {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .footer__socials a {
+      width: 38px; height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--ink-2);
+      transition: all var(--dur-fast);
+    }
+    .footer__socials a:hover {
+      background: var(--clay);
+      border-color: var(--clay);
+      color: var(--bg);
+    }
+    .footer__socials svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+    .footer__col h4 {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+    }
+    .footer__col ul li {
+      margin-bottom: 0.625rem;
+    }
+    .footer__col ul a {
+      font-size: 0.9375rem;
+      color: var(--ink-2);
+      transition: color var(--dur-fast);
+    }
+    .footer__col ul a:hover { color: var(--clay); }
+
+    .footer__bottom {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 2rem var(--gutter);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .footer__copy {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .footer__legal {
+      display: flex;
+      gap: 1.75rem;
+    }
+    .footer__legal a {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      transition: color var(--dur-fast);
+    }
+    .footer__legal a:hover { color: var(--clay); }
+
+    /* ============================================================
+       SCROLL REVEAL
+       ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+      will-change: opacity, transform;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+    .reveal[data-delay="4"] { transition-delay: 0.4s; }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translate(-50%, 120%);
+      background: var(--ink);
+      color: var(--bg);
+      padding: 1rem 1.75rem;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      z-index: 300;
+      box-shadow: var(--shadow-lg);
+      transition: transform var(--dur) var(--ease);
+      max-width: calc(100vw - 2rem);
+    }
+    .toast.show { transform: translate(-50%, 0); }
+
+    /* ============================================================
+       RESPONSIVE — Mobile-first adjustments
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .categories__grid { grid-template-columns: repeat(2, 1fr); }
+      .products__grid { grid-template-columns: repeat(3, 1fr); }
+      .materials__grid { grid-template-columns: 1fr; gap: 1rem; }
+      .testimonials__grid { grid-template-columns: 1fr; }
+      .journal__grid { grid-template-columns: repeat(2, 1fr); }
+      .instagram__grid { grid-template-columns: repeat(3, 1fr); }
+      .footer__top { grid-template-columns: 1fr 1fr; }
+      .featured__grid, .philosophy__grid { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    @media (max-width: 768px) {
+      .header__nav { display: none; }
+      .header__icon[aria-label="Search"], .header__icon[aria-label="Account"] { display: none; }
+      .header__menu-btn { display: flex; }
+
+      .hero { height: 88vh; min-height: 540px; }
+      .hero__title { font-size: clamp(2.5rem, 11vw, 4rem); }
+
+      .section { padding: 64px 0; }
+      .section-head { flex-direction: column; align-items: flex-start; gap: 1rem; }
+
+      .products__grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; }
+      .product-card__wishlist { opacity: 1; transform: none; }
+      .product-card__quick-add { opacity: 1; transform: none; bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.6rem; font-size: 10px; }
+
+      .journal__grid { grid-template-columns: 1fr; }
+      .instagram__grid { grid-template-columns: repeat(3, 1fr); }
+      .footer__top { grid-template-columns: 1fr; gap: 2rem; padding-bottom: 2.5rem; }
+      .footer__bottom { flex-direction: column; align-items: flex-start; }
+
+      .philosophy__images { aspect-ratio: 4 / 5; }
+      .stats { grid-template-columns: 1fr; gap: 1rem; }
+      .featured__detail { flex-wrap: wrap; gap: 1.5rem; }
+
+      .hero__actions .btn { flex: 1; justify-content: center; padding: 0.85rem 1.25rem; font-size: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      :root { --gutter: 1.25rem; }
+      .categories__grid { grid-template-columns: 1fr; }
+      .products__grid { grid-template-columns: 1fr; }
+      .announcement { font-size: 10px; letter-spacing: 0.14em; }
+    }
+
+    /* ============================================================
+       ACCESSIBILITY — Reduced motion
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero__bg img { animation: none; }
+      .marquee__track { animation: none; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       ANNOUNCEMENT BAR
+       ============================================================ -->
+  <div class="announcement" role="banner">
+    Free shipping on orders over <span>$150</span> &nbsp;&middot;&nbsp; Complimentary gift wrapping on all orders &nbsp;&middot;&nbsp; 30-day returns
+  </div>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="header" id="header">
+    <div class="header__inner">
+      <a href="#" class="header__logo" aria-label="Maison home">M<em>a</em>ison</a>
+
+      <nav class="header__nav" aria-label="Primary">
+        <a href="#shop" class="header__link">Shop All</a>
+        <a href="#categories" class="header__link">Collections</a>
+        <a href="#story" class="header__link">Our Story</a>
+        <a href="#journal" class="header__link">Journal</a>
+        <a href="#contact" class="header__link">Contact</a>
+      </nav>
+
+      <div class="header__actions">
+        <button class="header__icon" aria-label="Search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="header__icon" aria-label="Account">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1" stroke-linecap="round"/></svg>
+        </button>
+        <button class="header__icon" aria-label="Cart" id="cartBtn">
+          <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18" stroke-linecap="round"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="header__cart-count" id="cartCount">0</span>
+        </button>
+        <button class="header__menu-btn" aria-label="Open menu" id="menuBtn">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <aside class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <button class="mobile-nav__close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+    <div>
+      <p class="mobile-nav__eyebrow">Menu</p>
+      <a href="#shop">Shop All</a>
+      <a href="#categories">Collections</a>
+      <a href="#story">Our Story</a>
+      <a href="#journal">Journal</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div>
+      <p class="mobile-nav__eyebrow">Help</p>
+      <a href="#">Shipping &amp; Returns</a>
+      <a href="#">Material Care</a>
+      <a href="#">FAQ</a>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ============================================================
+         HERO — Full-bleed editorial
+         ============================================================ -->
+    <section class="hero" id="hero">
+      <div class="hero__bg">
+        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80"
+             alt="A sunlit Scandinavian living room with linen armchair and oak side table"
+             fetchpriority="high">
+      </div>
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <p class="hero__eyebrow">Curated for Considered Living</p>
+        <h1 class="hero__title">Objects of<br><em>Quiet Beauty</em></h1>
+        <p class="hero__desc">Handcrafted home goods, sculptural lighting, and tactile lifestyle pieces — made by Nordic artisans from solid oak, linen, and clay, designed to bring warmth and intention to everyday moments.</p>
+        <div class="hero__actions">
+          <a href="#shop" class="btn btn-primary">Shop the Collection
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a href="#story" class="btn btn-outline">Our Craft</a>
+        </div>
+      </div>
+      <div class="hero__scroll" aria-hidden="true">
+        <span>Scroll</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MARQUEE — Brand promises
+         ============================================================ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span class="marquee__item"><span>&#9670;</span> Handcrafted in Scandinavia</span>
+        <span class="marquee__item"><span>&#9670;</span> FSC-certified Oak</span>
+        <span class="marquee__item"><span>&#9670;</span> Carbon-neutral Delivery</span>
+        <span class="marquee__item"><span>&#9670;</span> 10-year Guarantee</span>
+        <span class="marquee__item"><span>&#9670;</span> Plant-based Textiles</span>
+        <span class="marquee__item"><span>&#9670;</span> Handcrafted in Scandinavia</span>
+        <span class="marquee__item"><span>&#9670;</span> FSC-certified Oak</span>
+        <span class="marquee__item"><span>&#9670;</span> Carbon-neutral Delivery</span>
+        <span class="marquee__item"><span>&#9670;</span> 10-year Guarantee</span>
+        <span class="marquee__item"><span>&#9670;</span> Plant-based Textiles</span>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         FEATURED COLLECTION — Lighting spotlight
+         ============================================================ -->
+    <section class="featured" id="featured">
+      <div class="featured__grid">
+        <div class="featured__image reveal">
+          <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=900&q=80"
+               alt="Sculptural Arc Pendant Light in hand-bent brass and linen"
+               loading="lazy">
+          <span class="featured__image-tag">Featured</span>
+        </div>
+        <div class="featured__text reveal" data-delay="1">
+          <span class="eyebrow">Featured Collection</span>
+          <h2>Lighting that<br><em>casts warmth</em>.</h2>
+          <p>Sculptural forms that cast warmth and shadow — each piece mouth-blown, hand-bent, or wheel-thrown by Nordic makers who shape light as carefully as they shape material. Discover pendants, table lamps, and floor lights designed to transform any space into a sanctuary of warm, deliberate glow.</p>
+          <div class="featured__detail">
+            <div class="featured__detail-item">
+              <span>Pieces</span>
+              <strong>28</strong>
+            </div>
+            <div class="featured__detail-item">
+              <span>Makers</span>
+              <strong>9</strong>
+            </div>
+            <div class="featured__detail-item">
+              <span>Materials</span>
+              <strong>Brass &middot; Glass &middot; Clay</strong>
+            </div>
+          </div>
+          <a href="#shop" class="btn btn-outline">Shop Lighting
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CATEGORIES — Browse by collection
+         ============================================================ -->
+    <section class="section" id="categories">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="head-text">
+            <span class="eyebrow">Browse by Category</span>
+            <h2 class="section-title">For every <em>quiet</em> corner.</h2>
+          </div>
+          <a href="#shop" class="link">View all categories &rarr;</a>
+        </div>
+        <div class="categories__grid">
+          <a href="#shop" class="category-card reveal">
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" alt="Furniture" loading="lazy">
+            <div class="category-card__overlay">
+              <h3 class="category-card__name">Furniture</h3>
+              <p class="category-card__count"><span>42 pieces</span></p>
+            </div>
+          </a>
+          <a href="#shop" class="category-card reveal" data-delay="1">
+            <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80" alt="Lighting" loading="lazy">
+            <div class="category-card__overlay">
+              <h3 class="category-card__name">Lighting</h3>
+              <p class="category-card__count"><span>28 pieces</span></p>
+            </div>
+          </a>
+          <a href="#shop" class="category-card reveal" data-delay="2">
+            <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80" alt="Textiles" loading="lazy">
+            <div class="category-card__overlay">
+              <h3 class="category-card__name">Textiles</h3>
+              <p class="category-card__count"><span>36 pieces</span></p>
+            </div>
+          </a>
+          <a href="#shop" class="category-card reveal" data-delay="3">
+            <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80" alt="Ceramics" loading="lazy">
+            <div class="category-card__overlay">
+              <h3 class="category-card__name">Ceramics</h3>
+              <p class="category-card__count"><span>24 pieces</span></p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FEATURED PRODUCTS — Cards with hover-swap
+         ============================================================ -->
+    <section class="section" id="shop" style="padding-top:0;">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="head-text">
+            <span class="eyebrow">Just Arrived</span>
+            <h2 class="section-title">Pieces we'd <em>live with</em>.</h2>
+          </div>
+          <a href="#" class="link">Shop all new &rarr;</a>
+        </div>
+        <div class="products__grid" id="productsGrid">
+          <!-- Populated by JS -->
+        </div>
+        <div style="text-align:center; margin-top:3rem;" class="reveal">
+          <a href="#" class="btn btn-outline">View All Products</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PHILOSOPHY — Asymmetric editorial story
+         ============================================================ -->
+    <section class="philosophy" id="story">
+      <div class="philosophy__grid">
+        <div class="philosophy__images reveal">
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80" alt="Artisan workshop with hand tools" loading="lazy">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80" alt="Quiet living space" loading="lazy">
+          <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" alt="Detail of crafted object" loading="lazy">
+        </div>
+        <div class="philosophy__content reveal" data-delay="1">
+          <span class="eyebrow">Our Philosophy</span>
+          <h2>Objects made with <em>care</em>, materials that age <em>gracefully</em>, spaces that invite pause.</h2>
+          <p>We believe that the objects we surround ourselves with should tell stories, age beautifully, and bring quiet joy to daily rituals. Every piece in our collection passes through our hands before it reaches yours — we visit workshops, meet makers, and learn the story behind each object.</p>
+          <div class="ornament"><span>&#10038;</span></div>
+          <p>This personal connection ensures that what we offer carries meaning beyond its function. Born out of Nordic design traditions, Maison partners with independent European artisans who honor slow craftsmanship, natural materials, and timeless function.</p>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat__num">27</span>
+              <span class="stat__label">Years in craft</span>
+            </div>
+            <div class="stat">
+              <span class="stat__num">14</span>
+              <span class="stat__label">Nordic makers</span>
+            </div>
+            <div class="stat">
+              <span class="stat__num">100%</span>
+              <span class="stat__label">FSC oak</span>
+            </div>
+          </div>
+          <a href="#story" class="btn btn-outline">Read Our Manifesto
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MATERIALS — Three natural materials with custom icons
+         ============================================================ -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="head-text">
+            <span class="eyebrow">Made to Last</span>
+            <h2 class="section-title">Materials we <em>trust</em>.</h2>
+          </div>
+        </div>
+        <div class="materials__grid">
+          <article class="material reveal">
+            <div class="material__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>FSC Oak</h3>
+            <p>Solid oak from sustainably managed forests in southern Sweden, kiln-dried and finished with raw linseed oil. Each board is selected for grain character and structural integrity, then hand-finished by our cabinetmakers.</p>
+            <p class="material__origin"><strong>Origin:</strong> Småland, Sweden</p>
+          </article>
+          <article class="material reveal" data-delay="1">
+            <div class="material__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke-linecap="round"/></svg>
+            </div>
+            <h3>European Linen</h3>
+            <p>Flax grown in Normandy, woven in Belgium. Naturally antibacterial, biodegradable, and softened with each wash — a fabric that becomes more beautiful the more it is lived with, never less.</p>
+            <p class="material__origin"><strong>Origin:</strong> Normandy &amp; Flanders</p>
+          </article>
+          <article class="material reveal" data-delay="2">
+            <div class="material__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Hand-thrown Clay</h3>
+            <p>Stoneware fired at 1240°C in a wood kiln by ceramicist Lars Berg in Gothenburg — no two pieces alike. Each vessel carries the maker's mark, the kiln's breath, and the small irregularities that signal a human hand.</p>
+            <p class="material__origin"><strong>Origin:</strong> Gothenburg, Sweden</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         EDITORIAL — The Hygge Edit (full-bleed)
+         ============================================================ -->
+    <section class="editorial">
+      <div class="editorial__bg">
+        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1600&q=80" alt="A warm, dimly lit Scandinavian living room at dusk" loading="lazy">
+      </div>
+      <div class="editorial__overlay"></div>
+      <div class="editorial__content">
+        <div class="editorial__inner reveal">
+          <span class="eyebrow">The Hygge Edit</span>
+          <h2>A room is a <em>feeling</em>.</h2>
+          <p>For autumn we've gathered pieces that ask you to slow down — a low-slung chair, a heavy linen throw, a lamp that throws soft amber light across the floor. The Hygge Edit is a small, deliberate collection for the season of turning inward.</p>
+          <a href="#shop" class="btn btn-primary">Shop the Hygge Edit
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TESTIMONIALS
+         ============================================================ -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="head-text">
+            <span class="eyebrow">From Our Home to Yours</span>
+            <h2 class="section-title">Loved by <em>2,400+</em> homes.</h2>
+          </div>
+          <a href="#" class="link">Read all reviews &rarr;</a>
+        </div>
+        <div class="testimonials__grid">
+          <article class="testimonial reveal">
+            <span class="testimonial__quote-mark" aria-hidden="true">&ldquo;</span>
+            <div class="testimonial__stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>The Halden armchair arrived fully assembled and feels like it was made for our living room. Three years in and it has only softened beautifully — every mark tells a story.</blockquote>
+            <cite>
+              <strong>Freja L.</strong>
+              <span>Copenhagen, DK</span>
+            </cite>
+          </article>
+          <article class="testimonial reveal" data-delay="1">
+            <span class="testimonial__quote-mark" aria-hidden="true">&ldquo;</span>
+            <div class="testimonial__stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>I waited six months for the Berg floor lamp and would do it again. The light is warm, the brass has aged like a heirloom. Maison is the rare shop that respects patience.</blockquote>
+            <cite>
+              <strong>Henry W.</strong>
+              <span>Portland, US</span>
+            </cite>
+          </article>
+          <article class="testimonial reveal" data-delay="2">
+            <span class="testimonial__quote-mark" aria-hidden="true">&ldquo;</span>
+            <div class="testimonial__stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>Customer service replaced a chipped ceramic bowl without question. You can tell this is a company that stands behind what they make — and the people who make it.</blockquote>
+            <cite>
+              <strong>Sofia M.</strong>
+              <span>Stockholm, SE</span>
+            </cite>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         JOURNAL — Notes on slow living
+         ============================================================ -->
+    <section class="section" id="journal" style="background: var(--bg-2);">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="head-text">
+            <span class="eyebrow">From the Journal</span>
+            <h2 class="section-title">Notes on <em>slow living</em>.</h2>
+          </div>
+          <a href="#" class="link">All journal entries &rarr;</a>
+        </div>
+        <div class="journal__grid">
+          <a href="#" class="journal-card reveal">
+            <div class="journal-card__img">
+              <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=700&q=80" alt="" loading="lazy">
+            </div>
+            <p class="journal-card__meta"><span>Craft</span> &middot; 6 min read</p>
+            <h3>Why oak gets better with age</h3>
+            <p>A short guide to oiling, brushing, and accepting the small marks a piece will gather over a decade of use.</p>
+          </a>
+          <a href="#" class="journal-card reveal" data-delay="1">
+            <div class="journal-card__img">
+              <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=700&q=80" alt="" loading="lazy">
+            </div>
+            <p class="journal-card__meta"><span>Home</span> &middot; 4 min read</p>
+            <h3>Lighting a room for autumn</h3>
+            <p>Three small changes — lamp height, bulb temperature, layering — that shift how a room feels at dusk.</p>
+          </a>
+          <a href="#" class="journal-card reveal" data-delay="2">
+            <div class="journal-card__img">
+              <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80" alt="" loading="lazy">
+            </div>
+            <p class="journal-card__meta"><span>People</span> &middot; 8 min read</p>
+            <h3>A day in the Aalborg workshop</h3>
+            <p>We spend a morning with founder Mette and her team as they finish the autumn run of dining chairs.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INSTAGRAM — Community grid
+         ============================================================ -->
+    <section class="section" style="padding-bottom: clamp(64px, 9vw, 120px);">
+      <div class="container">
+        <div class="section-head reveal" style="justify-content: center; text-align: center; flex-direction: column; align-items: center;">
+          <div class="head-text" style="text-align: center;">
+            <span class="eyebrow">Follow Us</span>
+            <h2 class="section-title">@maison<em>living</em></h2>
+            <p class="lede" style="margin: 1rem auto 0;">Join our community and get inspired by curated spaces and behind-the-scenes moments from our makers.</p>
+          </div>
+        </div>
+        <div class="instagram__grid reveal" id="instagramGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         NEWSLETTER — "Letters from Maison"
+         ============================================================ -->
+    <section class="newsletter" id="contact">
+      <div class="newsletter__inner reveal">
+        <span class="eyebrow">Join the List</span>
+        <h2>Letters from <em>Maison</em>.</h2>
+        <p>One quiet email a month — new pieces, workshop notes, artisan interviews, and early access to small-batch releases. No noise, no clutter, ever.</p>
+        <form class="newsletter__form" id="newsletterForm" novalidate>
+          <input type="email" placeholder="Your email address" required aria-label="Email address">
+          <button type="submit">Subscribe</button>
+        </form>
+        <p class="newsletter__note">By subscribing you agree to our privacy policy. Unsubscribe anytime.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="footer__top">
+      <div class="footer__brand-col">
+        <a href="#" class="footer__brand">M<em>a</em>ison</a>
+        <p class="footer__tagline">Curated home objects and lifestyle pieces — crafted by Nordic artisans for intentional, serene living since 1998.</p>
+        <div class="footer__socials">
+          <a href="#" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
+          </a>
+          <a href="#" aria-label="Pinterest">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 20c-.5-2 .5-7 1.5-10M9 11c0-2 1.5-3.5 4-3.5 2 0 3.5 1.5 3.5 3.5 0 2.5-1.5 4-3.5 4-1.2 0-2-.8-2-2"/></svg>
+          </a>
+          <a href="#" aria-label="YouTube">
+            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="#shop">Furniture</a></li>
+          <li><a href="#shop">Lighting</a></li>
+          <li><a href="#shop">Textiles</a></li>
+          <li><a href="#shop">Ceramics</a></li>
+          <li><a href="#shop">Gift Cards</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>About</h4>
+        <ul>
+          <li><a href="#story">Our Story</a></li>
+          <li><a href="#story">Sustainability</a></li>
+          <li><a href="#story">Materials</a></li>
+          <li><a href="#journal">Journal</a></li>
+          <li><a href="#story">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#">Shipping &amp; Returns</a></li>
+          <li><a href="#">Material Care Guide</a></li>
+          <li><a href="#">Artisan Traceability</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="mailto:hello@maison-living.com">hello@maison-living.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; <span id="currentYear">2026</span> Maison Living. All rights reserved. Built with intention.</p>
+      <div class="footer__legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Preferences</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============================================================
+       JAVASCRIPT — Vanilla, minimal, accessible
+       ============================================================ -->
+  <script>
+    // ===== DATA =====
+    const products = [
+      {
+        id: "arc-pendant",
+        name: "Arc Pendant Light",
+        category: "Lighting",
+        material: "Hand-bent brass & Belgian linen",
+        price: 485,
+        badge: "Featured",
+        badgeClass: "",
+        images: [
+          "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80",
+          "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80"
+        ]
+      },
+      {
+        id: "orb-table-lamp",
+        name: "Orb Table Lamp",
+        category: "Lighting",
+        material: "Mouth-blown glass & solid bronze",
+        price: 295,
+        badge: "New",
+        badgeClass: "new",
+        images: [
+          "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80",
+          "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80"
+        ]
+      },
+      {
+        id: "halden-armchair",
+        name: "Halden Linen Armchair",
+        category: "Furniture",
+        material: "Solid oak & washed linen, sand",
+        price: 890,
+        badge: "Bestseller",
+        badgeClass: "bestseller",
+        images: [
+          "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&q=80",
+          "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80"
+        ]
+      },
+      {
+        id: "berg-floor-lamp",
+        name: "Berg Floor Lamp",
+        category: "Lighting",
+        material: "Aged brass & rice paper shade",
+        price: 620,
+        badge: "",
+        badgeClass: "",
+        images: [
+          "https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80",
+          "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80"
+        ]
+      },
+      {
+        id: "sculptural-vessel",
+        name: "Large Sculptural Vessel",
+        category: "Ceramics",
+        material: "Hand-thrown stoneware, ash glaze",
+        price: 320,
+        badge: "New",
+        badgeClass: "new",
+        images: [
+          "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80",
+          "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=600&q=80"
+        ]
+      },
+      {
+        id: "everyday-bowl",
+        name: "Everyday Serving Bowl",
+        category: "Ceramics",
+        material: "Stoneware, food-safe glaze",
+        price: 145,
+        badge: "",
+        badgeClass: "",
+        images: [
+          "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600&q=80",
+          "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80"
+        ]
+      },
+      {
+        id: "linen-throw",
+        name: "Washed Linen Throw",
+        category: "Textiles",
+        material: "100% washed European linen, sand",
+        price: 195,
+        badge: "Bestseller",
+        badgeClass: "bestseller",
+        images: [
+          "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=600&q=80",
+          "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80"
+        ]
+      },
+      {
+        id: "oak-side-table",
+        name: "SolSide Oak Table",
+        category: "Furniture",
+        material: "Solid FSC oak, linseed finish",
+        price: 540,
+        badge: "",
+        badgeClass: "",
+        images: [
+          "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
+          "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80"
+        ]
+      }
+    ];
+
+    const instagramImages = [
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80",
+      "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80",
+      "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=400&q=80"
+    ];
+
+    // ===== STATE =====
+    let cartCount = 0;
+    const wishlist = new Set();
+
+    // ===== RENDER: PRODUCTS =====
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = products.map((p, i) => `
+        <article class="product-card reveal" data-delay="${(i % 4) + 1}" data-id="${p.id}">
+          <div class="product-card__image-wrap">
+            ${p.badge ? `<span class="product-card__badge ${p.badgeClass}">${p.badge}</span>` : ''}
+            <img src="${p.images[0]}" alt="${p.name} — ${p.material}" loading="lazy">
+            <img src="${p.images[1]}" alt="" class="alt" loading="lazy" aria-hidden="true">
+            <button class="product-card__wishlist" aria-label="Add ${p.name} to wishlist" data-wishlist="${p.id}">
+              <svg viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="product-card__quick-add" data-add="${p.id}">Quick Add</button>
+          </div>
+          <div class="product-card__info">
+            <p class="product-card__category">${p.category}</p>
+            <h3 class="product-card__name">${p.name}</h3>
+            <p class="product-card__material">${p.material}</p>
+            <p class="product-card__price">$${p.price.toLocaleString()}</p>
+          </div>
+        </article>
+      `).join('');
+
+      // Re-observe newly added reveal elements
+      document.querySelectorAll('.product-card.reveal').forEach(el => revealObserver.observe(el));
+    }
+
+    // ===== RENDER: INSTAGRAM =====
+    function renderInstagram() {
+      const grid = document.getElementById('instagramGrid');
+      grid.innerHTML = instagramImages.map((src, i) => `
+        <a href="#" class="instagram__item" aria-label="View Instagram post ${i + 1}">
+          <img src="${src}" alt="" loading="lazy">
+          <span class="instagram__item-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
+          </span>
+        </a>
+      `).join('');
+    }
+
+    // ===== SCROLL REVEAL =====
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ===== HEADER SCROLL STATE =====
+    const header = document.getElementById('header');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const scroll = window.scrollY;
+      if (scroll > 40) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      lastScroll = scroll;
+    }, { passive: true });
+
+    // ===== MOBILE NAV =====
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileNavClose = document.getElementById('mobileNavClose');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function toggleMobileNav(open) {
+      const isOpen = open !== undefined ? open : !mobileNav.classList.contains('open');
+      mobileNav.classList.toggle('open', isOpen);
+      mobileOverlay.classList.toggle('show', isOpen);
+      menuBtn.classList.toggle('active', isOpen);
+      menuBtn.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', () => toggleMobileNav());
+    mobileNavClose.addEventListener('click', () => toggleMobileNav(false));
+    mobileOverlay.addEventListener('click', () => toggleMobileNav(false));
+    mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => toggleMobileNav(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileNav.classList.contains('open')) toggleMobileNav(false);
+    });
+
+    // ===== TOAST =====
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // ===== CART (mock) =====
+    const cartCountEl = document.getElementById('cartCount');
+    const cartBtn = document.getElementById('cartBtn');
+    cartBtn.addEventListener('click', () => showToast(`You have ${cartCount} item${cartCount === 1 ? '' : 's'} in your bag. Checkout opens soon.`));
+
+    document.addEventListener('click', (e) => {
+      const addBtn = e.target.closest('[data-add]');
+      if (addBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = addBtn.dataset.add;
+        const product = products.find(p => p.id === id);
+        if (product) {
+          cartCount += 1;
+          cartCountEl.textContent = cartCount;
+          showToast(`${product.name} added to your bag.`);
+        }
+        return;
+      }
+      const wishBtn = e.target.closest('[data-wishlist]');
+      if (wishBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = wishBtn.dataset.wishlist;
+        if (wishlist.has(id)) {
+          wishlist.delete(id);
+          wishBtn.classList.remove('active');
+          showToast('Removed from wishlist.');
+        } else {
+          wishlist.add(id);
+          wishBtn.classList.add('active');
+          showToast('Saved to wishlist.');
+        }
+      }
+    });
+
+    // ===== NEWSLETTER =====
+    const newsletterForm = document.getElementById('newsletterForm');
+    newsletterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = newsletterForm.querySelector('input').value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Please enter a valid email address.');
+        return;
+      }
+      showToast('Thank you for subscribing to Letters from Maison.');
+      newsletterForm.reset();
+    });
+
+    // ===== CURRENT YEAR =====
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // ===== INIT =====
+    renderProducts();
+    renderInstagram();
+  </script>
+
+</body>
+</html>
