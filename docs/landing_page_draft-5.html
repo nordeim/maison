@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maison — Curated Home Objects for Considered Living</title>
+  <meta name="description" content="Handcrafted home goods and lifestyle pieces designed to bring warmth and intention to everyday moments." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: 40 33% 97%;
+      --foreground: 30 10% 15%;
+      --card: 40 30% 95%;
+      --popover: 40 33% 97%;
+      --primary: 18 45% 45%;
+      --primary-foreground: 40 33% 97%;
+      --secondary: 30 15% 85%;
+      --muted: 30 10% 90%;
+      --muted-foreground: 30 8% 45%;
+      --accent: 35 40% 92%;
+      --border: 30 15% 88%;
+      --destructive: 0 65% 50%;
+      --radius: .25rem;
+      --terracotta: #a06840;
+      --terracotta-light: #c17d52;
+      --warm-cream: #faf8f5;
+      --warm-taupe: #c4b8a8;
+      --charcoal: #262220;
+      --linen: #f0ebe4;
+      --font-serif: "Cormorant Garamond", Georgia, serif;
+      --font-sans: "Inter", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; border-color: hsl(var(--border)); }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+    h1,h2,h3,h4,h5,h6 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.025em; line-height: 1.15; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; height: auto; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    ::selection { background: rgba(160,104,64,0.15); color: inherit; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(196,184,168,0.4); border-radius: 3px; }
+
+    /* Layout */
+    .container-narrow { max-width: 64rem; margin: 0 auto; padding: 0 1.5rem; }
+    .container-wide { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; }
+    .container-full { max-width: 1600px; margin: 0 auto; padding: 0 1.5rem; }
+    @media (min-width: 1024px) { .container-full { padding: 0 3rem; } }
+
+    /* Navigation */
+    .site-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(250,248,245,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid hsl(var(--border));
+      transition: box-shadow 0.3s ease;
+    }
+    .site-header.scrolled { box-shadow: 0 1px 0 rgba(0,0,0,0.04); }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-serif); font-size: 1.5rem; font-weight: 600;
+      letter-spacing: -0.02em; color: var(--charcoal);
+    }
+    .nav-links { display: none; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem; font-weight: 400; letter-spacing: 0.02em;
+      color: hsl(var(--muted-foreground));
+      position: relative; padding-bottom: 2px;
+      transition: color 0.3s ease;
+    }
+    .nav-links a::after {
+      content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+      background: currentColor; transform: scaleX(0); transform-origin: left;
+      transition: transform 0.5s cubic-bezier(0,0,0.2,1);
+    }
+    .nav-links a:hover { color: var(--charcoal); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-actions { display: flex; align-items: center; gap: 1.25rem; }
+    .icon-btn {
+      position: relative; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: background 0.2s ease;
+    }
+    .icon-btn:hover { background: hsl(var(--accent)); }
+    .icon-btn svg { width: 20px; height: 20px; stroke: var(--charcoal); fill: none; stroke-width: 1.5; }
+    .cart-count {
+      position: absolute; top: 2px; right: 2px;
+      background: var(--terracotta); color: #fff;
+      font-size: 0.625rem; font-weight: 600;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-menu-btn { display: flex; flex-direction: column; gap: 4px; padding: 8px; }
+    .mobile-menu-btn span { display: block; width: 20px; height: 1.5px; background: var(--charcoal); transition: all 0.3s ease; }
+    @media (min-width: 768px) { .nav-links { display: flex; } .mobile-menu-btn { display: none; } }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed; inset: 0; z-index: 99;
+      background: hsl(var(--background));
+      padding: 6rem 2rem 2rem;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .mobile-menu.open { transform: translateX(0); }
+    .mobile-menu a {
+      display: block; font-family: var(--font-serif); font-size: 1.75rem;
+      padding: 0.75rem 0; border-bottom: 1px solid hsl(var(--border));
+    }
+
+    /* Hero */
+    .hero {
+      position: relative; min-height: 100vh; display: flex; align-items: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background-size: cover; background-position: center;
+      transition: transform 1.2s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(to bottom, rgba(38,34,32,0.25), rgba(38,34,32,0.45));
+    }
+    .hero-content {
+      position: relative; z-index: 2; max-width: 640px;
+      color: #fff; padding: 8rem 1.5rem 4rem;
+    }
+    .hero-label {
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 1.5rem; opacity: 0.85;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 500; line-height: 1.05;
+      margin-bottom: 1.5rem;
+    }
+    .hero p {
+      font-size: 1.125rem; line-height: 1.7; opacity: 0.9; margin-bottom: 2.5rem; max-width: 480px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.875rem 2rem; font-size: 0.8125rem; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: #fff; color: var(--charcoal);
+      border-radius: var(--radius);
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      position: relative; overflow: hidden;
+    }
+    .btn::after {
+      content: ""; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0,0,0.2,1);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.2); }
+    .btn:hover::after { transform: translateY(0); }
+    .btn span { position: relative; z-index: 1; }
+    .btn-terracotta {
+      background: var(--terracotta); color: #fff;
+    }
+    .btn-terracotta::after { background: rgba(255,255,255,0.1); }
+
+    /* Sections */
+    .section { padding: 6rem 0; }
+    .section-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 500;
+    }
+    .section-subtitle {
+      font-size: 0.9375rem; color: hsl(var(--muted-foreground)); max-width: 480px; margin-top: 0.5rem;
+    }
+    .link-arrow {
+      font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.05em;
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      transition: gap 0.3s ease;
+    }
+    .link-arrow:hover { gap: 0.625rem; }
+
+    /* Collections Grid */
+    .collections-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    }
+    @media (min-width: 768px) {
+      .collections-grid { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+    }
+    .collection-card {
+      position: relative; aspect-ratio: 3/4; overflow: hidden; cursor: pointer;
+      border-radius: 2px;
+    }
+    .collection-card img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .collection-card:hover img { transform: scale(1.06); }
+    .collection-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(38,34,32,0.55) 0%, transparent 60%);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 1.5rem; color: #fff;
+    }
+    .collection-card h3 {
+      font-size: 1.25rem; font-weight: 500; margin-bottom: 0.25rem;
+    }
+    .collection-card p {
+      font-size: 0.8125rem; opacity: 0.85; line-height: 1.5;
+    }
+
+    /* Products */
+    .products-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem;
+    }
+    @media (min-width: 640px) { .products-grid { grid-template-columns: repeat(3, 1fr); gap: 2rem 1.5rem; } }
+    @media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
+    .product-card { cursor: pointer; group: product; }
+    .product-image-wrap {
+      position: relative; aspect-ratio: 4/5; overflow: hidden; background: hsl(var(--muted));
+      border-radius: 2px; margin-bottom: 1rem;
+    }
+    .product-image-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s ease;
+    }
+    .product-card:hover .product-image-wrap img { transform: scale(1.04); }
+    .product-badge {
+      position: absolute; top: 0.75rem; left: 0.75rem;
+      font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.25rem 0.625rem; background: #fff; color: var(--charcoal);
+      border-radius: 1px;
+    }
+    .product-wishlist {
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: translateY(4px);
+      transition: all 0.3s ease;
+    }
+    .product-card:hover .product-wishlist { opacity: 1; transform: translateY(0); }
+    .product-wishlist svg { width: 14px; height: 14px; stroke: var(--charcoal); fill: none; stroke-width: 1.5; }
+    .product-wishlist.active svg { fill: var(--terracotta); stroke: var(--terracotta); }
+    .product-info h4 {
+      font-family: var(--font-serif); font-size: 1.0625rem; font-weight: 500; margin-bottom: 0.25rem;
+    }
+    .product-info p { font-size: 0.8125rem; color: hsl(var(--muted-foreground)); margin-bottom: 0.5rem; line-height: 1.5; }
+    .product-price { font-size: 0.9375rem; font-weight: 500; }
+
+    /* Philosophy */
+    .philosophy {
+      background: var(--linen);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23d4c4b5' fill-opacity='0.15' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'/%3E%3C/svg%3E");
+    }
+    .philosophy-grid {
+      display: grid; grid-template-columns: 1fr; gap: 4rem; align-items: center;
+    }
+    @media (min-width: 1024px) { .philosophy-grid { grid-template-columns: 1fr 1fr; gap: 6rem; } }
+    .philosophy-images {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .philosophy-images img { border-radius: 2px; width: 100%; height: 100%; object-fit: cover; }
+    .philosophy-images .tall { aspect-ratio: 3/4; }
+    .philosophy-images .wide { aspect-ratio: 4/3; grid-column: span 2; }
+    .philosophy-content h2 {
+      font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 1.5rem;
+    }
+    .philosophy-content p {
+      font-size: 1rem; line-height: 1.8; color: hsl(var(--muted-foreground)); margin-bottom: 1.5rem;
+    }
+    .divider-ornament {
+      display: flex; align-items: center; gap: 1.5rem; margin: 2rem 0;
+    }
+    .divider-ornament::before, .divider-ornament::after {
+      content: ""; flex: 1; height: 1px; background: hsl(var(--border));
+    }
+
+    /* Newsletter */
+    .newsletter { text-align: center; max-width: 520px; margin: 0 auto; }
+    .newsletter h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 0.75rem; }
+    .newsletter p { color: hsl(var(--muted-foreground)); margin-bottom: 2rem; }
+    .newsletter-form { display: flex; gap: 0.5rem; max-width: 420px; margin: 0 auto; }
+    .newsletter-form input {
+      flex: 1; padding: 0.75rem 1rem; font-size: 0.875rem;
+      border: 1px solid hsl(var(--border)); background: #fff;
+      border-radius: var(--radius); font-family: inherit;
+    }
+    .newsletter-form input:focus { outline: none; border-color: var(--terracotta); }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid hsl(var(--border)); padding: 4rem 0 2rem;
+      background: hsl(var(--background));
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem 1.5rem;
+    }
+    @media (min-width: 768px) { .footer-grid { grid-template-columns: 2fr repeat(3, 1fr); } }
+    .footer-brand p { font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin: 1rem 0; max-width: 280px; line-height: 1.7; }
+    .footer-socials { display: flex; gap: 1rem; }
+    .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
+    .footer-socials a:hover { opacity: 1; }
+    .footer-socials svg { width: 18px; height: 18px; stroke: var(--charcoal); fill: none; stroke-width: 1.5; }
+    .footer-col h4 { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.25rem; }
+    .footer-col a { display: block; font-size: 0.8125rem; color: hsl(var(--muted-foreground)); margin-bottom: 0.625rem; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--charcoal); }
+    .footer-bottom {
+      margin-top: 4rem; padding-top: 2rem; border-top: 1px solid hsl(var(--border));
+      display: flex; flex-direction: column; gap: 1rem; align-items: center;
+    }
+    @media (min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
+    .footer-bottom p { font-size: 0.75rem; color: hsl(var(--muted-foreground)); }
+
+    /* Page Transitions */
+    .page { display: none; animation: fadeIn 0.5s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Products Page */
+    .page-hero {
+      position: relative; height: 45vh; min-height: 320px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .page-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .page-hero-overlay { position: absolute; inset: 0; background: rgba(38,34,32,0.35); }
+    .page-hero-content { position: relative; z-index: 2; text-align: center; color: #fff; }
+    .page-hero-content h1 { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 0.5rem; }
+    .page-hero-content p { opacity: 0.9; }
+
+    /* Filters */
+    .filter-bar {
+      display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 2rem;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      padding: 0.5rem 1rem; font-size: 0.8125rem; white-space: nowrap;
+      border: 1px solid hsl(var(--border)); border-radius: 100px;
+      background: transparent; color: hsl(var(--muted-foreground));
+      transition: all 0.2s;
+    }
+    .filter-pill:hover { border-color: var(--charcoal); color: var(--charcoal); }
+    .filter-pill.active { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
+
+    /* Product Detail */
+    .product-detail-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3rem; padding: 6rem 0;
+    }
+    @media (min-width: 1024px) { .product-detail-grid { grid-template-columns: 1.1fr 1fr; gap: 4rem; } }
+    .product-gallery { position: relative; }
+    .product-gallery-main {
+      aspect-ratio: 4/5; background: hsl(var(--muted)); border-radius: 2px; overflow: hidden;
+    }
+    .product-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .gallery-nav.prev { left: 1rem; }
+    .gallery-nav.next { right: 1rem; }
+    .gallery-nav svg { width: 16px; height: 16px; stroke: var(--charcoal); fill: none; stroke-width: 2; }
+    .product-meta h1 { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 0.5rem; }
+    .product-meta .price { font-size: 1.25rem; font-weight: 500; margin-bottom: 1.5rem; display: block; }
+    .product-meta .description { font-size: 1rem; line-height: 1.8; color: hsl(var(--muted-foreground)); margin-bottom: 2rem; }
+    .product-meta .details { border-top: 1px solid hsl(var(--border)); padding-top: 1.5rem; margin-bottom: 2rem; }
+    .product-meta .details div { font-size: 0.875rem; margin-bottom: 0.5rem; color: hsl(var(--muted-foreground)); }
+    .product-meta .details strong { color: var(--charcoal); font-weight: 500; }
+    .quantity-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .quantity-control { display: flex; align-items: center; border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+    .quantity-control button { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .quantity-control span { width: 40px; text-align: center; font-size: 0.875rem; font-weight: 500; }
+
+    /* Cart Drawer */
+    .cart-overlay {
+      position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.35);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 460px;
+      background: hsl(var(--background)); z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      display: flex; flex-direction: column;
+    }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem; border-bottom: 1px solid hsl(var(--border));
+    }
+    .cart-header h2 { font-size: 1.25rem; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
+    .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid hsl(var(--border)); }
+    .cart-item img { width: 80px; height: 100px; object-fit: cover; border-radius: 2px; background: hsl(var(--muted)); }
+    .cart-item-info { flex: 1; }
+    .cart-item-info h4 { font-family: var(--font-serif); font-size: 1rem; margin-bottom: 0.25rem; }
+    .cart-item-info p { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-bottom: 0.5rem; }
+    .cart-item-actions { display: flex; align-items: center; justify-content: space-between; }
+    .cart-item-qty { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
+    .cart-item-qty button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid hsl(var(--border)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+    .cart-footer { padding: 1.5rem; border-top: 1px solid hsl(var(--border)); background: hsl(var(--card)); }
+    .cart-subtotal { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.9375rem; }
+    .cart-subtotal strong { font-weight: 600; }
+    .cart-note { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-bottom: 1rem; text-align: center; }
+    .empty-cart { text-align: center; padding: 4rem 1.5rem; color: hsl(var(--muted-foreground)); }
+    .empty-cart svg { width: 48px; height: 48px; stroke: hsl(var(--muted-foreground)); fill: none; stroke-width: 1; margin: 0 auto 1rem; }
+
+    /* About Page */
+    .about-hero { padding: 8rem 0 4rem; text-align: center; max-width: 720px; margin: 0 auto; }
+    .about-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 1.5rem; }
+    .about-hero p { font-size: 1.125rem; color: hsl(var(--muted-foreground)); line-height: 1.8; }
+    .about-image-full { width: 100%; height: 50vh; object-fit: cover; border-radius: 2px; margin: 3rem 0; }
+    .values-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; margin: 4rem 0; }
+    @media (min-width: 768px) { .values-grid { grid-template-columns: repeat(3, 1fr); } }
+    .value-item h3 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+    .value-item p { font-size: 0.9375rem; color: hsl(var(--muted-foreground)); line-height: 1.7; }
+
+    /* Checkout */
+    .checkout-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; padding: 6rem 0; }
+    @media (min-width: 1024px) { .checkout-grid { grid-template-columns: 1fr 380px; gap: 4rem; } }
+    .checkout-form h2 { font-size: 1.25rem; margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-size: 0.8125rem; font-weight: 500; margin-bottom: 0.375rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 0.625rem 0.875rem; font-size: 0.875rem;
+      border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+      background: #fff; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--terracotta); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .checkout-summary { background: hsl(var(--card)); padding: 1.5rem; border-radius: 2px; height: fit-content; position: sticky; top: 100px; }
+    .checkout-summary h3 { font-size: 1.125rem; margin-bottom: 1rem; }
+    .summary-line { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.75rem; color: hsl(var(--muted-foreground)); }
+    .summary-line.total { font-size: 1rem; font-weight: 600; color: var(--charcoal); border-top: 1px solid hsl(var(--border)); padding-top: 0.75rem; margin-top: 0.75rem; }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 300; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast {
+      background: var(--charcoal); color: #fff; padding: 0.875rem 1.25rem;
+      border-radius: var(--radius); font-size: 0.8125rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      animation: slideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast.leaving { animation: slideOut 0.3s ease forwards; }
+    @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
+
+    /* Wishlist heart fill */
+    .heart-fill { fill: none; }
+    .heart-fill.active { fill: var(--terracotta); stroke: var(--terracotta); }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* 404 */
+    .not-found { text-align: center; padding: 10rem 1.5rem; }
+    .not-found h1 { font-size: 6rem; font-weight: 300; color: hsl(var(--border)); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header" id="header">
+    <div class="container-full nav-inner">
+      <a href="#/" class="nav-logo">Maison</a>
+      <nav class="nav-links">
+        <a href="#/products">Shop</a>
+        <a href="#/products?collection=ceramics">Ceramics</a>
+        <a href="#/products?collection=furniture">Furniture</a>
+        <a href="#/products?collection=textiles">Textiles</a>
+        <a href="#/about">About</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-btn" id="searchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <button class="icon-btn" id="cartBtn" aria-label="Cart">
+          <svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M6 6 5 3H2"/></svg>
+          <span class="cart-count" id="cartCount" style="display:none">0</span>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#/products">Shop All</a>
+    <a href="#/products?collection=ceramics">Ceramics</a>
+    <a href="#/products?collection=furniture">Furniture</a>
+    <a href="#/products?collection=textiles">Textiles</a>
+    <a href="#/products?collection=lighting">Lighting</a>
+    <a href="#/products?collection=objects">Objects & Vases</a>
+    <a href="#/about">About</a>
+  </div>
+
+  <!-- Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h2>Shopping Bag</h2>
+      <button class="icon-btn" id="closeCart" aria-label="Close cart">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart" id="emptyCart">
+        <svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M6 6 5 3H2"/></svg>
+        <p>Your bag is empty</p>
+        <a href="#/products" class="btn btn-terracotta" style="margin-top:1.5rem"><span>Start Shopping</span></a>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-subtotal"><span>Subtotal</span><strong id="cartSubtotal">$0</strong></div>
+      <p class="cart-note">Shipping & taxes calculated at checkout.<br>Orders are confirmed manually within 24 hours.</p>
+      <a href="#/checkout" class="btn btn-terracotta" style="width:100%;justify-content:center"><span>Proceed to Checkout</span></a>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main Content -->
+  <main id="app"></main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container-full">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">Maison</div>
+          <p>Handcrafted home goods and lifestyle pieces designed to bring warmth and intention to everyday moments.</p>
+          <div class="footer-socials">
+            <a href="https://instagram.com" target="_blank" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="https://pinterest.com" target="_blank" aria-label="Pinterest">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <a href="#/products">All Products</a>
+          <a href="#/products?collection=ceramics">Ceramics</a>
+          <a href="#/products?collection=furniture">Furniture</a>
+          <a href="#/products?collection=textiles">Textiles</a>
+          <a href="#/products?collection=lighting">Lighting</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#/about">Our Story</a>
+          <a href="#/about">Sustainability</a>
+          <a href="#/about">Journal</a>
+          <a href="#/about">Care Guide</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a href="#/about">Contact</a>
+          <a href="#/about">Shipping & Returns</a>
+          <a href="#/about">FAQ</a>
+          <a href="#/about">Privacy Policy</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Maison. All rights reserved.</p>
+        <p>Curated home objects and lifestyle pieces for considered living.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===================== DATA =====================
+    const collections = [
+      { id:"lighting", name:"Lighting", slug:"lighting", description:"Sculptural forms that cast warmth and shadow", image:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1920&q=80" },
+      { id:"ceramics", name:"Ceramics", slug:"ceramics", description:"Handcrafted vessels shaped by patient hands", image:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1920&q=80" },
+      { id:"furniture", name:"Furniture", slug:"furniture", description:"Timeless pieces built for generations", image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&q=80" },
+      { id:"textiles", name:"Textiles", slug:"textiles", description:"Natural fibers woven with intention", image:"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=80" },
+      { id:"objects", name:"Objects & Vases", slug:"objects", description:"Curated details that complete a space", image:"https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=1920&q=80" },
+      { id:"seasonal", name:"Seasonal Collection", slug:"seasonal", description:"Limited pieces inspired by the changing light", image:"https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=1920&q=80" },
+      { id:"new", name:"New Arrivals", slug:"new-arrivals", description:"The latest additions to our collection", image:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1920&q=80" },
+      { id:"gifts", name:"Curated Gifts", slug:"gifts", description:"Thoughtfully selected pieces for giving", image:"https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=800&q=80", heroImage:"https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=1920&q=80" }
+    ];
+
+    const products = [
+      { id:"arc-pendant", name:"Arc Pendant Light", slug:"arc-pendant-light", collection:"lighting", price:485, description:"A graceful arc of hand-bent brass and linen", longDescription:"The Arc Pendant embodies the quiet elegance of Scandinavian design. Each piece is hand-bent by our workshop artisans, creating subtle variations that make every light unique. The natural linen shade diffuses light softly, casting a warm glow that transforms any space into a sanctuary.", materials:"Solid brass, natural Belgian linen", dimensions:"45cm diameter × 30cm height", images:["https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=800&q=80","https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&q=80"], featured:true },
+      { id:"orb-table-lamp", name:"Orb Table Lamp", slug:"orb-table-lamp", collection:"lighting", price:295, description:"Mouth-blown glass meets sculptural bronze", longDescription:"Our Orb Table Lamp pairs the organic beauty of mouth-blown glass with a solid bronze base. The glass sphere captures and refracts light, while the weighted base provides perfect balance. A statement piece that works as beautifully switched off as it does illuminated.", materials:"Mouth-blown glass, solid bronze", dimensions:"25cm diameter × 40cm height", images:["https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&q=80","https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&q=80"], new:true },
+      { id:"vessel-collection", name:"Large Sculptural Vessel", slug:"large-sculptural-vessel", collection:"ceramics", price:320, description:"Hand-thrown stoneware with natural ash glaze", longDescription:"Each vessel in this collection is hand-thrown on the wheel and fired in our wood-burning kiln. The natural ash glaze creates unrepeatable patterns—from soft dove grey to deep iron brown. These vessels are meant to be touched, to show the maker's hand in every curve.", materials:"High-fire stoneware, natural ash glaze", dimensions:"35cm height × 22cm diameter", images:["https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80","https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&q=80"], featured:true },
+      { id:"serving-bowl", name:"Everyday Serving Bowl", slug:"everyday-serving-bowl", collection:"ceramics", price:145, description:"Simple forms for daily rituals", longDescription:"The Everyday Bowl is designed for the rituals that anchor our days—morning fruit, evening salads, gathered bread. Its generous proportions and gentle curve invite gathering around the table. Each bowl is glazed in our signature cream, revealing flecks of iron from the clay body.", materials:"Stoneware, food-safe glaze", dimensions:"28cm diameter × 10cm height", images:["https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&q=80","https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80"] },
+      { id:"oak-dining-table", name:"Harvest Dining Table", slug:"harvest-dining-table", collection:"furniture", price:2850, description:"Solid oak crafted for generations of gathering", longDescription:"The Harvest Table is built to become the heart of your home. Crafted from single-slab white oak, its live edges preserve the natural character of the wood. Traditional mortise-and-tenon joinery ensures this table will be passed down through generations. Each table is unique, bearing the grain patterns and subtle color variations that only solid wood can offer.", materials:"Solid white oak, natural oil finish", dimensions:"220cm length × 95cm width × 76cm height", images:["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80","https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800&q=80"], featured:true },
+      { id:"woven-lounge-chair", name:"Woven Lounge Chair", slug:"woven-lounge-chair", collection:"furniture", price:1450, description:"Danish paper cord meets sculptural walnut", longDescription:"Our Lounge Chair reimagines the classic Danish cord technique for contemporary comfort. The seat and back are hand-woven with natural paper cord over a sculptural walnut frame. The result is a chair that's as beautiful from behind as from the front—a piece that commands attention from every angle.", materials:"Solid walnut, natural paper cord", dimensions:"75cm width × 80cm depth × 85cm height", images:["https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800&q=80","https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"], new:true },
+      { id:"linen-throw", name:"Heritage Linen Throw", slug:"heritage-linen-throw", collection:"textiles", price:195, description:"Stonewashed Belgian linen in natural tones", longDescription:"Woven from Belgian flax and stonewashed for softness, our Heritage Throw brings effortless warmth to any room. The natural fiber breathes with the seasons—cool in summer, warming in winter. With each wash, the linen grows softer, developing a gentle drape that improves with time.", materials:"100% Belgian linen", dimensions:"180cm × 140cm", images:["https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80","https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=800&q=80"] },
+      { id:"wool-cushion", name:"Hand-Felted Wool Cushion", slug:"hand-felted-wool-cushion", collection:"textiles", price:165, description:"Artisan-made using traditional felting techniques", longDescription:"Each cushion begins as raw wool, carefully felted by hand using techniques passed down through generations. The resulting textile is dense yet soft, with a depth of texture that cannot be replicated by machine. Available in a palette of natural earth tones.", materials:"100% New Zealand wool, linen back", dimensions:"50cm × 50cm", images:["https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=800&q=80","https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"] },
+      { id:"sculptural-vase", name:"Sculptural Bud Vase", slug:"sculptural-bud-vase", collection:"objects", price:85, description:"Minimalist form for a single stem", longDescription:"The Bud Vase celebrates restraint—one stem, one bloom, one moment of beauty. Hand-thrown from local clay and finished with our matte white glaze, its gentle curves create elegant shadows that shift with the day's light. Perfect alone or grouped in threes.", materials:"Stoneware, matte white glaze", dimensions:"15cm height × 6cm diameter", images:["https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80","https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&q=80"] },
+      { id:"brass-candleholder", name:"Forge Candleholder Set", slug:"forge-candleholder-set", collection:"objects", price:245, description:"Hand-forged brass in three graduating heights", longDescription:"Our Forge Candleholders are shaped by fire, each one hand-forged from solid brass rod. The set of three graduating heights creates a sculptural tableau, their surfaces bearing the subtle marks of the blacksmith's hammer. Over time, the brass develops a rich patina that deepens their beauty.", materials:"Solid forged brass", dimensions:"15cm, 20cm, 25cm heights", images:["https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&q=80","https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80"], featured:true },
+      { id:"winter-candle", name:"Winter Hearth Candle", slug:"winter-hearth-candle", collection:"seasonal", price:65, description:"Notes of cedar, smoke, and dried herbs", longDescription:"Our Winter Hearth Candle captures the essence of the coldest months—the quiet of snow-covered mornings and the warmth of a well-tended fire. Hand-poured from natural soy wax and housed in our signature reusable stoneware vessel.", materials:"Natural soy wax, cotton wick, stoneware vessel", dimensions:"80 hour burn time", images:["https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=800&q=80","https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&q=80"] },
+      { id:"marble-tray", name:"Honed Marble Tray", slug:"honed-marble-tray", collection:"new", price:175, description:"Natural stone for everyday beauty", longDescription:"Cut from a single block of Carrara marble and honed to a soft matte finish, this tray elevates everyday objects into a curated vignette. Its natural veining ensures each tray is one of a kind. Use it for jewelry, candles, or as a serving piece.", materials:"Carrara marble", dimensions:"30cm × 20cm × 2cm", images:["https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=800&q=80","https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"] },
+      { id:"gift-box", name:"Curated Gift Box", slug:"curated-gift-box", collection:"gifts", price:225, description:"A thoughtful selection of our most-loved pieces", longDescription:"Our Curated Gift Box brings together a selection of our most-loved small pieces: a bud vase, a hand-poured candle, and a set of linen napkins. Presented in a reusable wooden box lined with tissue paper and dried botanicals.", materials:"Mixed materials", dimensions:"Gift box dimensions: 25cm × 20cm × 12cm", images:["https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=800&q=80","https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&q=80"] }
+    ];
+
+    // ===================== STATE =====================
+    let cart = JSON.parse(localStorage.getItem('maison_cart') || '[]');
+    let wishlist = JSON.parse(localStorage.getItem('maison_wishlist') || '[]');
+    let currentRoute = '/';
+
+    // ===================== UTILS =====================
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+    const formatPrice = (p) => '$' + p.toLocaleString();
+
+    function saveCart() {
+      localStorage.setItem('maison_cart', JSON.stringify(cart));
+      renderCart();
+      updateCartCount();
+    }
+
+    function saveWishlist() {
+      localStorage.setItem('maison_wishlist', JSON.stringify(wishlist));
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((a,b) => a + b.quantity, 0);
+      const el = $('#cartCount');
+      if (count > 0) { el.textContent = count; el.style.display = 'flex'; }
+      else { el.style.display = 'none'; }
+    }
+
+    function addToCart(product, qty=1) {
+      const existing = cart.find(i => i.product.id === product.id);
+      if (existing) { existing.quantity = Math.min(existing.quantity + qty, 10); }
+      else { cart.push({ product, quantity: qty }); }
+      saveCart();
+      showToast(`${qty} × ${product.name} added to your bag.`);
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.product.id !== id);
+      saveCart();
+    }
+
+    function toggleWishlist(product, btn) {
+      const idx = wishlist.findIndex(i => i.id === product.id);
+      if (idx > -1) { wishlist.splice(idx, 1); showToast('Removed from wishlist'); }
+      else { wishlist.push(product); showToast('Added to wishlist'); }
+      saveWishlist();
+      if (btn) {
+        const svg = btn.querySelector('svg');
+        const isActive = wishlist.some(i => i.id === product.id);
+        btn.classList.toggle('active', isActive);
+        svg.style.fill = isActive ? 'var(--terracotta)' : 'none';
+        svg.style.stroke = isActive ? 'var(--terracotta)' : 'var(--charcoal)';
+      }
+    }
+
+    function showToast(msg) {
+      const container = $('#toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('leaving'); setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    function getCartSubtotal() {
+      return cart.reduce((a,b) => a + (b.product.price * b.quantity), 0);
+    }
+
+    // ===================== RENDERERS =====================
+    function renderCart() {
+      const itemsEl = $('#cartItems');
+      const footerEl = $('#cartFooter');
+      const emptyEl = $('#emptyCart');
+      if (cart.length === 0) {
+        emptyEl.style.display = 'block';
+        footerEl.style.display = 'none';
+        itemsEl.innerHTML = '';
+        itemsEl.appendChild(emptyEl);
+        return;
+      }
+      emptyEl.style.display = 'none';
+      footerEl.style.display = 'block';
+      itemsEl.innerHTML = '';
+      cart.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="${item.product.images[0]}" alt="${item.product.name}">
+          <div class="cart-item-info">
+            <h4>${item.product.name}</h4>
+            <p>${item.product.description}</p>
+            <div class="cart-item-actions">
+              <div class="cart-item-qty">
+                <button onclick="window.updateQty('${item.product.id}', -1)">-</button>
+                <span>${item.quantity}</span>
+                <button onclick="window.updateQty('${item.product.id}', 1)">+</button>
+              </div>
+              <strong>${formatPrice(item.product.price * item.quantity)}</strong>
+            </div>
+          </div>
+        `;
+        itemsEl.appendChild(div);
+      });
+      $('#cartSubtotal').textContent = formatPrice(getCartSubtotal());
+    }
+
+    window.updateQty = function(id, delta) {
+      const item = cart.find(i => i.product.id === id);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) removeFromCart(id);
+      else saveCart();
+    };
+
+    function renderHome() {
+      const featured = products.filter(p => p.featured).slice(0, 4);
+      const newArrivals = products.filter(p => p.new).slice(0, 4);
+      return `
+        <section class="hero">
+          <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80')"></div>
+          <div class="hero-overlay"></div>
+          <div class="container-full hero-content">
+            <div class="hero-label">Curated for Considered Living</div>
+            <h1>Handcrafted home goods and lifestyle pieces designed to bring warmth and intention to everyday moments.</h1>
+            <p>Discover our curated collection of handcrafted home goods and find pieces that speak to you.</p>
+            <a href="#/products" class="btn"><span>Shop Collection</span></a>
+          </div>
+        </section>
+
+        <section class="section container-full">
+          <div class="section-header reveal">
+            <div>
+              <h2 class="section-title">Browse By Category</h2>
+              <p class="section-subtitle">Explore our collections, each one telling a story of craft and material.</p>
+            </div>
+            <a href="#/products" class="link-arrow">View All <span>&rarr;</span></a>
+          </div>
+          <div class="collections-grid">
+            ${collections.slice(0,6).map(c => `
+              <a href="#/products?collection=${c.id}" class="collection-card reveal">
+                <img src="${c.image}" alt="${c.name}" loading="lazy">
+                <div class="collection-card-overlay">
+                  <h3>${c.name}</h3>
+                  <p>${c.description}</p>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="section" style="background:hsl(var(--card))">
+          <div class="container-full">
+            <div class="section-header reveal">
+              <div>
+                <h2 class="section-title">Featured Collection</h2>
+                <p class="section-subtitle">Pieces selected for their exceptional craft and enduring beauty.</p>
+              </div>
+              <a href="#/products" class="link-arrow">View All Pieces <span>&rarr;</span></a>
+            </div>
+            <div class="products-grid">
+              ${featured.map(p => productCard(p)).join('')}
+            </div>
+          </div>
+        </section>
+
+        <section class="section philosophy">
+          <div class="container-full philosophy-grid">
+            <div class="philosophy-images reveal">
+              <img class="tall" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80" alt="Artisan workshop" loading="lazy">
+              <img class="tall" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" alt="Living space" loading="lazy">
+              <img class="wide" src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80" alt="Craft detail" loading="lazy">
+            </div>
+            <div class="philosophy-content reveal">
+              <h2>Objects made with care, materials that age gracefully, and spaces that invite pause.</h2>
+              <p>We believe that the objects we surround ourselves with should tell stories, age beautifully, and bring quiet joy to daily rituals. Every piece in our collection passes through our hands before reaching yours.</p>
+              <div class="divider-ornament"><span>&#10038;</span></div>
+              <p>We visit workshops, meet makers, and learn the stories behind each object. This personal connection ensures that what we offer carries meaning beyond its function.</p>
+              <a href="#/about" class="link-arrow" style="margin-top:1rem">Read Our Story <span>&rarr;</span></a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section container-full">
+          <div class="section-header reveal">
+            <div>
+              <h2 class="section-title">Just Arrived</h2>
+              <p class="section-subtitle">The latest additions to our growing collection.</p>
+            </div>
+            <a href="#/products?collection=new-arrivals" class="link-arrow">View All <span>&rarr;</span></a>
+          </div>
+          <div class="products-grid">
+            ${newArrivals.map(p => productCard(p)).join('')}
+          </div>
+        </section>
+
+        <section class="section" style="background:var(--linen);background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%274%27 height=%274%27 viewBox=%270 0 4 4%27%3E%3Cpath fill=%27%23d4c4b5%27 fill-opacity=%270.15%27 d=%27M1 3h1v1H1V3zm2-2h1v1H3V1z%27/%3E%3C/svg%3E')">
+          <div class="container-narrow newsletter reveal">
+            <h2>Stay Connected</h2>
+            <p>Join our community and get inspired by curated spaces and behind-the-scenes moments.</p>
+            <form class="newsletter-form" onsubmit="event.preventDefault(); showToast('Thank you for subscribing'); this.reset();">
+              <input type="email" placeholder="Enter your email" required>
+              <button type="submit" class="btn btn-terracotta"><span>Subscribe</span></button>
+            </form>
+          </div>
+        </section>
+      `;
+    }
+
+    function productCard(p) {
+      const isWished = wishlist.some(w => w.id === p.id);
+      const coll = collections.find(c => c.id === p.collection);
+      return `
+        <article class="product-card reveal" onclick="location.hash='#/product/${p.slug}'">
+          <div class="product-image-wrap">
+            <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
+            ${p.new ? '<span class="product-badge">New</span>' : ''}
+            ${p.featured && !p.new ? '<span class="product-badge">Featured</span>' : ''}
+            <button class="product-wishlist ${isWished?'active':''}" onclick="event.stopPropagation(); toggleWishlistById('${p.id}', this)" aria-label="Toggle wishlist">
+              <svg viewBox="0 0 24 24" style="fill:${isWished?'var(--terracotta)':'none'};stroke:${isWished?'var(--terracotta)':'var(--charcoal)'}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1
