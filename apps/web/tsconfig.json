@@ -1,0 +1,13 @@
+{
+  "extends": "@maison/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules", ".next", "out", "dist", ".turbo"]
+}

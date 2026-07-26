@@ -1,0 +1,11 @@
+/**
+ * Maison — Tokens index
+ *
+ * Combines all design tokens (colors, typography, motion, spacing).
+ * Imported by packages/ui/src/globals.css.
+ */
+
+@import "./colors.css";
+@import "./typography.css";
+@import "./motion.css";
+@import "./spacing.css";

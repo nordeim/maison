@@ -1,0 +1,185 @@
+/**
+ * Maison — App Global CSS (Tailwind v4 CSS-first)
+ *
+ * Import order matters:
+ *   1. @maison/ui/globals — design tokens + fonts + reset
+ *   2. tailwindcss — Tailwind v4 utilities
+ *   3. tw-animate-css — Radix UI overlay animations
+ *   4. @theme — maps tokens to Tailwind theme namespace
+ *
+ * Per nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth skill §3.2:
+ * Tailwind v4 uses CSS-first @theme config (no tailwind.config.js for tokens).
+ */
+
+@import "@maison/ui/globals";
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ── Tailwind v4 Theme Mapping ─────────────────────────────── */
+/* Maps Maison design tokens to Tailwind's theme namespace
+   so utilities like bg-cream-50, font-display, duration-standard
+   generate correctly. */
+
+@theme {
+  /* Colors — Cream (backgrounds) */
+  --color-cream-50: var(--bg);
+  --color-cream-100: var(--bg-2);
+  --color-cream-200: var(--bg-3);
+  --color-cream-card: var(--bg-card);
+  --color-cream-dark: var(--bg-dark);
+
+  /* Colors — Ink (text) */
+  --color-ink-900: var(--ink);
+  --color-ink-700: var(--ink-2);
+  --color-ink-500: var(--muted);
+
+  /* Colors — Clay (primary accent) */
+  --color-clay-900: var(--clay-dark);
+  --color-clay-700: var(--clay);
+  --color-clay-500: var(--clay-light);
+  --color-clay-100: #f7ede8;
+
+  /* Colors — Gold (editorial accent) */
+  --color-gold: var(--gold);
+
+  /* Colors — Sage (tertiary) */
+  --color-sage: var(--sage);
+
+  /* Colors — Line (borders) */
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
+  /* Status colors */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  /* Fonts */
+  --font-display: var(--font-serif);
+  --font-body: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Type scale (fluid tokens — mapped so text-hero etc. generate utilities) */
+  --text-hero: var(--text-hero);
+  --text-display-xl: var(--text-display-xl);
+  --text-display-lg: var(--text-display-lg);
+  --text-heading-lg: var(--text-heading-lg);
+  --text-heading-md: var(--text-heading-md);
+  --text-body-lg: var(--text-body-lg);
+  --text-body-md: var(--text-body-md);
+  --text-body-sm: var(--text-body-sm);
+  --text-caption: var(--text-caption);
+  --text-label: var(--text-label);
+
+  /* Spacing (4px base) */
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-7: var(--space-7);
+  --spacing-8: var(--space-8);
+  --spacing-9: var(--space-9);
+  --spacing-10: var(--space-10);
+  --spacing-11: var(--space-11);
+  --spacing-12: var(--space-12);
+
+  /* Border radius — deliberately minimal (editorial = sharp edges) */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* Motion easings */
+  --ease-gentle: var(--ease-gentle);
+  --ease-maison: var(--ease-maison);
+  --ease-out: var(--ease-out);
+  --ease-in: var(--ease-in);
+  --ease-in-out: var(--ease-in-out);
+
+  /* Motion durations */
+  --duration-instant: var(--duration-instant);
+  --duration-quick: var(--duration-quick);
+  --duration-fast: var(--duration-fast);
+  --duration-standard: var(--duration-standard);
+  --duration-slow: var(--duration-slow);
+  --duration-crawl: var(--duration-crawl);
+
+  /* Container widths */
+  --container-content: 1280px;
+  --container-narrow: 760px;
+  --container-wide: 1440px;
+}
+
+/* ── Base styles ────────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: var(--leading-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+
+/* ── Utility classes (Tailwind v4 @layer utilities) ────────── */
+@layer utilities {
+  /* Eyebrow label — used above section titles */
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--clay);
+    margin-bottom: 1rem;
+  }
+
+  /* Container */
+  .container-maison {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .container-narrow {
+    max-width: var(--container-narrow);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* Section padding */
+  .section-padding {
+    padding-block: var(--section-padding-y);
+  }
+
+  /* Scroll reveal (initial hidden state — revealed via IntersectionObserver) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity var(--duration-slow) var(--ease-out),
+                transform var(--duration-slow) var(--ease-out);
+    will-change: opacity, transform;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Reduced motion (accessibility — already in @maison/ui/globals, reinforced here) ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

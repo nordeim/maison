@@ -1,0 +1,51 @@
+{
+  "name": "@maison/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "@maison/source": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./schema": {
+      "@maison/source": "./src/schema/index.ts",
+      "default": "./src/schema/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "clean": "rm -rf dist .turbo",
+    "check-types": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/seed/index.ts",
+    "db:seed:e2e": "tsx src/seed/e2e.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "tsx src/scripts/reset.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.13.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@maison/typescript-config": "workspace:*",
+    "@types/node": "^26.1.0",
+    "@types/pg": "^8.11.10",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
+    "testcontainers": "^11.0.3",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.9"
+  }
+}

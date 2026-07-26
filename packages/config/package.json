@@ -1,0 +1,43 @@
+{
+  "name": "@maison/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "@maison/source": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./env": {
+      "@maison/source": "./src/env.ts",
+      "default": "./src/env.ts"
+    },
+    "./site": {
+      "@maison/source": "./src/site.ts",
+      "default": "./src/site.ts"
+    },
+    "./jobs-client": {
+      "@maison/source": "./src/jobs-client.ts",
+      "default": "./src/jobs-client.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "clean": "rm -rf dist .turbo",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.11",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@maison/typescript-config": "workspace:*",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.9"
+  }
+}

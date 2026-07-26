@@ -1,0 +1,48 @@
+/**
+ * Maison — Motion tokens
+ *
+ * All animations respect prefers-reduced-motion: reduce (see globals.css).
+ */
+
+:root {
+  /* ─── Easings ──────────────────────────────────────────────────── */
+  --ease-gentle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-maison: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ─── Durations ────────────────────────────────────────────────── */
+  --duration-instant: 100ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-standard: 450ms;
+  --duration-slow: 800ms;
+  --duration-crawl: 900ms;
+
+  /* ─── Keyframe animations ──────────────────────────────────────── */
+  --animation-marquee: marquee 38s linear infinite;
+  --animation-ken-burns: ken-burns 24s ease-in-out infinite alternate;
+  --animation-scroll-hint: scroll-hint 2.4s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes ken-burns {
+  0%   { transform: scale(1.08) translate(-1%, -1%); }
+  100% { transform: scale(1.18) translate(1.5%, 1%); }
+}
+
+@keyframes scroll-hint {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

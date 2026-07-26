@@ -33,7 +33,8 @@
     "lighthouse": "lhci",
     "lighthouse:ci": "lhci autorun",
     "bundle-size": "ANALYZE=true pnpm --filter=@maison/web build",
-    "audit": "pnpm audit --audit-level=high"
+    "audit": "pnpm audit --audit-level=high",
+    "prepare": "ln -sf ../../scripts/pre-commit-check.sh .git/hooks/pre-commit 2>/dev/null || true"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

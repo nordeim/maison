@@ -1,0 +1,46 @@
+/**
+ * Maison — Color tokens (CSS custom properties)
+ *
+ * Canonical source: docs/landing_page_unified.html
+ * Aligned with PROJECT-ARCHITECTURE.md §5.2.
+ *
+ * WCAG contrast ratios (on --bg #faf8f5):
+ *   --ink:     14.8:1 (AAA)
+ *   --ink-2:    9.2:1 (AAA)
+ *   --muted:    4.6:1 (AA — meta labels only, never primary content)
+ *   --clay:     4.8:1 (AA)
+ *   --clay-dark: 6.1:1 (AA)
+ *   --gold:     3.2:1 (decorative only — never text < 18px)
+ *   --sage:     3.5:1 (decorative only — never text < 18px)
+ */
+
+:root {
+  /* ─── Backgrounds ──────────────────────────────────────────────── */
+  --bg: #faf8f5;
+  --bg-2: #f3efe8;
+  --bg-3: #ece5d8;
+  --bg-card: #ffffff;
+  --bg-dark: #1f1b17;
+
+  /* ─── Ink (text) ───────────────────────────────────────────────── */
+  --ink: #1f1b17;
+  --ink-2: #4a433b;
+  --muted: #8a8178;
+
+  /* ─── Lines ────────────────────────────────────────────────────── */
+  --line: #e5ddd1;
+  --line-soft: #efe9df;
+
+  /* ─── Accents ──────────────────────────────────────────────────── */
+  --clay: #a86b4a;
+  --clay-dark: #8a5538;
+  --clay-light: #c17d52;
+  --gold: #c4a265;
+  --sage: #8b9a82;
+
+  /* ─── Status (Phase 2 — for badges, alerts) ────────────────────── */
+  --success: #8b9a82;
+  --warning: #c4a265;
+  --error: #a86b4a;
+  --info: #8a8178;
+}

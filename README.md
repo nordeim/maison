@@ -257,13 +257,15 @@ pnpm dev
 
 ```bash
 # Health checks
-curl http://localhost:3000/api/health        # → {"status":"ok"}
-docker compose ps                            # → postgres + redis running
-pnpm check-types                             # → no errors
-pnpm test                                    # → all unit tests pass
+curl http://localhost:3000                    # → Homepage renders (hero + seeded products)
+curl http://localhost:3000/products           # → PLP shows 13 seeded products
+docker compose ps                             # → postgres + redis running
+pnpm check-types                              # → no errors
+pnpm test                                     # → all unit tests pass
+pnpm test:e2e                                 # → Playwright E2E (requires pnpm build first)
 ```
 
-Open `http://localhost:3000` — you should see the homepage with hero, featured collection, products, and all sections from `docs/landing_page_unified.html` rendered server-side from the seeded data.
+Open `http://localhost:3000` — you should see the homepage hero ("Objects of Quiet Beauty") plus the 4 most recent seeded products rendered server-side from the database via the tRPC server caller.
 
 ---
 
@@ -435,12 +437,12 @@ REFACTOR → Clean up the code while keeping the test green
 
 | Phase | Status | Key Deliverables |
 |-------|--------|------------------|
-| Phase 0 — Foundation | 🟡 Scaffold defined | Monorepo structure, design tokens, env template, docs |
-| Phase 1 — MVP | ⚪ Not started | Homepage, PLP, PDP, cart, checkout, account, admin |
+| Phase 0 — Foundation | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (16 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (8), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml` |
+| Phase 1 — MVP | 🟡 In progress | Full homepage (15 sections), PLP + PDP with gallery, cart drawer, Stripe checkout, customer account, admin dashboard |
 | Phase 2 — Growth | ⚪ Not started | OAuth, search, promo codes, multi-region, CMS full integration |
 | Phase 3 — Optimisation | ⚪ Not started | Reviews, A/B testing, trade program, gift cards, loyalty |
 
-**Current progress:** Documentation complete. Build to commence per `docs/PRD_unified.md` §18.
+**Current progress:** Phase 0 scaffold complete. The monorepo installs and builds; `pnpm dev` starts the Next.js app at `:3000`; `pnpm db:seed` loads the initial catalog. Phase 1 feature implementation per `docs/PRD_unified.md` §18 to commence.
 
 ---
 

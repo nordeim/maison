@@ -1,0 +1,24 @@
+/**
+ * Maison — Cormorant Garamond font (self-hosted)
+ *
+ * Loaded via next/font in apps/web/src/app/layout.tsx instead of @font-face
+ * (Next.js handles font optimization, preloading, and CLS prevention).
+ *
+ * This file is a fallback for non-Next.js consumers (Storybook, tests).
+ * The actual woff2 files should be added to packages/ui/src/fonts/cormorant/
+ * and referenced here once downloaded.
+ *
+ * Subsets needed: Latin, Latin Extended (for European accented chars).
+ * Weights: 300, 400, 500, 600, 700 + italic 400, italic 500.
+ */
+
+/* Placeholder — replace with @font-face declarations once woff2 files are downloaded.
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./cormorant-garamond-regular-normal-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+*/

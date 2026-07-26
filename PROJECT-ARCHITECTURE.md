@@ -1361,13 +1361,18 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
-| CRITICAL | Application code not yet scaffolded (Phase 0) | Cannot run the storefront | Open — Phase 0 to commence per PRD §18 |
-| HIGH | GitHub Actions CI workflow not yet created | No automated quality gates | Open — scaffold in Phase 0 |
-| HIGH | Drizzle schema not yet written (tables defined in PRD §9.2 but not coded) | No DB layer | Open — Phase 0 |
-| HIGH | tRPC routers not yet implemented | No API layer | Open — Phase 1 |
-| MEDIUM | Sanity Studio schemas not yet defined | No CMS content management | Open — Phase 1 |
-| MEDIUM | Playwright E2E test suite not yet written | No automated user journey tests | Open — Phase 1 |
-| MEDIUM | Stripe webhook handler not yet implemented | Cannot process payments | Open — Phase 1 |
+| ~~CRITICAL~~ | ~~Application code not yet scaffolded (Phase 0)~~ | ~~Cannot run the storefront~~ | ✅ Resolved — Phase 0 scaffold complete |
+| ~~HIGH~~ | ~~GitHub Actions CI workflow not yet created~~ | ~~No automated quality gates~~ | ✅ Resolved — `.github/workflows/ci.yml` created |
+| ~~HIGH~~ | ~~Drizzle schema not yet written~~ | ~~No DB layer~~ | ✅ Resolved — 16 tables in `packages/db/src/schema/`, migration `0000_initial.sql` |
+| ~~HIGH~~ | ~~tRPC routers not yet implemented~~ | ~~No API layer~~ | ✅ Resolved — 8 routers in `packages/api/src/routers/` (products, collections, cart, account, checkout, admin, newsletter, contact) |
+| MEDIUM | Sanity Studio schemas not yet defined | No CMS content management | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings) |
+| MEDIUM | Playwright E2E test suite not yet written | No automated user journey tests | ✅ Resolved — `e2e/smoke.spec.ts` + `e2e/accessibility.spec.ts` + `playwright.config.ts` |
+| HIGH | Homepage renders only Phase 0 hero + 4 products (not full 15 sections from landing_page_unified.html) | Brand experience incomplete | Open — Phase 1 |
+| HIGH | Stripe webhook handler returns 200 but doesn't update order status | Cannot process payments end-to-end | Open — Phase 1 |
+| HIGH | Cart router creates carts but no cart drawer UI | No add-to-cart from PDP | Open — Phase 1 |
+| HIGH | Checkout page is a stub (no Stripe Elements, no order creation) | Cannot complete purchases | Open — Phase 1 |
+| HIGH | Account dashboard is a stub (no order history, no wishlist UI) | Account section non-functional | Open — Phase 1 |
+| HIGH | Admin dashboard is a stub (no KPI queries, no product table) | Admin section non-functional | Open — Phase 1 |
 | LOW | OAuth providers (Google, Apple) not configured | Email/password only in v1 | Phase 2 |
 | LOW | Multi-region (EU/UK) not implemented | US-only in v1 | Phase 2 |
 | LOW | Product reviews not implemented | No social proof on PDP | Phase 3 |
@@ -1379,19 +1384,56 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `docs/PRD_unified.md` | ~1,200 | Product requirements — what to build (features, pages, data models, API) |
+| `docs/PRD_unified.md` | ~1,374 | Product requirements — what to build (features, pages, data models, API) |
 | `docs/landing_page_unified.html` | ~2,250 | Canonical visual reference — CSS tokens, sections, copy |
-| `PROJECT-ARCHITECTURE.md` | ~1,400 | This document — engineering blueprint |
-| `AGENTS.md` | ~200 | High-signal facts for AI agents |
-| `CLAUDE.md` | ~300 | Claude Code instructions |
-| `README.md` | ~400 | Project overview + quick start |
-| `.env.example` | ~90 | Environment variable template |
+| `PROJECT-ARCHITECTURE.md` | ~1,450 | This document — engineering blueprint |
+| `AGENTS.md` | ~212 | High-signal facts for AI agents |
+| `CLAUDE.md` | ~248 | Claude Code instructions |
+| `README.md` | ~490 | Project overview + quick start |
 | `package.json` | ~50 | Root scripts + devDependencies |
-| `pnpm-workspace.yaml` | ~50 | Workspace config + supply-chain guardrails |
+| `pnpm-workspace.yaml` | ~55 | Workspace config + supply-chain guardrails |
 | `turbo.json` | ~100 | Task pipeline definition |
-| `docker-compose.yml` | ~80 | Local Postgres + Redis + Stripe CLI |
+| `.env.example` | ~104 | Environment variable template |
+| `docker-compose.yml` | ~90 | Local Postgres + Redis + Stripe CLI |
 | `scripts/db-setup.sh` | ~45 | One-shot DB setup |
-| `docs/ssh_git_wrapper_v3.py` | ~700 | Paramiko SSH wrapper (no openssh-client) |
+| `scripts/pre-commit-check.sh` | ~20 | Pre-commit quality gates |
+| `.github/workflows/ci.yml` | ~100 | GitHub Actions CI (8-gate pipeline) |
+| `playwright.config.ts` | ~45 | Playwright E2E config (desktop + mobile) |
+| `packages/config/src/env.ts` | ~190 | Zod-validated env (t3-env, build-context fallback) |
+| `packages/config/src/site.ts` | ~110 | Brand metadata, nav, footer, shipping config |
+| `packages/db/src/index.ts` | ~90 | Drizzle client (Neon + node-postgres auto-detect) |
+| `packages/db/src/schema/index.ts` | ~60 | Schema barrel (re-exports all 16 tables + enums + relations) |
+| `packages/db/drizzle/migrations/0000_initial.sql` | ~190 | Initial migration (all tables + enums + indexes) |
+| `packages/db/src/seed/index.ts` | ~100 | Seed script (8 collections + 13 products, idempotent) |
+| `packages/db/drizzle.config.ts` | ~45 | Drizzle Kit config (uses DATABASE_URL_UNPOOLED) |
+| `packages/auth/src/config.ts` | ~130 | Better Auth config (email/password, custom session w/ role, rate limiting) |
+| `packages/auth/src/rbac.ts` | ~45 | RBAC roles (customer/staff/admin) + helpers |
+| `packages/api/src/trpc.ts` | ~55 | tRPC init + 4 procedure tiers (public/protected/admin/adminWrite) |
+| `packages/api/src/context.ts` | ~35 | Context builder (db + session w/ 5s timeout) |
+| `packages/api/src/root.ts` | ~30 | Root router (8 routers merged) |
+| `packages/api/src/routers/products.ts` | ~130 | Products router (list, getBySlug, getRelated, search) |
+| `packages/api/src/middleware/rateLimit.ts` | ~60 | Upstash Redis rate limit (fail-open) |
+| `packages/payments/src/client.ts` | ~35 | Stripe client (lazy-init, stub fallback) |
+| `packages/payments/src/webhooks.ts` | ~55 | Webhook event handlers (idempotent) |
+| `packages/email/src/templates/OrderConfirmation.tsx` | ~170 | Order confirmation email (React Email) |
+| `packages/ui/src/tokens/colors.css` | ~45 | Color tokens (WCAG contrast documented) |
+| `packages/ui/src/globals.css` | ~80 | Combined tokens + fonts + CSS reset |
+| `apps/web/src/app/globals.css` | ~140 | Tailwind v4 @theme mapping (CSS-first) |
+| `apps/web/src/app/layout.tsx` | ~90 | Root layout (next/font, TRPCProvider, metadata) |
+| `apps/web/proxy.ts` | ~60 | Next.js 16 proxy (auth cookie check, route protection) |
+| `apps/web/next.config.ts` | ~110 | Next.js config (CSP, transpilePackages, image domains) |
+| `apps/web/src/lib/trpc/server.ts` | ~20 | Server-side tRPC caller (for RSC, zero HTTP) |
+| `apps/web/src/lib/trpc/client.tsx` | ~60 | Client tRPC provider + hooks |
+| `apps/web/src/app/api/webhooks/stripe/route.ts` | ~65 | Stripe webhook handler (signature verify + idempotent) |
+| `apps/web/src/app/api/webhooks/sanity/route.ts` | ~40 | Sanity webhook → ISR revalidation |
+| `apps/web/src/app/(shop)/page.tsx` | ~140 | Homepage (Phase 0 hero + seeded products) |
+| `apps/web/src/app/(shop)/products/[slug]/page.tsx` | ~150 | PDP (gallery, JSON-LD, async params) |
+| `apps/web/src/app/(admin)/layout.tsx` | ~85 | Admin layout (RBAC guard — Layer 2) |
+| `apps/web/src/app/(account)/layout.tsx` | ~55 | Account layout (auth guard — Layer 2) |
+| `apps/studio/sanity.config.ts` | ~25 | Sanity Studio config |
+| `apps/studio/schemas/index.ts` | ~15 | Schema barrel (4 content types) |
+| `e2e/smoke.spec.ts` | ~50 | E2E smoke tests (homepage, products, auth redirect) |
+| `e2e/accessibility.spec.ts` | ~35 | Axe-core accessibility tests (8 public pages) |
 
 ---
 

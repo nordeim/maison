@@ -136,9 +136,9 @@ next-env.d.ts
 *.tsbuildinfo
 next-stats/
 
-# ─── Drizzle ORM (generated artifacts — keep migrations, ignore meta caches) ──
-packages/db/drizzle/meta/
+# ─── Drizzle ORM (keep migrations + meta journal, ignore build caches) ──
 packages/db/.drizzle/
+packages/db/dist/
 
 # ─── Playwright ───────────────────────────────────────────────────
 playwright-report/

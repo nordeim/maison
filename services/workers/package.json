@@ -1,0 +1,29 @@
+{
+  "name": "@maison/workers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "trigger dev",
+    "deploy": "trigger deploy",
+    "clean": "rm -rf dist .turbo",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@maison/db": "workspace:*",
+    "@maison/email": "workspace:*",
+    "@trigger.dev/sdk": "^4.0.0",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@maison/typescript-config": "workspace:*",
+    "@types/node": "^26.1.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.9"
+  }
+}
