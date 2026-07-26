@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Maison — Curated Home Objects for Considered Living</title>
+<meta name="description" content="Handcrafted home goods and lifestyle pieces designed to bring warmth and intention to everyday moments." />
+<meta property="og:title" content="Maison — Objects of Quiet Beauty" />
+<meta property="og:description" content="Curated home objects and lifestyle pieces for considered living." />
+<meta property="og:image" content="/images/og-cover.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --background: 40 33% 97%;
+    --foreground: 30 10% 15%;
+    --primary: 18 45% 45%;
+    --primary-foreground: 40 33% 97%;
+    --muted-foreground: 30 8% 45%;
+    --border: 30 15% 88%;
+    --terracotta: 18 45% 45%;
+    --charcoal: 30 10% 15%;
+    --linen: 35 25% 93%;
+    --font-serif: "Cormorant Garamond", Georgia, serif;
+    --font-sans: "Inter", system-ui, sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:hsl(var(--background));
+    color:hsl(var(--foreground));
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.5;
+  }
+  img{display:block;max-width:100%;height:auto;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;}
+  input{font-family:inherit;}
+  h1,h2,h3,h4{font-family:var(--font-serif);font-weight:500;letter-spacing:-0.025em;}
+  ::selection{background:hsl(var(--terracotta) / .18);}
+  .container-full{margin:0 auto;max-width:1600px;padding:0 1.5rem;}
+  .container-narrow{margin:0 auto;max-width:64rem;padding:0 1.5rem;}
+  .kicker{font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:hsl(var(--primary));margin-bottom:.9rem;display:block;}
+  .italic{font-style:italic;font-weight:400;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:1.1rem 2.5rem;font-size:.8rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+    border:1px solid transparent;transition:all .35s ease;cursor:pointer;white-space:nowrap;position:relative;overflow:hidden;
+  }
+  .btn-primary{background:hsl(var(--charcoal));color:hsl(var(--background));}
+  .btn-primary:hover{background:hsl(var(--charcoal) / .85);transform:translateY(-1px);}
+  .btn-white{background:#fff;color:hsl(var(--charcoal));}
+  .btn-white:hover{background:#f2f0ec;}
+  .btn-outline{border-color:hsl(var(--border));background:transparent;color:hsl(var(--foreground));}
+  .btn-outline:hover{background:hsl(var(--foreground)/.05);}
+  .arrow{margin-left:.75rem;width:16px;height:16px;transition:transform .3s ease;}
+  .btn:hover .arrow{transform:translateX(4px);}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:50;background:hsl(var(--background)/.8);backdrop-filter:blur(6px);border-bottom:1px solid transparent;transition:all .5s ease;}
+  header.scrolled{background:hsl(var(--background)/.96);border-bottom-color:hsl(var(--border));box-shadow:0 1px 8px rgba(0,0,0,.04);}
+  nav.top{display:flex;align-items:center;justify-content:space-between;height:4.5rem;}
+  .logo{font-family:var(--font-serif);font-size:1.7rem;letter-spacing:-0.02em;transition:color .3s ease;}
+  .logo:hover{color:hsl(var(--primary));}
+  .nav-links{display:none;align-items:center;gap:2rem;}
+  .nav-link{font-size:.72rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:hsl(var(--muted-foreground));position:relative;transition:color .3s ease;padding:.4rem 0;}
+  .nav-link::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(0,0,.2,1);}
+  .nav-link:hover{color:hsl(var(--foreground));}
+  .nav-link:hover::after{transform:scaleX(1);}
+  .icons{display:flex;align-items:center;gap:.35rem;}
+  .icon-btn{position:relative;padding:.5rem;border-radius:2px;transition:background .3s ease;}
+  .icon-btn:hover{background:hsl(var(--foreground)/.06);}
+  .icon-btn svg{width:20px;height:20px;transition:transform .3s ease;}
+  .icon-btn:hover svg{transform:scale(1.1);}
+  .badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:hsl(var(--primary));color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+  .menu-toggle{display:flex;padding:.5rem;}
+  .menu-toggle svg{width:20px;height:20px;}
+
+  .dropdown{position:relative;}
+  .dropdown-panel{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(6px);background:hsl(var(--background));border:1px solid hsl(var(--border));box-shadow:0 12px 30px rgba(0,0,0,.08);padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.25rem;width:420px;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;}
+  .dropdown:hover .dropdown-panel,.dropdown:focus-within .dropdown-panel{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+  .dropdown-panel a{display:block;padding:.6rem .75rem;border-radius:2px;transition:background .25s ease;}
+  .dropdown-panel a:hover{background:hsl(var(--foreground)/.05);}
+  .dropdown-panel .cname{font-size:.85rem;font-weight:500;margin-bottom:2px;}
+  .dropdown-panel .cdesc{font-size:.75rem;color:hsl(var(--muted-foreground));}
+
+  .mobile-menu{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.25,.46,.45,.94);border-top:1px solid transparent;}
+  .mobile-menu.open{max-height:600px;border-top-color:hsl(var(--border));}
+  .mobile-menu-inner{padding:2rem 0;}
+  .mobile-section-label{font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:hsl(var(--muted-foreground)/.6);padding:0 .5rem;margin-bottom:.75rem;}
+  .mobile-link{display:block;padding:.65rem .5rem;font-size:.9rem;border-radius:2px;transition:background .3s ease;}
+  .mobile-link:hover{background:hsl(var(--foreground)/.05);}
+  .mobile-divider{border-top:1px solid hsl(var(--border));margin:1.5rem 0;padding-top:1.5rem;}
+
+  @media(min-width:768px){
+    .nav-links{display:flex;}
+    .menu-toggle{display:none;}
+    .mobile-menu{display:none;}
+  }
+
+  /* Hero */
+  .hero{position:relative;height:100svh;margin-top:-4.5rem;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;}
+  .hero-bg img{width:100%;height:120%;object-fit:cover;animation:kenburns 20s ease-out forwards;}
+  @keyframes kenburns{0%{transform:scale(1);}100%{transform:scale(1.12);}}
+  .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom, hsl(var(--charcoal)/.3), hsl(var(--charcoal)/.1) 45%, hsl(var(--charcoal)/.55));}
+  .hero-content{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 1.5rem 6rem;max-width:1600px;margin:0 auto;}
+  .hero-content .inner{max-width:44rem;}
+  .hero-kicker{font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:1.5rem;opacity:0;animation:fadeIn .8s ease .6s forwards;}
+  .hero h1{font-size:clamp(2.75rem,8vw,6.5rem);color:#fff;line-height:.9;margin-bottom:2rem;letter-spacing:-0.02em;opacity:0;transform:translateY(40px);animation:riseIn 1s cubic-bezier(.25,.46,.45,.94) .3s forwards;}
+  .hero p.sub{font-size:1.05rem;color:rgba(255,255,255,.8);max-width:32rem;margin-bottom:2.5rem;line-height:1.7;opacity:0;transform:translateY(40px);animation:riseIn 1s cubic-bezier(.25,.46,.45,.94) .5s forwards;}
+  .hero .cta-wrap{opacity:0;transform:translateY(40px);animation:riseIn 1s cubic-bezier(.25,.46,.45,.94) .7s forwards;}
+  @keyframes riseIn{to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeIn{to{opacity:1;}}
+  .scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;opacity:0;animation:fadeIn .8s ease 1.5s forwards;}
+  .scroll-indicator span{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+  .scroll-indicator svg{width:16px;height:16px;color:rgba(255,255,255,.5);animation:bounce 2s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.25,.46,.45,.94), transform .8s cubic-bezier(.25,.46,.45,.94);}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  .reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .8s cubic-bezier(.25,.46,.45,.94), transform .8s cubic-bezier(.25,.46,.45,.94);}
+  .reveal-left.visible{opacity:1;transform:translateX(0);}
+  .reveal-right{opacity:0;transform:translateX(30px);transition:opacity .8s cubic-bezier(.25,.46,.45,.94), transform .8s cubic-bezier(.25,.46,.45,.94);}
+  .reveal-right.visible{opacity:1;transform:translateX(0);}
+
+  section{padding:5rem 0;}
+  @media(min-width:768px){section{padding:7rem 0;}}
+  .bg-linen{background:hsl(var(--linen));}
+
+  /* Featured collection split */
+  .split{display:grid;gap:2.5rem;align-items:center;}
+  @media(min-width:768px){.split{grid-template-columns:1fr 1fr;gap:4rem;}}
+  .split-image{position:relative;aspect-ratio:4/5;overflow:hidden;}
+  .split-image img{width:100%;height:100%;object-fit:cover;transition:transform 1.5s ease-out;}
+  .split-image:hover img{transform:scale(1.05);}
+  .split-image .fade{position:absolute;inset:0;background:linear-gradient(to top, hsl(var(--charcoal)/.4), transparent 60%);}
+  .split h2{font-size:clamp(2rem,5vw,3.25rem);line-height:.95;margin-bottom:1.5rem;}
+  .split p.desc{color:hsl(var(--muted-foreground));line-height:1.75;margin-bottom:2rem;max-width:28rem;}
+
+  /* section head */
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3.5rem;flex-wrap:wrap;gap:1rem;}
+  .section-head h2{font-size:clamp(2rem,4vw,3rem);}
+  .view-all{display:none;align-items:center;gap:.6rem;font-size:.8rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--muted-foreground));}
+  .view-all:hover{color:hsl(var(--foreground));}
+  .view-all svg{width:16px;height:16px;transition:transform .3s ease;}
+  .view-all:hover svg{transform:translateX(4px);}
+  @media(min-width:768px){.view-all{display:inline-flex;}}
+  .section-head-center{text-align:center;margin-bottom:3.5rem;}
+
+  /* product grid */
+  .product-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:2.5rem;}
+  @media(min-width:640px){.product-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1024px){.product-grid{grid-template-columns:repeat(4,1fr);gap:2.5rem;}}
+  .product-card{display:block;}
+  .product-thumb{position:relative;aspect-ratio:4/5;overflow:hidden;background:hsl(var(--foreground)/.04);margin-bottom:1.1rem;}
+  .product-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 1s ease-out;}
+  .product-card:hover .product-thumb img{transform:scale(1.06);}
+  .wish-btn{position:absolute;top:.75rem;right:.75rem;width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(-6px);transition:all .3s ease;}
+  .product-card:hover .wish-btn{opacity:1;transform:translateY(0);}
+  .wish-btn svg{width:16px;height:16px;}
+  .wish-btn.active svg{fill:hsl(var(--primary));color:hsl(var(--primary));}
+  .tag{position:absolute;top:.75rem;left:.75rem;background:hsl(var(--charcoal));color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .6rem;}
+  .product-name{font-family:var(--font-serif);font-size:1.15rem;margin-bottom:.25rem;transition:color .3s ease;}
+  .product-card:hover .product-name{color:hsl(var(--primary));}
+  .product-desc{font-size:.85rem;color:hsl(var(--muted-foreground));margin-bottom:.4rem;}
+  .product-price{font-family:var(--font-serif);font-size:1.05rem;}
+
+  /* collections masonry */
+  .collections-grid{display:grid;grid-template-columns:1fr;gap:1rem;}
+  @media(min-width:768px){.collections-grid{grid-template-columns:repeat(12,1fr);gap:1.5rem;}}
+  .col-span-7{grid-column:span 12;}
+  .col-span-5{grid-column:span 12;}
+  .col-span-4{grid-column:span 12;}
+  .col-span-12{grid-column:span 12;}
+  @media(min-width:768px){
+    .col-span-7{grid-column:span 7;}
+    .col-span-5{grid-column:span 5;}
+    .col-span-4{grid-column:span 4;}
+    .col-span-12{grid-column:span 12;}
+  }
+  .cat-card{position:relative;overflow:hidden;display:block;aspect-ratio:16/10;}
+  .cat-card.tall{aspect-ratio:4/5;}
+  .cat-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease;}
+  .cat-card:hover img{transform:scale(1.08);}
+  .cat-card .overlay{position:absolute;inset:0;background:linear-gradient(to top, hsl(var(--charcoal)/.65), hsl(var(--charcoal)/.05) 55%);display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem;}
+  .cat-card h3{color:#fff;font-size:1.5rem;margin-bottom:.25rem;}
+  .cat-card p{color:rgba(255,255,255,.75);font-size:.85rem;}
+
+  /* about teaser */
+  .about-teaser{text-align:center;}
+  .about-teaser h2{font-size:clamp(1.7rem,4vw,2.75rem);line-height:1.3;max-width:46rem;margin:0 auto 2rem;}
+  .about-teaser p{color:hsl(var(--muted-foreground));max-width:38rem;margin:0 auto 2.5rem;line-height:1.7;}
+
+  /* instagram */
+  .insta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
+  @media(min-width:768px){.insta-grid{grid-template-columns:repeat(6,1fr);gap:1rem;}}
+  .insta-item{position:relative;aspect-ratio:1/1;overflow:hidden;}
+  .insta-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+  .insta-item:hover img{transform:scale(1.1);}
+  .insta-item .overlay{position:absolute;inset:0;background:hsl(var(--charcoal)/0);display:flex;align-items:center;justify-content:center;transition:background .3s ease;}
+  .insta-item:hover .overlay{background:hsl(var(--charcoal)/.4);}
+  .insta-item svg{width:22px;height:22px;color:#fff;opacity:0;transition:opacity .3s ease;}
+  .insta-item:hover svg{opacity:1;}
+
+  /* footer */
+  footer{background:hsl(var(--charcoal));color:hsl(var(--background));}
+  .footer-top{border-bottom:1px solid rgba(255,255,255,.1);}
+  .footer-top-inner{padding:3rem 0;display:flex;flex-direction:column;gap:2rem;}
+  @media(min-width:768px){.footer-top-inner{flex-direction:row;align-items:flex-end;justify-content:space-between;}}
+  .footer-logo{font-family:var(--font-serif);font-size:1.9rem;}
+  .footer-tag{margin-top:.75rem;font-size:.85rem;color:rgba(255,255,255,.5);max-width:20rem;line-height:1.6;}
+  .newsletter-label{font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.75rem;}
+  .newsletter-form{display:flex;max-width:24rem;width:100%;}
+  .newsletter-form input{flex:1;height:3rem;padding:0 1rem;font-size:.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;}
+  .newsletter-form input::placeholder{color:rgba(255,255,255,.3);}
+  .newsletter-form input:focus{outline:none;border-color:rgba(255,255,255,.4);}
+  .newsletter-form button{height:3rem;padding:0 1.25rem;background:#fff;color:hsl(var(--charcoal));}
+  .newsletter-form button:hover{background:rgba(255,255,255,.9);}
+  .newsletter-form button svg{width:16px;height:16px;}
+  .footer-cols{padding:3rem 0;display:grid;grid-template-columns:1fr;gap:2.5rem;}
+  @media(min-width:640px){.footer-cols{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1024px){.footer-cols{grid-template-columns:repeat(4,1fr);}}
+  .footer-cols h4{font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:1.25rem;}
+  .footer-cols li{margin-bottom:.75rem;}
+  .footer-cols a{font-size:.85rem;color:rgba(255,255,255,.6);transition:color .3s ease;}
+  .footer-cols a:hover{color:#fff;}
+  .footer-cols p{font-size:.85rem;color:rgba(255,255,255,.4);}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.1);}
+  .footer-bottom-inner{padding:1.5rem 0;display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;}
+  @media(min-width:768px){.footer-bottom-inner{flex-direction:row;justify-content:space-between;text-align:left;}}
+  .footer-bottom-inner p{font-size:12px;color:rgba(255,255,255,.3);}
+  .footer-legal{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;}
+  .footer-legal a{font-size:12px;color:rgba(255,255,255,.3);transition:color .3s ease;}
+  .footer-legal a:hover{color:rgba(255,255,255,.6);}
+
+  /* toast */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:hsl(var(--charcoal));color:#fff;padding:.9rem 1.6rem;font-size:.85rem;border-radius:2px;opacity:0;pointer-events:none;transition:all .35s ease;z-index:100;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .divider-orn{display:flex;align-items:center;gap:1.5rem;justify-content:center;margin-bottom:2rem;}
+  .divider-orn::before,.divider-orn::after{content:"";height:1px;flex:1;background:hsl(var(--border));}
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <nav class="top container-full">
+    <a href="#" class="logo">Maison</a>
+
+    <div class="nav-links">
+      <div class="dropdown">
+        <button class="nav-link" style="display:inline-flex;align-items:center;gap:4px;">Collections</button>
+        <div class="dropdown-panel" id="collectionsPanel"></div>
+      </div>
+      <a href="#" class="nav-link" data-toast="Shop All is part of the full multi-page experience — see PRD for scope.">Shop All</a>
+      <a href="#about" class="nav-link">About</a>
+    </div>
+
+    <div class="icons">
+      <button class="icon-btn" id="wishlistBtn" title="Wishlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6Z"/></svg>
+        <span class="badge" id="wishBadge" style="display:none;">0</span>
+      </button>
+      <button class="icon-btn" id="cartBtn" title="Bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="badge" id="cartBadge" style="display:none;">0</span>
+      </button>
+      <button class="menu-toggle" id="menuToggle" title="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner container-full">
+      <p class="mobile-section-label">Collections</p>
+      <div id="mobileCollections"></div>
+      <div class="mobile-divider">
+        <a class="mobile-link" href="#" data-toast="Shop All is part of the full multi-page experience — see PRD for scope.">Shop All</a>
+        <a class="mobile-link" href="#about">About</a>
+        <a class="mobile-link" href="#" id="mobileBagLink">Shopping Bag</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80" alt="Curated home lifestyle" />
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="inner">
+      <span class="hero-kicker">Curated for Considered Living</span>
+      <h1>Objects of<br><span class="italic">Quiet Beauty</span></h1>
+      <p class="sub">Handcrafted home goods and lifestyle pieces designed to bring warmth and intention to everyday moments.</p>
+      <div class="cta-wrap">
+        <a href="#latest" class="btn btn-primary">Shop Now
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- Featured Collection -->
+<section>
+  <div class="container-full">
+    <div class="split">
+      <div class="split-image reveal-left">
+        <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1200&q=80" alt="Lighting collection" />
+        <div class="fade"></div>
+      </div>
+      <div class="reveal-right">
+        <span class="kicker">Featured Collection</span>
+        <h2>Lighting</h2>
+        <p class="desc">Sculptural forms that cast warmth and shadow. Discover sculptural forms that cast warmth and shadow, designed to transform any space into a sanctuary of light.</p>
+        <a href="#latest" class="btn btn-primary">Shop Lighting
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Products -->
+<section class="bg-linen" id="latest">
+  <div class="container-full">
+    <div class="section-head reveal">
+      <div>
+        <span class="kicker">Just Arrived</span>
+        <h2>Latest Products</h2>
+      </div>
+      <a href="#" class="view-all" data-toast="Full catalog browsing is detailed in the PRD.">View All
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<!-- Collections grid -->
+<section>
+  <div class="container-full">
+    <div class="section-head-center reveal">
+      <span class="kicker">Browse By</span>
+      <h2>Collections</h2>
+    </div>
+    <div class="collections-grid" id="collectionsGrid"></div>
+  </div>
+</section>
+
+<!-- About teaser -->
+<section class="bg-linen" id="about">
+  <div class="container-narrow about-teaser reveal">
+    <span class="kicker">About Us</span>
+    <h2>We believe in the beauty of slow living—in objects made with care, materials that age gracefully, and spaces that invite <span class="italic">pause</span>.</h2>
+    <p>Every piece in our collection is selected for its material integrity, its maker's story, and its ability to endure beautifully. We work with artisans who share our commitment to craft and sustainability.</p>
+    <a href="#" class="btn btn-outline" data-toast="The full Our Story page is scoped in the PRD.">Read Our Story
+      <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- Instagram -->
+<section>
+  <div class="container-full">
+    <div class="section-head-center reveal">
+      <span class="kicker">Follow Us</span>
+      <h2>@maisonhome</h2>
+      <p style="color:hsl(var(--muted-foreground));max-width:28rem;margin:0.75rem auto 0;">Join our community and get inspired by curated spaces and behind-the-scenes moments.</p>
+    </div>
+    <div class="insta-grid" id="instaGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-top-inner container-full">
+      <div>
+        <a href="#" class="footer-logo">Maison</a>
+        <p class="footer-tag">Curated home objects and lifestyle pieces for considered living.</p>
+      </div>
+      <div style="max-width:24rem;width:100%;">
+        <p class="newsletter-label">Stay Connected</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" placeholder="Your email" required />
+          <button type="submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-full footer-cols">
+    <div>
+      <h4>Collections</h4>
+      <ul id="footerCollections"></ul>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#" data-toast="Shop All is scoped in the PRD.">Shop All</a></li>
+        <li><a href="#about">Our Story</a></li>
+        <li><a href="#" id="footerBagLink">Shopping Bag</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Shipping & Returns</a></li>
+        <li><a href="#">Care Guide</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:hello@maison.com">hello@maison.com</a></li>
+        <li><p>Mon–Fri, 9am–6pm CET</p></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container-full footer-bottom-inner">
+      <p>© <span id="year"></span> Maison. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  // ---------- Data (mirrors extracted content from the live site) ----------
+  var categories = [
+    {id:"lighting", name:"Lighting", desc:"Sculptural forms that cast warmth and shadow", img:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&q=80"},
+    {id:"ceramics", name:"Ceramics", desc:"Handcrafted vessels shaped by patient hands", img:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80"},
+    {id:"furniture", name:"Furniture", desc:"Timeless pieces built for generations", img:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"},
+    {id:"textiles", name:"Textiles", desc:"Natural fibers woven with intention", img:"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"},
+    {id:"objects", name:"Objects & Vases", desc:"Curated details that complete a space", img:"https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80"},
+    {id:"seasonal", name:"Seasonal Collection", desc:"Limited pieces inspired by the changing light", img:"https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=800&q=80"},
+    {id:"new", name:"New Arrivals", desc:"The latest additions to our collection", img:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"},
+    {id:"gifts", name:"Curated Gifts", desc:"Thoughtfully selected pieces for giving", img:"https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&q=80"}
+  ];
+
+  var products = [
+    {id:"arc-pendant", name:"Arc Pendant Light", price:485, desc:"A graceful arc of hand-bent brass and linen", img:"https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=800&q=80", tag:"Featured"},
+    {id:"orb-table-lamp", name:"Orb Table Lamp", price:295, desc:"Mouth-blown glass meets sculptural bronze", img:"https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800&q=80", tag:"New"},
+    {id:"vessel-collection", name:"Large Sculptural Vessel", price:320, desc:"Hand-thrown stoneware with natural ash glaze", img:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80", tag:"Featured"},
+    {id:"serving-bowl", name:"Everyday Serving Bowl", price:145, desc:"Simple forms for daily rituals", img:"https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&q=80", tag:null}
+  ];
+
+  var instaImages = [
+    "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80",
+    "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&q=80",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80",
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80",
+    "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80",
+    "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=400&q=80"
+  ];
+
+  // ---------- Render: nav collections dropdown ----------
+  var panel = document.getElementById('collectionsPanel');
+  categories.forEach(function(c){
+    var a = document.createElement('a');
+    a.href = '#';
+    a.setAttribute('data-toast', 'Collection pages (' + c.name + ') are scoped in the PRD.');
+    a.innerHTML = '<div class="cname">'+c.name+'</div><div class="cdesc">'+c.desc+'</div>';
+    panel.appendChild(a);
+  });
+
+  // ---------- Render: mobile collections ----------
+  var mobileCollections = document.getElementById('mobileCollections');
+  categories.slice(0,6).forEach(function(c){
+    var a = document.createElement('a');
+    a.href = '#';
+    a.className = 'mobile-link';
+    a.textContent = c.name;
+    a.setAttribute('data-toast', 'Collection pages (' + c.name + ') are scoped in the PRD.');
+    mobileCollections.appendChild(a);
+  });
+
+  // ---------- Render: footer collections ----------
+  var footerCollections = document.getElementById('footerCollections');
+  categories.slice(0,6).forEach(function(c){
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#';
+    a.textContent = c.name;
+    a.setAttribute('data-toast', 'Collection pages (' + c.name + ') are scoped in the PRD.');
+    li.appendChild(a);
+    footerCollections.appendChild(li);
+  });
+
+  // ---------- Render: product grid ----------
+  var wishlist = JSON.parse(localStorage.getItem('maison_wishlist') || '[]');
+  var cart = JSON.parse(localStorage.getItem('maison_cart') || '[]');
+
+  function updateBadges(){
+    var wishBadge = document.getElementById('wishBadge');
+    var cartBadge = document.getElementById('cartBadge');
+    wishBadge.style.display = wishlist.length ? 'flex' : 'none';
+    wishBadge.textContent = wishlist.length > 9 ? '9+' : wishlist.length;
+    cartBadge.style.display = cart.length ? 'flex' : 'none';
+    cartBadge.textContent = cart.length > 9 ? '9+' : cart.length;
+  }
+
+  var grid = document.getElementById('productGrid');
+  products.forEach(function(p){
+    var card = document.createElement('div');
+    card.className = 'product-card reveal';
+    card.innerHTML =
+      '<div class="product-thumb">' +
+        (p.tag ? '<span class="tag">'+p.tag+'</span>' : '') +
+        '<button class="wish-btn" data-id="'+p.id+'" title="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6Z"/></svg></button>' +
+        '<img src="'+p.img+'" alt="'+p.name+'" />' +
+      '</div>' +
+      '<h3 class="product-name">'+p.name+'</h3>' +
+      '<p class="product-desc">'+p.desc+'</p>' +
+      '<p class="product-price">$'+p.price.toLocaleString()+'</p>';
+    grid.appendChild(card);
+  });
+
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.wish-btn');
+    if(btn){
+      e.preventDefault();
+      var id = btn.getAttribute('data-id');
+      var idx = wishlist.indexOf(id);
+      if(idx > -1){ wishlist.splice(idx,1); btn.classList.remove('active'); showToast('Removed from wishlist'); }
+      else { wishlist.push(id); btn.classList.add('active'); showToast('Saved to wishlist'); }
+      localStorage.setItem('maison_wishlist', JSON.stringify(wishlist));
+      updateBadges();
+    }
+  });
+
+  // ---------- Render: collections masonry ----------
+  var colGrid = document.getElementById('collectionsGrid');
+  var layout = [
+    {span:'col-span-7', tall:false},
+    {span:'col-span-5', tall:false},
+    {span:'col-span-4', tall:false},
+    {span:'col-span-4', tall:false},
+    {span:'col-span-4', tall:false},
+    {span:'col-span-12', tall:false}
+  ];
+  categories.slice(0,6).forEach(function(c, i){
+    var wrap = document.createElement('div');
+    wrap.className = layout[i].span;
+    wrap.innerHTML =
+      '<a href="#" class="cat-card reveal" data-toast="Collection page for '+c.name+' is scoped in the PRD.">' +
+        '<img src="'+c.img+'" alt="'+c.name+'" />' +
+        '<div class="overlay"><h3>'+c.name+'</h3><p>'+c.desc+'</p></div>' +
+      '</a>';
+    colGrid.appendChild(wrap);
+  });
+
+  // ---------- Render: instagram grid ----------
+  var instaGrid = document.getElementById('instaGrid');
+  instaImages.forEach(function(src){
+    var a = document.createElement('a');
+    a.href = 'https://instagram.com';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'insta-item reveal';
+    a.innerHTML = '<img src="'+src+'" alt="Instagram post" /><div class="overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></div>';
+    instaGrid.appendChild(a);
+  });
+
+  // ---------- Sticky header shadow ----------
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    if(window.scrollY > 50) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+  }, {passive:true});
+
+  // ---------- Mobile menu ----------
+  var menuToggle = document.getElementById('menuToggle');
+  var mobileMenu = document.getElementById('mobileMenu');
+  menuToggle.addEventListener('click', function(){
+    mobileMenu.classList.toggle('open');
+  });
+
+  // ---------- Toast ----------
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2400);
+  }
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('[data-toast]');
+    if(el){ e.preventDefault(); showToast(el.getAttribute('data-toast')); }
+  });
+  document.getElementById('cartBtn').addEventListener('click', function(){
+    showToast(cart.length ? ('Your bag has ' + cart.length + ' item(s). Full cart/checkout flow is scoped in the PRD.') : 'Your bag is empty. Full cart/checkout flow is scoped in the PRD.');
+  });
+  document.getElementById('wishlistBtn').addEventListener('click', function(){
+    showToast(wishlist.length ? ('You have ' + wishlist.length + ' saved item(s).') : 'Your wishlist is empty.');
+  });
+  var mobileBagLink = document.getElementById('mobileBagLink');
+  var footerBagLink = document.getElementById('footerBagLink');
+  [mobileBagLink, footerBagLink].forEach(function(el){
+    if(el) el.addEventListener('click', function(e){ e.preventDefault(); showToast('Full cart/checkout flow is scoped in the PRD.'); });
+  });
+
+  // ---------- Newsletter ----------
+  document.getElementById('newsletterForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    showToast('Thanks for subscribing!');
+    e.target.reset();
+  });
+
+  // ---------- Reveal on scroll ----------
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:.15, rootMargin:'0px 0px -50px 0px'});
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el){ io.observe(el); });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+  updateBadges();
+})();
+</script>
+</body>
+</html>
