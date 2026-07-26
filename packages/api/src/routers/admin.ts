@@ -18,6 +18,7 @@ import {
   customers,
   users,
   auditLog,
+  discounts,
 } from "@maison/db";
 import { router, adminProcedure, adminWriteProcedure } from "../trpc";
 
@@ -431,6 +432,80 @@ export const adminRouter = router({
         entityType: "variant",
         entityId: input.variantId,
         diff: { stockQuantity: input.stockQuantity },
+      });
+
+      return { success: true };
+    }),
+
+  /**
+   * List all discount codes (admin only).
+   */
+  discountsList: adminProcedure.query(async ({ ctx }) => {
+    const allDiscounts = await ctx.db
+      .select()
+      .from(discounts)
+      .orderBy(desc(discounts.createdAt));
+
+    return allDiscounts;
+  }),
+
+  /**
+   * Create a discount code (admin only).
+   */
+  discountsCreate: adminWriteProcedure
+    .input(
+      z.object({
+        code: z.string().min(1).max(50).transform((s) => s.toUpperCase().trim()),
+        type: z.enum(["percentage", "fixed", "free_shipping"]),
+        value: z.number().int().min(0),
+        minOrderCents: z.number().int().min(0).default(0),
+        maxUses: z.number().int().positive().nullable().optional(),
+        startsAt: z.string().datetime().optional(),
+        endsAt: z.string().datetime().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [discount] = await ctx.db
+        .insert(discounts)
+        .values({
+          code: input.code,
+          type: input.type,
+          value: input.value,
+          minOrderCents: input.minOrderCents,
+          maxUses: input.maxUses ?? null,
+          startsAt: input.startsAt ? new Date(input.startsAt) : null,
+          endsAt: input.endsAt ? new Date(input.endsAt) : null,
+          isActive: true,
+        })
+        .returning({ id: discounts.id });
+
+      await ctx.db.insert(auditLog).values({
+        actorUserId: ctx.session.user.id,
+        action: "discount.create",
+        entityType: "discount",
+        entityId: discount!.id,
+        diff: input,
+      });
+
+      return { id: discount!.id };
+    }),
+
+  /**
+   * Deactivate a discount (admin only — soft delete).
+   */
+  discountsDeactivate: adminWriteProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db
+        .update(discounts)
+        .set({ isActive: false })
+        .where(eq(discounts.id, input.id));
+
+      await ctx.db.insert(auditLog).values({
+        actorUserId: ctx.session.user.id,
+        action: "discount.deactivate",
+        entityType: "discount",
+        entityId: input.id,
       });
 
       return { success: true };

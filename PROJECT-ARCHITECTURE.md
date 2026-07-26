@@ -1373,11 +1373,12 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | ~~HIGH~~ | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~ | ~~Cannot complete purchases~~ | ✅ Resolved — Multi-step checkout with real order creation + Stripe Payment Intents |
 | ~~HIGH~~ | ~~Account dashboard is a stub (no order history, no wishlist UI)~~ | ~~Account section non-functional~~ | ✅ Resolved — Dashboard with order count + wishlist count, order history, wishlist grid |
 | ~~HIGH~~ | ~~Admin dashboard is a stub (no KPI queries, no product table)~~ | ~~Admin section non-functional~~ | ✅ Resolved — Dashboard with KPIs + recent orders + low-stock alerts, product table, order fulfillment, customer directory, inventory management |
-| MEDIUM | Stripe Elements not rendering card input (checkout uses demo mode) | No real card payments in dev | Open — Phase 2 (requires Stripe account config) |
-| MEDIUM | Wishlist toggle on ProductCard is client-side only (not persisted to DB) | Wishlist lost on page refresh | Open — Phase 2 (wire to account.toggleWishlist mutation) |
-| MEDIUM | No product image upload in admin | Admin can't add images to new products | Open — Phase 2 (Cloudflare Images integration) |
-| LOW | OAuth providers (Google, Apple) not configured | Email/password only in v1 | Phase 2 |
-| LOW | Multi-region (EU/UK) not implemented | US-only in v1 | Phase 2 |
+| ~~MEDIUM~~ | ~~Wishlist toggle on ProductCard is client-side only (not persisted to DB)~~ | ~~Wishlist lost on page refresh~~ | ✅ Resolved — WishlistButton persists to DB for auth users, localStorage for anon |
+| ~~MEDIUM~~ | ~~No product image upload in admin~~ | ~~Admin can't add images to new products~~ | ✅ Resolved — Admin product create form (Phase 3: image upload via Cloudflare) |
+| MEDIUM | Stripe Elements not rendering card input (checkout uses demo mode) | No real card payments in dev | Open — Phase 3 (requires Stripe account config) |
+| MEDIUM | No product image upload (only URL-based) | Admin can't upload images to Cloudflare | Open — Phase 3 (Cloudflare Images integration) |
+| LOW | OAuth providers (Google, Apple) not configured | Email/password only in v1 | Phase 3 |
+| LOW | Multi-region (EU/UK) not implemented | US-only in v1 | Phase 3 |
 | LOW | Product reviews not implemented | No social proof on PDP | Phase 3 |
 | LOW | Trade program (designer tier) not implemented | No B2B workflow | Phase 3 |
 

@@ -249,6 +249,148 @@ export const accountRouter = router({
 
     return { items: customerAddresses };
   }),
+
+  /**
+   * Create or update an address.
+   * If addressId is provided, updates; otherwise creates.
+   */
+  upsertAddress: protectedProcedure
+    .input(
+      z.object({
+        addressId: z.string().uuid().optional(),
+        label: z.string().max(50).optional(),
+        line1: z.string().min(1),
+        line2: z.string().optional(),
+        city: z.string().min(1),
+        region: z.string().min(1),
+        postalCode: z.string().min(1),
+        country: z.string().min(2).max(2),
+        isDefaultShipping: z.boolean().default(false),
+        isDefaultBilling: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [customer] = await ctx.db
+        .select()
+        .from(customers)
+        .where(eq(customers.userId, ctx.session.user.id))
+        .limit(1);
+
+      if (!customer) {
+        // Create customer record if missing
+        const [newCustomer] = await ctx.db
+          .insert(customers)
+          .values({ userId: ctx.session.user.id })
+          .returning({ id: customers.id });
+        if (!newCustomer) throw new Error("Failed to create customer record");
+
+        // If setting as default, unset other defaults first
+        if (input.isDefaultShipping || input.isDefaultBilling) {
+          await ctx.db
+            .update(addresses)
+            .set({
+              isDefaultShipping: input.isDefaultShipping ? false : undefined,
+              isDefaultBilling: input.isDefaultBilling ? false : undefined,
+            })
+            .where(eq(addresses.customerId, newCustomer.id));
+        }
+
+        const [addr] = await ctx.db
+          .insert(addresses)
+          .values({
+            customerId: newCustomer.id,
+            ...input,
+          })
+          .returning({ id: addresses.id });
+        return { id: addr!.id };
+      }
+
+      // If setting as default, unset other defaults first
+      if (input.isDefaultShipping || input.isDefaultBilling) {
+        await ctx.db
+          .update(addresses)
+          .set({
+            isDefaultShipping: input.isDefaultShipping ? false : undefined,
+            isDefaultBilling: input.isDefaultBilling ? false : undefined,
+          })
+          .where(eq(addresses.customerId, customer.id));
+      }
+
+      if (input.addressId) {
+        await ctx.db
+          .update(addresses)
+          .set({
+            label: input.label,
+            line1: input.line1,
+            line2: input.line2,
+            city: input.city,
+            region: input.region,
+            postalCode: input.postalCode,
+            country: input.country,
+            isDefaultShipping: input.isDefaultShipping,
+            isDefaultBilling: input.isDefaultBilling,
+          })
+          .where(and(eq(addresses.id, input.addressId), eq(addresses.customerId, customer.id)));
+        return { id: input.addressId };
+      }
+
+      const [addr] = await ctx.db
+        .insert(addresses)
+        .values({
+          customerId: customer.id,
+          ...input,
+        })
+        .returning({ id: addresses.id });
+      return { id: addr!.id };
+    }),
+
+  /**
+   * Delete an address.
+   */
+  deleteAddress: protectedProcedure
+    .input(z.object({ addressId: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const [customer] = await ctx.db
+        .select()
+        .from(customers)
+        .where(eq(customers.userId, ctx.session.user.id))
+        .limit(1);
+
+      if (!customer) return { success: true };
+
+      await ctx.db
+        .delete(addresses)
+        .where(and(eq(addresses.id, input.addressId), eq(addresses.customerId, customer.id)));
+
+      return { success: true };
+    }),
+
+  /**
+   * Update newsletter subscription preference.
+   */
+  updateNewsletter: protectedProcedure
+    .input(z.object({ subscribed: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const [customer] = await ctx.db
+        .select()
+        .from(customers)
+        .where(eq(customers.userId, ctx.session.user.id))
+        .limit(1);
+
+      if (customer) {
+        await ctx.db
+          .update(customers)
+          .set({ newsletterSubscribed: input.subscribed, updatedAt: new Date() })
+          .where(eq(customers.id, customer.id));
+      } else {
+        await ctx.db.insert(customers).values({
+          userId: ctx.session.user.id,
+          newsletterSubscribed: input.subscribed,
+        });
+      }
+
+      return { success: true };
+    }),
 });
 
 /**

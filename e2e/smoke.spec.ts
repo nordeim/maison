@@ -66,11 +66,45 @@ test.describe("Smoke tests", () => {
     await expect(page.locator("h1")).toContainText("quiet");
   });
 
-  test("about page loads", async ({ page }) => {
+  test("about page loads with full editorial content", async ({ page }) => {
     await page.goto("/about");
 
     await expect(page.locator("h1")).toContainText("care");
     await expect(page.locator("h1")).toContainText("gracefully");
+
+    // Values section
+    await expect(page.getByText("Material Integrity")).toBeVisible();
+    await expect(page.getByText("Maker Dignity")).toBeVisible();
+    await expect(page.getByText("Slow Design")).toBeVisible();
+    await expect(page.getByText("Repair Over Replace")).toBeVisible();
+
+    // Sustainability section
+    await expect(page.getByText("Three")).toBeVisible();
+
+    // Founder quote
+    await expect(page.getByText("Mette")).toBeVisible();
+  });
+
+  test("search page loads", async ({ page }) => {
+    await page.goto("/search?q=linen");
+
+    await expect(page.locator("h1")).toContainText("linen");
+  });
+
+  test("search page with no query shows prompt", async ({ page }) => {
+    await page.goto("/search");
+
+    await expect(page.locator("h1")).toContainText("collection");
+  });
+
+  test("header search button opens search modal", async ({ page }) => {
+    await page.goto("/");
+
+    // Click search button in header
+    await page.getByRole("button", { name: "Search" }).click();
+
+    // Search input should be visible
+    await expect(page.getByPlaceholder(/search for pieces/i)).toBeVisible();
   });
 
   test("journal page loads", async ({ page }) => {

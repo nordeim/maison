@@ -17,6 +17,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "./CartProvider";
+import { WishlistButton } from "./WishlistButton";
 import { formatPrice, cn } from "@/lib/utils";
 
 export interface ProductCardProps {
@@ -41,7 +42,6 @@ export interface ProductCardProps {
 export function ProductCard({ product, alternateImage }: ProductCardProps) {
   const { addItem } = useCart();
   const [isAdding, setIsAdding] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const badge = product.isNew
     ? { text: "New", className: "new" }
@@ -62,12 +62,6 @@ export function ProductCard({ product, alternateImage }: ProductCardProps) {
     } finally {
       setIsAdding(false);
     }
-  };
-
-  const toggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
   };
 
   return (
@@ -131,37 +125,7 @@ export function ProductCard({ product, alternateImage }: ProductCardProps) {
           )}
 
           {/* Wishlist */}
-          <button
-            onClick={toggleWishlist}
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            style={{
-              position: "absolute",
-              top: "0.75rem",
-              right: "0.75rem",
-              width: 36,
-              height: 36,
-              background: "rgba(250,248,245,0.9)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "none",
-              cursor: "pointer",
-              zIndex: 2,
-              transition: "background 0.25s ease",
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill={isWishlisted ? "var(--clay)" : "none"}
-              stroke={isWishlisted ? "var(--clay)" : "var(--ink)"}
-              strokeWidth="1.5"
-            >
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          <WishlistButton productSlug={product.slug} productName={product.name} variant="card" />
 
           {/* Quick Add */}
           <button

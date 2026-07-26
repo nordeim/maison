@@ -69,12 +69,52 @@ export default function CheckoutPage() {
   const [isPlacing, setIsPlacing] = useState(false);
   const [error, setError] = useState<string>("");
 
+  // Promo code state
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    type: string;
+    discountAmountCents: number;
+    freeShipping: boolean;
+  } | null>(null);
+  const [promoError, setPromoError] = useState("");
+
+  const validatePromo = trpc.discounts.validate.useQuery(
+    { code: promoCode, subtotalCents },
+    { enabled: promoCode.length >= 2 && !!promoCode },
+  );
+
   const createPaymentIntent = trpc.checkout.createPaymentIntent.useMutation();
   const confirmOrder = trpc.checkout.confirmOrder.useMutation();
 
-  const shippingCost = SHIPPING_COSTS[shipping.shippingMethod] ?? 0;
-  const taxCents = Math.round(subtotalCents * 0.08); // 8% tax (simplified)
-  const totalCents = subtotalCents + shippingCost + taxCents;
+  const handleApplyPromo = () => {
+    if (!promoCode.trim()) return;
+    setPromoError("");
+    if (validatePromo.data) {
+      if (validatePromo.data.valid) {
+        setAppliedPromo({
+          code: validatePromo.data.code,
+          type: validatePromo.data.type,
+          discountAmountCents: validatePromo.data.discountAmountCents,
+          freeShipping: validatePromo.data.freeShipping,
+        });
+      } else {
+        setPromoError(validatePromo.data.error);
+        setAppliedPromo(null);
+      }
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode("");
+    setAppliedPromo(null);
+    setPromoError("");
+  };
+
+  const shippingCost = appliedPromo?.freeShipping ? 0 : SHIPPING_COSTS[shipping.shippingMethod] ?? 0;
+  const discountCents = appliedPromo?.discountAmountCents ?? 0;
+  const taxCents = Math.round(Math.max(0, subtotalCents - discountCents) * 0.08);
+  const totalCents = subtotalCents - discountCents + shippingCost + taxCents;
 
   // Redirect to cart if empty (unless we're on confirmation step)
   if (items.length === 0 && step !== "confirmation") {
@@ -338,13 +378,58 @@ export default function CheckoutPage() {
         {/* Order summary sidebar */}
         <aside style={{ position: "sticky", top: "6rem", padding: "2rem", background: "var(--bg-2)", border: "1px solid var(--line)" }}>
           <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", fontWeight: 500, marginBottom: "1.5rem" }}>Order Summary</h2>
+
+          {/* Promo code */}
+          {!appliedPromo ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <label style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.3rem", display: "block" }}>
+                Promo Code
+              </label>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code"
+                  style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid var(--line)", background: "var(--bg-card)", fontSize: 13, textTransform: "uppercase" }}
+                />
+                <button
+                  onClick={handleApplyPromo}
+                  style={{ padding: "0.5rem 1rem", background: "var(--ink)", color: "var(--bg)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", border: "none", cursor: "pointer" }}
+                >
+                  Apply
+                </button>
+              </div>
+              {promoError && <p style={{ fontSize: 12, color: "var(--clay)", marginTop: "0.5rem" }}>{promoError}</p>}
+            </div>
+          ) : (
+            <div style={{ marginBottom: "1.5rem", padding: "0.75rem", background: "rgba(139,154,130,0.1)", border: "1px solid var(--sage)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--sage)" }}>✓ {appliedPromo.code} applied</p>
+                <p style={{ fontSize: 11, color: "var(--muted)" }}>
+                  {appliedPromo.type === "percentage" ? `${appliedPromo.discountAmountCents > 0 ? "-" + formatPrice(appliedPromo.discountAmountCents) : ""}` : ""}
+                  {appliedPromo.freeShipping ? "Free shipping" : ""}
+                </p>
+              </div>
+              <button onClick={handleRemovePromo} style={{ fontSize: 11, color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}>
+                Remove
+              </button>
+            </div>
+          )}
+
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <span style={{ fontSize: "0.875rem", color: "var(--ink-2)" }}>Subtotal ({items.length} items)</span>
             <span style={{ fontSize: "0.875rem" }}>{formatPrice(subtotalCents)}</span>
           </div>
+          {discountCents > 0 && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.875rem", color: "var(--sage)" }}>Discount</span>
+              <span style={{ fontSize: "0.875rem", color: "var(--sage)" }}>-{formatPrice(discountCents)}</span>
+            </div>
+          )}
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <span style={{ fontSize: "0.875rem", color: "var(--ink-2)" }}>Shipping</span>
-            <span style={{ fontSize: "0.875rem" }}>{formatPrice(shippingCost)}</span>
+            <span style={{ fontSize: "0.875rem" }}>{shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <span style={{ fontSize: "0.875rem", color: "var(--ink-2)" }}>Estimated Tax</span>

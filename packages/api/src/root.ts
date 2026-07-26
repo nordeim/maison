@@ -14,6 +14,7 @@ import { checkoutRouter } from "./routers/checkout";
 import { newsletterRouter } from "./routers/newsletter";
 import { contactRouter } from "./routers/contact";
 import { adminRouter } from "./routers/admin";
+import { discountsRouter } from "./routers/discounts";
 
 export const appRouter = router({
   products: productsRouter,
@@ -24,6 +25,7 @@ export const appRouter = router({
   newsletter: newsletterRouter,
   contact: contactRouter,
   admin: adminRouter,
+  discounts: discountsRouter,
 });
 
 export type AppRouter = typeof appRouter;

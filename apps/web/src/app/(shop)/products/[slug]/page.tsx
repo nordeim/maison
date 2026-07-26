@@ -13,6 +13,7 @@ import Link from "next/link";
 import { api } from "@/lib/trpc/server";
 import { formatPrice } from "@/lib/utils";
 import { AddToBagButton } from "@/components/shop/AddToBagButton";
+import { WishlistButton } from "@/components/shop/WishlistButton";
 import { ProductCard } from "@/components/shop/ProductCard";
 
 interface ProductPageProps {
@@ -152,9 +153,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </p>
             )}
 
-            {/* Add to Bag */}
-            <div style={{ marginBottom: "2rem" }}>
-              <AddToBagButton productSlug={product.slug} productName={product.name} />
+            {/* Add to Bag + Wishlist */}
+            <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem" }}>
+              <div style={{ flex: 1 }}>
+                <AddToBagButton productSlug={product.slug} productName={product.name} />
+              </div>
+              <WishlistButton productSlug={product.slug} productName={product.name} variant="pdp" />
             </div>
 
             {/* Trust badges */}

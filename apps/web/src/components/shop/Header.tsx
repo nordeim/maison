@@ -17,12 +17,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "./CartProvider";
+import { SearchModal } from "./SearchModal";
 
 export function Header() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -33,6 +35,18 @@ export function Header() {
   useEffect(() => {
     setMobileNavOpen(false);
   }, [pathname]);
+
+  // Keyboard shortcut: "/" opens search
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && !searchOpen && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
 
   const navLinks = [
     { label: "Shop All", href: "/products" },
@@ -104,6 +118,28 @@ export function Header() {
 
           {/* Actions */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              style={{
+                width: 40,
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                color: "var(--ink)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.25s, color 0.25s",
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+              </svg>
+            </button>
             <Link
               href="/account"
               aria-label="Account"
@@ -266,6 +302,9 @@ export function Header() {
           header nav[aria-label="Primary"] { display: none; }
         }
       `}</style>
+
+      {/* Search modal */}
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
