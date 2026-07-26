@@ -107,6 +107,19 @@ test.describe("Smoke tests", () => {
     await expect(page.getByPlaceholder(/search for pieces/i)).toBeVisible();
   });
 
+  test("gift cards page loads", async ({ page }) => {
+    await page.goto("/gift-cards");
+
+    await expect(page.locator("h1")).toContainText("quiet beauty");
+    await expect(page.locator("h1")).toContainText("gift");
+  });
+
+  test("trade program page loads", async ({ page }) => {
+    await page.goto("/trade");
+
+    await expect(page.locator("h1")).toContainText("designers");
+  });
+
   test("journal page loads", async ({ page }) => {
     await page.goto("/journal");
 

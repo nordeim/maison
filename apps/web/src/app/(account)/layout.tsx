@@ -47,6 +47,7 @@ export default async function AccountLayout({
         </a>
         <a href="/account/orders" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Orders</a>
         <a href="/account/wishlist" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Wishlist</a>
+        <a href="/account/loyalty" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Loyalty</a>
         <a href="/account/addresses" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Addresses</a>
         <a href="/account/settings" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Settings</a>
       </nav>

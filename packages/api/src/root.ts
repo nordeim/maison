@@ -15,6 +15,10 @@ import { newsletterRouter } from "./routers/newsletter";
 import { contactRouter } from "./routers/contact";
 import { adminRouter } from "./routers/admin";
 import { discountsRouter } from "./routers/discounts";
+import { reviewsRouter } from "./routers/reviews";
+import { giftCardsRouter } from "./routers/gift-cards";
+import { tradeRouter } from "./routers/trade";
+import { loyaltyRouter } from "./routers/loyalty";
 
 export const appRouter = router({
   products: productsRouter,
@@ -26,6 +30,10 @@ export const appRouter = router({
   contact: contactRouter,
   admin: adminRouter,
   discounts: discountsRouter,
+  reviews: reviewsRouter,
+  giftCards: giftCardsRouter,
+  trade: tradeRouter,
+  loyalty: loyaltyRouter,
 });
 
 export type AppRouter = typeof appRouter;

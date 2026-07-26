@@ -19,6 +19,7 @@ import {
   users,
   auditLog,
   discounts,
+  cartItems,
 } from "@maison/db";
 import { router, adminProcedure, adminWriteProcedure } from "../trpc";
 
@@ -510,4 +511,104 @@ export const adminRouter = router({
 
       return { success: true };
     }),
+
+  /**
+   * Analytics: revenue over time (last 30 days, grouped by day).
+   */
+  analyticsRevenue: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30) }))
+    .query(async ({ input, ctx }) => {
+      const daysAgo = new Date();
+      daysAgo.setDate(daysAgo.getDate() - input.days);
+
+      const result = await ctx.db.execute(sql`
+        SELECT
+          DATE(${orders.placedAt}) as date,
+          COUNT(*) as order_count,
+          SUM(${orders.totalCents}) as revenue_cents
+        FROM ${orders}
+        WHERE ${orders.placedAt} >= ${daysAgo}
+          AND ${orders.status} NOT IN ('cancelled', 'refunded')
+        GROUP BY DATE(${orders.placedAt})
+        ORDER BY DATE(${orders.placedAt})
+      `);
+
+      return (result as Array<Record<string, unknown>>).map((row) => ({
+        date: row.date as string,
+        orderCount: Number(row.order_count),
+        revenueCents: Number(row.revenue_cents),
+      }));
+    }),
+
+  /**
+   * Analytics: top products by revenue.
+   */
+  analyticsTopProducts: adminProcedure
+    .input(z.object({ limit: z.number().min(1).max(20).default(10) }))
+    .query(async ({ input, ctx }) => {
+      const result = await ctx.db.execute(sql`
+        SELECT
+          ${products.name} as product_name,
+          ${products.slug} as product_slug,
+          SUM(${lineItems.quantity}) as units_sold,
+          SUM(${lineItems.quantity} * ${lineItems.priceCents}) as revenue_cents
+        FROM ${lineItems}
+        JOIN ${orders} ON ${lineItems.orderId} = ${orders.id}
+        JOIN ${products} ON ${lineItems.productId} = ${products.id}
+        WHERE ${orders.status} NOT IN ('cancelled', 'refunded')
+        GROUP BY ${products.id}, ${products.name}, ${products.slug}
+        ORDER BY revenue_cents DESC
+        LIMIT ${input.limit}
+      `);
+
+      return (result as Array<Record<string, unknown>>).map((row) => ({
+        productName: row.product_name as string,
+        productSlug: row.product_slug as string,
+        unitsSold: Number(row.units_sold),
+        revenueCents: Number(row.revenue_cents),
+      }));
+    }),
+
+  /**
+   * Analytics: conversion funnel (views, carts, checkouts, purchases).
+   * Phase 3: views/carts are approximated from PostHog events (stub).
+   */
+  analyticsFunnel: adminProcedure.query(async ({ ctx }) => {
+    const totalOrders = await ctx.db
+      .select({ count: count() })
+      .from(orders)
+      .where(sql`${orders.status} NOT IN ('cancelled', 'refunded')`);
+
+    const totalCarts = await ctx.db
+      .select({ count: count() })
+      .from(cartItems);
+
+    return {
+      productViews: 0, // Phase 3.1: PostHog integration
+      cartAdds: totalCarts[0]?.count ?? 0,
+      checkouts: totalOrders[0]?.count ?? 0,
+      purchases: totalOrders[0]?.count ?? 0,
+    };
+  }),
+
+  /**
+   * Analytics: customer cohorts (signup month + retention).
+   * Phase 3: simplified — returns new customers per month.
+   */
+  analyticsCohorts: adminProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.execute(sql`
+      SELECT
+        DATE_TRUNC('month', ${customers.createdAt}) as cohort_month,
+        COUNT(*) as new_customers
+      FROM ${customers}
+      GROUP BY DATE_TRUNC('month', ${customers.createdAt})
+      ORDER BY cohort_month DESC
+      LIMIT 12
+    `);
+
+    return (result as Array<Record<string, unknown>>).map((row) => ({
+      cohortMonth: row.cohort_month as string,
+      newCustomers: Number(row.new_customers),
+    }));
+  }),
 });

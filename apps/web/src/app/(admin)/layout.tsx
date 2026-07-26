@@ -79,6 +79,9 @@ export default async function AdminLayout({
         <a href="/admin/customers" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Customers</a>
         <a href="/admin/inventory" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Inventory</a>
         <a href="/admin/discounts" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Discounts</a>
+        <a href="/admin/reviews" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Reviews</a>
+        <a href="/admin/trade" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Trade</a>
+        <a href="/admin/analytics" style={{ fontSize: "0.875rem", color: "#4a433b" }}>Analytics</a>
       </nav>
 
       {children}

@@ -14,6 +14,7 @@ import { api } from "@/lib/trpc/server";
 import { formatPrice } from "@/lib/utils";
 import { AddToBagButton } from "@/components/shop/AddToBagButton";
 import { WishlistButton } from "@/components/shop/WishlistButton";
+import { ReviewsSection } from "@/components/shop/ReviewsSection";
 import { ProductCard } from "@/components/shop/ProductCard";
 
 interface ProductPageProps {
@@ -203,6 +204,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </section>
         )}
+
+        {/* Reviews */}
+        <ReviewsSection productSlug={product.slug} />
       </div>
 
       <style>{`

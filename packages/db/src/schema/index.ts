@@ -54,5 +54,18 @@ export type { Discount } from "./discounts";
 export { auditLog } from "./audit-log";
 export type { AuditLogEntry } from "./audit-log";
 
+// Phase 3 tables
+export { productReviews } from "./product-reviews";
+export type { ProductReview, NewProductReview } from "./product-reviews";
+
+export { giftCards, giftCardRedemptions } from "./gift-cards";
+export type { GiftCard, NewGiftCard, GiftCardRedemption } from "./gift-cards";
+
+export { tradeApplications } from "./trade-applications";
+export type { TradeApplication, NewTradeApplication } from "./trade-applications";
+
+export { loyaltyAccounts, loyaltyTransactions } from "./loyalty";
+export type { LoyaltyAccount, LoyaltyTransaction } from "./loyalty";
+
 // Relations (for Drizzle query API: db.query.*.findMany({ with: ... }))
 export * from "./relations";
