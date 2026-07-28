@@ -6,7 +6,7 @@
  * which doesn't load dotenv automatically.
  */
 
-import { config } from "dotenv";
+import { config } from 'dotenv';
 
-config({ path: "../../.env.local" });
-config({ path: "../../.env" });
+config({ path: '../../.env.local' });
+config({ path: '../../.env' });

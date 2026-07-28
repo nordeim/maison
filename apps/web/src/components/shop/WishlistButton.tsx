@@ -8,22 +8,24 @@
  * Used on: ProductCard, PDP.
  */
 
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc/client";
-import { useSession } from "@maison/auth/client";
+import { useState, useEffect } from 'react';
+
+import { useSession } from '@maison/auth/client';
+
+import { trpc } from '@/lib/trpc/client';
 
 interface WishlistButtonProps {
   productSlug: string;
   productName: string;
-  variant?: "card" | "pdp";
+  variant?: 'card' | 'pdp';
 }
 
-const ANON_WISHLIST_KEY = "maison_anon_wishlist";
+const ANON_WISHLIST_KEY = 'maison_anon_wishlist';
 
 function getAnonWishlist(): string[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(ANON_WISHLIST_KEY);
     return raw ? (JSON.parse(raw) as string[]) : [];
@@ -33,11 +35,15 @@ function getAnonWishlist(): string[] {
 }
 
 function setAnonWishlist(slugs: string[]) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   localStorage.setItem(ANON_WISHLIST_KEY, JSON.stringify(slugs));
 }
 
-export function WishlistButton({ productSlug, productName, variant = "card" }: WishlistButtonProps) {
+export function WishlistButton({
+  productSlug,
+  productName,
+  variant = 'card',
+}: WishlistButtonProps) {
   const { data: session } = useSession();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -85,50 +91,52 @@ export function WishlistButton({ productSlug, productName, variant = "card" }: W
         }
       }
     } catch (err) {
-      console.error("Failed to toggle wishlist:", err);
+      console.error('Failed to toggle wishlist:', err);
     } finally {
       setIsToggling(false);
     }
   };
 
-  const isPdp = variant === "pdp";
+  const isPdp = variant === 'pdp';
 
   return (
     <button
       onClick={handleToggle}
       disabled={isToggling}
-      aria-label={isWishlisted ? `Remove ${productName} from wishlist` : `Add ${productName} to wishlist`}
+      aria-label={
+        isWishlisted ? `Remove ${productName} from wishlist` : `Add ${productName} to wishlist`
+      }
       style={
         isPdp
           ? {
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.75rem 1.5rem",
-              border: "1px solid var(--line)",
-              background: "transparent",
-              color: isWishlisted ? "var(--clay)" : "var(--ink-2)",
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1.5rem',
+              border: '1px solid var(--line)',
+              background: 'transparent',
+              color: isWishlisted ? 'var(--clay)' : 'var(--ink-2)',
               fontSize: 12,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              cursor: isToggling ? "wait" : "pointer",
-              transition: "all 0.25s ease",
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              cursor: isToggling ? 'wait' : 'pointer',
+              transition: 'all 0.25s ease',
             }
           : {
-              position: "absolute",
-              top: "0.75rem",
-              right: "0.75rem",
+              position: 'absolute',
+              top: '0.75rem',
+              right: '0.75rem',
               width: 36,
               height: 36,
-              background: "rgba(250,248,245,0.9)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "none",
-              cursor: isToggling ? "wait" : "pointer",
+              background: 'rgba(250,248,245,0.9)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: isToggling ? 'wait' : 'pointer',
               zIndex: 2,
-              transition: "background 0.25s ease",
+              transition: 'background 0.25s ease',
             }
       }
     >
@@ -136,8 +144,8 @@ export function WishlistButton({ productSlug, productName, variant = "card" }: W
         width={isPdp ? 18 : 16}
         height={isPdp ? 18 : 16}
         viewBox="0 0 24 24"
-        fill={isWishlisted ? "var(--clay)" : "none"}
-        stroke={isWishlisted ? "var(--clay)" : isPdp ? "currentColor" : "var(--ink)"}
+        fill={isWishlisted ? 'var(--clay)' : 'none'}
+        stroke={isWishlisted ? 'var(--clay)' : isPdp ? 'currentColor' : 'var(--ink)'}
         strokeWidth="1.5"
       >
         <path
@@ -146,7 +154,7 @@ export function WishlistButton({ productSlug, productName, variant = "card" }: W
           strokeLinejoin="round"
         />
       </svg>
-      {isPdp && (isWishlisted ? "Saved" : "Save to Wishlist")}
+      {isPdp && (isWishlisted ? 'Saved' : 'Save to Wishlist')}
     </button>
   );
 }

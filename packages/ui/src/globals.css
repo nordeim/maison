@@ -12,9 +12,9 @@
  *   @theme { ... }  ← maps tokens to Tailwind v4 theme namespace
  */
 
-@import "./tokens/index.css";
-@import "./fonts/cormorant/cormorant.css";
-@import "./fonts/inter/inter.css";
+@import './tokens/index.css';
+@import './fonts/cormorant/cormorant.css';
+@import './fonts/inter/inter.css';
 
 /* ─── Minimal CSS reset ──────────────────────────────────────────── */
 *,

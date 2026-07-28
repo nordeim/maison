@@ -7,19 +7,12 @@
  * Per PRD §10.2 and PROJECT-ARCHITECTURE.md §3.3 (Pattern 2).
  */
 
-import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import {
-  carts,
-  cartItems,
-  products,
-  orders,
-  lineItems,
-  customers,
-} from "@maison/db";
-import { stripe } from "@maison/payments";
-import { router, protectedProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, sql } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { carts, cartItems, products, orders, lineItems, customers } from '@maison/db';
+import { stripe } from '@maison/payments';
+import { router, protectedProcedure } from '../trpc';
 
 const SHIPPING_COSTS: Record<string, number> = {
   standard: 1500,
@@ -36,7 +29,7 @@ function generateOrderNumber(): string {
   const year = new Date().getFullYear();
   const random = Math.floor(Math.random() * 100000)
     .toString()
-    .padStart(5, "0");
+    .padStart(5, '0');
   return `MAI-${year}-${random}`;
 }
 
@@ -60,7 +53,7 @@ export const checkoutRouter = router({
           postalCode: z.string(),
           country: z.string(),
         }),
-        shippingMethod: z.enum(["standard", "express", "white_glove"]),
+        shippingMethod: z.enum(['standard', 'express', 'white_glove']),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -80,12 +73,12 @@ export const checkoutRouter = router({
         .where(eq(cartItems.cartId, input.cartId));
 
       if (cartItemsList.length === 0) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Cart is empty" });
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Cart is empty' });
       }
 
       // 2. Calculate totals
       const subtotalCents = cartItemsList.reduce(
-        (sum, item) => sum + item.priceCents * item.quantity,
+        (sum, item) => sum + Number(item.priceCents ?? 0) * item.quantity,
         0,
       );
       const shippingCostCents = SHIPPING_COSTS[input.shippingMethod] ?? 0;
@@ -106,31 +99,31 @@ export const checkoutRouter = router({
           .insert(customers)
           .values({
             userId: ctx.session.user.id,
-            firstName: ctx.session.user.name?.split(" ")[0] ?? null,
-            lastName: ctx.session.user.name?.split(" ").slice(1).join(" ") ?? null,
+            firstName: ctx.session.user.name?.split(' ')[0] ?? null,
+            lastName: ctx.session.user.name?.split(' ').slice(1).join(' ') ?? null,
           })
           .returning({ id: customers.id });
         customerId = newCustomer!.id;
       }
 
       // 4. Create Stripe Payment Intent
-      let clientSecret = "pi_stub_secret";
-      let paymentIntentId = "pi_stub";
+      let clientSecret = 'pi_stub_secret';
+      let paymentIntentId = 'pi_stub';
 
       try {
         const paymentIntent = await stripe.paymentIntents.create({
           amount: totalCents,
-          currency: "usd",
+          currency: 'usd',
           metadata: {
             cartId: input.cartId,
-            customerId: customerId ?? "",
+            customerId: customerId ?? '',
             userEmail: ctx.session.user.email,
           },
         });
-        clientSecret = paymentIntent.client_secret ?? "pi_stub_secret";
+        clientSecret = paymentIntent.client_secret ?? 'pi_stub_secret';
         paymentIntentId = paymentIntent.id;
       } catch (err) {
-        console.error("[checkout] Stripe PaymentIntent creation failed:", err);
+        console.error('[checkout] Stripe PaymentIntent creation failed:', err);
         // Fallback: create order without Stripe (Phase 1 demo mode)
       }
 
@@ -144,12 +137,12 @@ export const checkoutRouter = router({
           orderNumber,
           customerId,
           email: ctx.session.user.email,
-          status: "pending",
+          status: 'pending',
           subtotalCents,
           shippingCostCents,
           taxCents,
           totalCents,
-          currency: "USD",
+          currency: 'USD',
           shippingAddress: input.shippingAddress,
           billingAddress: input.shippingAddress,
           shippingMethod: input.shippingMethod,
@@ -164,8 +157,8 @@ export const checkoutRouter = router({
         cartItemsList.map((item) => ({
           orderId: order!.id,
           productId: item.productId,
-          productName: item.productName ?? "Unknown Product",
-          priceCents: item.priceCents,
+          productName: item.productName ?? 'Unknown Product',
+          priceCents: Number(item.priceCents ?? 0),
           quantity: item.quantity,
         })),
       );
@@ -196,11 +189,11 @@ export const checkoutRouter = router({
       const [order] = await ctx.db
         .update(orders)
         .set({
-          status: "confirmed",
+          status: 'confirmed',
           stripePaymentIntentId: input.paymentIntentId,
           updatedAt: new Date(),
         })
-        .where(and(eq(orders.id, input.orderId), eq(orders.status, "pending")))
+        .where(and(eq(orders.id, input.orderId), eq(orders.status, 'pending')))
         .returning({ id: orders.id, orderNumber: orders.orderNumber });
 
       if (!order) {
@@ -214,7 +207,7 @@ export const checkoutRouter = router({
         if (existing) {
           return { orderNumber: existing.orderNumber };
         }
-        throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Order not found' });
       }
 
       // Clear the cart (mark items as converted — for now, just delete them)

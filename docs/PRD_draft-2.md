@@ -18,6 +18,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 ### 2. Goals & Non-Goals
 
 **Goals**
+
 - Replace the static landing page with a full storefront (PLP, PDP, cart, checkout, account, order management).
 - Provide an admin back-office for products, orders, customers, content and promotions usable by a non-technical operator.
 - Support multi-region (EU + US + UK) with localized pricing, taxes, shipping and language.
@@ -25,6 +26,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Be commercially extensible (discounts, gift cards, trade program, subscriptions later).
 
 **Non-Goals (v1)**
+
 - Marketplace / third-party sellers.
 - Physical retail POS integration.
 - Augmented-reality room visualisation.
@@ -48,12 +50,14 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 ### 4. Functional Requirements (by domain)
 
 #### 4.1 Storefront — Navigation & Discovery
+
 - **Global header:** logo, primary nav (Shop, Collections, Our Story, Journal, Contact), search, account, cart. Sticky on scroll. Mobile hamburger drawer.
 - **Search:** instant results with product image, name, price; typeahead suggestions for categories and journal entries; supports synonyms ("couch" → "sofa"); typo tolerance; recent searches.
 - **Mega-menu:** Shop → Furniture → Seating / Tables / Storage / Beds; each with featured collection thumbnail.
 - **Footer:** shop links, about links, help links, showroom addresses, newsletter form, social icons, payment methods, legal links, locale switcher.
 
 #### 4.2 Product Listing Page (PLP)
+
 - Filters: category, sub-category, material, colour, price range, availability, lead time, collection.
 - Sort: featured, newest, price asc/desc, best-selling.
 - Grid/list toggle. Product card: image (hover-swap), badge (New/Sale/Low-stock), name, material, price (with strikethrough if on sale), quick-add.
@@ -63,6 +67,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Empty-state messaging when filters return zero results.
 
 #### 4.3 Product Detail Page (PDP)
+
 - Image gallery: primary + up to 8 thumbnails, zoom-on-hover, swipe on mobile, video optional.
 - Variants: material/colour/size selectors with swatch images and stock state per variant.
 - Price display: current price, compare-at price, "save X%" badge, tax-inclusive label per locale.
@@ -75,6 +80,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Structured data: `Product`, `Offer`, `AggregateRating`, `BreadcrumbList`.
 
 #### 4.4 Cart & Checkout
+
 - Slide-out mini-cart drawer (already prototyped in the captured HTML) with line items, qty stepper, remove, subtotal, "Proceed to checkout".
 - Full cart page with order summary, shipping estimate by ZIP/postcode, promo code field, gift card field.
 - **Checkout:** single-page, 3 steps (Information → Shipping → Payment), express options (Apple Pay, Google Pay, Klarna, PayPal).
@@ -87,6 +93,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Order confirmation: on-screen + email + SMS (optional opt-in).
 
 #### 4.5 Customer Account
+
 - Auth: email/password, magic-link, OAuth (Google, Apple).
 - Profile: name, email, phone, default addresses, communication preferences.
 - Order history with status, tracking link, invoice PDF download.
@@ -97,6 +104,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Trade account: separate registration with business verification, trade-only pricing visible when approved.
 
 #### 4.6 Content & Editorial
+
 - **Collections** (curated groups of products with editorial header image, story copy, and product grid).
 - **Journal** (blog posts with categories: Craft, Home, People, Sustainability). Rich-text WYSIWYG, hero image, inline product embeds ("shop this post").
 - **Static pages:** Our Story, Sustainability, Materials, Showrooms, Trade Program, FAQ, Shipping, Returns, Privacy, Terms, Cookies, Accessibility.
@@ -108,12 +116,14 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 **Dashboard:** revenue today/7d/30d, orders pending fulfilment, low-stock alerts, top products, conversion funnel.
 
 **Catalog management:**
+
 - Product CRUD: title, slug, description (rich text), variants, materials, dimensions, weight, HS code, country of origin, lead time, images (with alt text), collections, tags, SEO meta.
 - Inventory per variant per warehouse (Aalborg warehouse + Copenhagen showroom floor stock).
 - Pricing: base price per currency, sale price with schedule, trade price tier.
 - Bulk import/export (CSV).
 
 **Order management:**
+
 - Order list with filters (status, date, channel, value, country).
 - Order detail: line items, customer, addresses, payments, shipments, notes, timeline.
 - Actions: capture payment, refund (partial/full), cancel, split-ship, mark shipped, print packing slip, print return label.
@@ -135,6 +145,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 **Roles & permissions:** Owner, Admin, Merchandiser, Customer-service, Warehouse, Read-only.
 
 #### 4.8 Trade / B2B
+
 - Application form with business details + resale certificate upload.
 - Manual approval workflow.
 - Trade-only pricing visible after login (crossed-out retail + net price).
@@ -143,6 +154,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 - Dedicated trade concierge contact.
 
 #### 4.9 Post-Purchase
+
 - Order status emails: confirmed, in-production, shipped, out-for-delivery, delivered.
 - Tracking page (carrier-agnostic via AfterShip).
 - Returns portal: self-service, reason codes, photo upload for damage, label generation, refund status.
@@ -152,19 +164,19 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 
 ### 5. Non-Functional Requirements
 
-| Domain | Requirement |
-|---|---|
-| **Performance** | LCP < 2.0s on 4G mobile for PDP/PLP; INP < 200ms; CLS < 0.05. Product images served as AVIF/WebP via CDN with responsive `srcset`. |
-| **Availability** | 99.95% monthly for storefront; 99.9% for admin. Multi-AZ; DR RTO 4h, RPO 15min. |
-| **Scalability** | Support 10× traffic peak (e.g., holiday gift guide press) without degradation. Stateless web tier, horizontally scalable. |
-| **Security** | OWASP ASVS L2; PCI DSS via Stripe (no card data on our servers); TLS 1.3; HSTS; CSP; signed S3 image URLs; secrets in vault; pen-test annually. |
-| **Accessibility** | WCAG 2.2 AA; axe-core in CI; keyboard navigable; screen-reader tested with NVDA + VoiceOver. |
-| **i18n** | English (default), Danish, German, Swedish. Language negotiation by URL prefix (`/de/...`) + Accept-Language. |
-| **Browser support** | Last 2 versions of Chrome, Safari, Firefox, Edge; iOS Safari 16+; Android Chrome 110+. |
-| **SEO** | Server-rendered HTML; canonical URLs; sitemap.xml; robots.txt; structured data; breadcrumb; OG/Twitter cards; pagination via `rel=next/prev`. |
-| **Privacy / Compliance** | GDPR (EU + UK), CCPA, Danish Cookie Order, EU Digital Services Act (DSA). Consent management via OneTrust or Cookiebot. |
-| **Observability** | APM (Datadog or Sentry), structured logs, RUM (SpeedCurve or Datadog RUM), error tracking, alerting on SLO breaches. |
-| **Backup** | Database PITR + daily snapshots; 30-day retention; quarterly restore drills. |
+| Domain                   | Requirement                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Performance**          | LCP < 2.0s on 4G mobile for PDP/PLP; INP < 200ms; CLS < 0.05. Product images served as AVIF/WebP via CDN with responsive `srcset`.              |
+| **Availability**         | 99.95% monthly for storefront; 99.9% for admin. Multi-AZ; DR RTO 4h, RPO 15min.                                                                 |
+| **Scalability**          | Support 10× traffic peak (e.g., holiday gift guide press) without degradation. Stateless web tier, horizontally scalable.                       |
+| **Security**             | OWASP ASVS L2; PCI DSS via Stripe (no card data on our servers); TLS 1.3; HSTS; CSP; signed S3 image URLs; secrets in vault; pen-test annually. |
+| **Accessibility**        | WCAG 2.2 AA; axe-core in CI; keyboard navigable; screen-reader tested with NVDA + VoiceOver.                                                    |
+| **i18n**                 | English (default), Danish, German, Swedish. Language negotiation by URL prefix (`/de/...`) + Accept-Language.                                   |
+| **Browser support**      | Last 2 versions of Chrome, Safari, Firefox, Edge; iOS Safari 16+; Android Chrome 110+.                                                          |
+| **SEO**                  | Server-rendered HTML; canonical URLs; sitemap.xml; robots.txt; structured data; breadcrumb; OG/Twitter cards; pagination via `rel=next/prev`.   |
+| **Privacy / Compliance** | GDPR (EU + UK), CCPA, Danish Cookie Order, EU Digital Services Act (DSA). Consent management via OneTrust or Cookiebot.                         |
+| **Observability**        | APM (Datadog or Sentry), structured logs, RUM (SpeedCurve or Datadog RUM), error tracking, alerting on SLO breaches.                            |
+| **Backup**               | Database PITR + daily snapshots; 30-day retention; quarterly restore drills.                                                                    |
 
 ---
 
@@ -194,6 +206,7 @@ This PRD defines the requirements to build a **full production e-commerce platfo
 ```
 
 Admin:
+
 ```
 /admin                       Dashboard
 /admin/catalog/products      Product list
@@ -214,6 +227,7 @@ Admin:
 ### 7. User Flows (illustrative)
 
 **Flow A — First-time buyer (cold traffic → first order):**
+
 1. Lands on homepage from Instagram ad.
 2. Browses "Autumn Collection".
 3. Opens Halden Armchair PDP.
@@ -227,6 +241,7 @@ Admin:
 11. 30 days later: win-back email with €50 off next order.
 
 **Flow B — Trade buyer:**
+
 1. Lands via Google search "trade furniture suppliers Denmark".
 2. Visits /trade, applies with CVR + resale cert.
 3. Admin reviews within 48h, approves.
@@ -237,6 +252,7 @@ Admin:
 8. Invoice generated via Stripe Invoicing, sent to AP email.
 
 **Flow C — Return:**
+
 1. Customer logs into /account/orders.
 2. Clicks "Return item" on order.
 3. Selects reason, uploads damage photo.
@@ -250,7 +266,9 @@ Admin:
 ### 8. Page-by-Page Specifications (key pages)
 
 #### 8.1 Homepage
+
 Sections (in order):
+
 1. Announcement bar (rotating, dismissible, content-managed).
 2. Hero — editorial split (image + headline + CTAs), content-managed, can be swapped per season.
 3. Trust marquee (handcrafted, FSC oak, carbon-neutral, 10-year guarantee).
@@ -265,13 +283,16 @@ Sections (in order):
 12. Footer.
 
 #### 8.2 Product Detail Page
+
 Specs in section 4.3. Additional:
+
 - Breadcrumb (Home > Shop > Category > Product).
 - Mobile sticky add-to-cart.
 - Out-of-stock variant: disabled swatch + "Notify me" form (Klaviyo back-in-stock).
 - Pre-order support: distinct badge + estimated ship date.
 
 #### 8.3 Checkout
+
 - Single-page accordion layout.
 - Express pay buttons at top (Apple/Google/PayPal).
 - Email → shipping → shipping method → payment → review.
@@ -382,6 +403,7 @@ POST   /store/back-in-stock                         Notify me
 ```
 
 Admin API (key-only):
+
 ```
 GET/POST/PUT/DELETE /admin/products
 GET/POST/PUT        /admin/orders/{id}
@@ -394,6 +416,7 @@ GET                 /admin/reports/sales
 ```
 
 Webhooks:
+
 - `order.placed` → Klaviyo, ShipStation, Slack
 - `order.shipped` → AfterShip, Klaviyo
 - `order.delivered` → review request scheduled
@@ -404,30 +427,31 @@ Webhooks:
 
 ### 12. Third-Party Integrations
 
-| Purpose | Vendor | Notes |
-|---|---|---|
-| Payments | Stripe | EU + US, 3DS SCA compliant |
-| BNPL | Klarna | DE/SE/DK/UK |
-| Tax | Stripe Tax | Real-time by destination |
-| Shipping rates & labels | Shippo | Multi-carrier |
-| Tracking | AfterShip | Customer-facing tracking page |
-| Email (transactional) | Resend | Order confirmations, shipping updates |
-| Email (marketing) | Klaviyo | Newsletters, abandoned cart, flows |
-| Reviews | Yotpo or Junip | Photo reviews, verified buyer |
-| Search | Algolia | Faceted, typo-tolerant |
-| CMS (journal) | Built-in or Sanity | Depends on editorial workflow |
-| Auth | Clerk | Magic link, OAuth |
-| Analytics | GA4 + Segment | Single event source |
-| Error tracking | Sentry | Frontend + backend |
-| APM | Datadog | Backend services |
-| CDN | Cloudflare | WAF + image resizing |
-| Consent | Cookiebot | GDPR/CCPA |
+| Purpose                 | Vendor             | Notes                                 |
+| ----------------------- | ------------------ | ------------------------------------- |
+| Payments                | Stripe             | EU + US, 3DS SCA compliant            |
+| BNPL                    | Klarna             | DE/SE/DK/UK                           |
+| Tax                     | Stripe Tax         | Real-time by destination              |
+| Shipping rates & labels | Shippo             | Multi-carrier                         |
+| Tracking                | AfterShip          | Customer-facing tracking page         |
+| Email (transactional)   | Resend             | Order confirmations, shipping updates |
+| Email (marketing)       | Klaviyo            | Newsletters, abandoned cart, flows    |
+| Reviews                 | Yotpo or Junip     | Photo reviews, verified buyer         |
+| Search                  | Algolia            | Faceted, typo-tolerant                |
+| CMS (journal)           | Built-in or Sanity | Depends on editorial workflow         |
+| Auth                    | Clerk              | Magic link, OAuth                     |
+| Analytics               | GA4 + Segment      | Single event source                   |
+| Error tracking          | Sentry             | Frontend + backend                    |
+| APM                     | Datadog            | Backend services                      |
+| CDN                     | Cloudflare         | WAF + image resizing                  |
+| Consent                 | Cookiebot          | GDPR/CCPA                             |
 
 ---
 
 ### 13. Design System
 
 **Tokens (matching the captured landing page):**
+
 - Background: `#FAF7F2` (warm off-white), `#F0EAE0` (cream), `#E8E0D2` (sand)
 - Ink: `#1F1B17` (warm near-black), `#4A433B` (warm gray), `#8A8178` (muted)
 - Accent: `#C97B5E` (terracotta), `#B06548` (deep terracotta)
@@ -463,6 +487,7 @@ Webhooks:
 ### 15. Analytics & Event Tracking
 
 **GA4 events** (via Segment):
+
 - `page_viewed`
 - `product_viewed` (with product_id, variant, price)
 - `product_list_viewed` (PLP, with list_id)
@@ -495,12 +520,12 @@ Webhooks:
 
 ### 17. Performance Budget
 
-| Page | LCP | INP | CLS | JS transferred |
-|---|---|---|---|---|
-| Homepage | < 2.0s | < 200ms | < 0.05 | < 180 KB |
-| PLP | < 2.0s | < 200ms | < 0.05 | < 200 KB |
-| PDP | < 2.0s | < 200ms | < 0.05 | < 220 KB |
-| Checkout | < 1.5s | < 100ms | < 0.02 | < 250 KB |
+| Page     | LCP    | INP     | CLS    | JS transferred |
+| -------- | ------ | ------- | ------ | -------------- |
+| Homepage | < 2.0s | < 200ms | < 0.05 | < 180 KB       |
+| PLP      | < 2.0s | < 200ms | < 0.05 | < 200 KB       |
+| PDP      | < 2.0s | < 200ms | < 0.05 | < 220 KB       |
+| Checkout | < 1.5s | < 100ms | < 0.02 | < 250 KB       |
 
 Image strategy: AVIF first, WebP fallback; responsive `srcset`; lazy-load below the fold; CMS enforces max 200KB per hero, 80KB per product image.
 
@@ -536,54 +561,60 @@ Image strategy: AVIF first, WebP fallback; responsive `srcset`; lazy-load below 
 ### 20. Release & Rollout Plan
 
 **Phase 0 — Foundations (4 weeks):**
+
 - Repo setup, CI/CD, design system in Storybook, auth scaffold, Medusa deploy, Stripe connect, basic catalog import.
 
 **Phase 1 — MVP Storefront (6 weeks):**
+
 - Homepage, PLP, PDP, cart, checkout, order confirmation, customer account, search, basic admin (catalog + orders). Launch to staging.
 
 **Phase 2 — Pre-launch polish (3 weeks):**
+
 - Performance pass, accessibility audit, SEO setup, analytics, email flows, returns portal, reviews.
 
 **Phase 3 — Soft launch (2 weeks):**
+
 - Invite-only to existing newsletter; monitor; fix; refine.
 
 **Phase 4 — Public launch:**
+
 - DNS cutover, redirect legacy URLs, press kit, paid social.
 - Rollback plan: feature flags on all major surfaces; instant rollback via Vercel + ECS.
 
 **Phase 5 — Post-launch (ongoing):**
+
 - Trade program (4 weeks post-launch), gift cards (6 weeks), subscriptions on consumables (Q+2), AR visualizer (Q+3).
 
 ---
 
 ### 21. Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Long lead times (made-to-order) hurt conversion | High | High | Clear lead-time badges; "in-stock" filter; safety stock for hero SKUs |
-| Cross-border tax complexity (EU OSS + US nexus) | Med | High | Use Stripe Tax from day 1; quarterly tax review |
-| Carrier damage on large furniture | Med | Med | White-glove option for >30kg; packaging spec; damage-claim SOP |
-| Image bloat hurts performance | High | Med | Hard limits in CMS; AVIF; CDN resizing |
-| Trade program abuse (resale) | Low | Med | Manual approval; resale cert required; order limits |
-| Single-supplier concentration (oak from SE) | Low | High | Qualify second supplier in PL; safety stock |
-| SEO migration from current site | Med | High | 301 map; preserve high-traffic URLs; monitor 404s weekly |
+| Risk                                            | Likelihood | Impact | Mitigation                                                            |
+| ----------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------- |
+| Long lead times (made-to-order) hurt conversion | High       | High   | Clear lead-time badges; "in-stock" filter; safety stock for hero SKUs |
+| Cross-border tax complexity (EU OSS + US nexus) | Med        | High   | Use Stripe Tax from day 1; quarterly tax review                       |
+| Carrier damage on large furniture               | Med        | Med    | White-glove option for >30kg; packaging spec; damage-claim SOP        |
+| Image bloat hurts performance                   | High       | Med    | Hard limits in CMS; AVIF; CDN resizing                                |
+| Trade program abuse (resale)                    | Low        | Med    | Manual approval; resale cert required; order limits                   |
+| Single-supplier concentration (oak from SE)     | Low        | High   | Qualify second supplier in PL; safety stock                           |
+| SEO migration from current site                 | Med        | High   | 301 map; preserve high-traffic URLs; monitor 404s weekly              |
 
 ---
 
 ### 22. Success Metrics (12-month targets)
 
-| Metric | Target |
-|---|---|
-| Conversion rate (cold traffic) | ≥ 2.4% |
-| AOV | ≥ €420 |
-| Repeat purchase rate (12m) | ≥ 38% |
-| NPS | ≥ 70 |
-| Return rate | ≤ 6% |
-| Order-to-ship lead (in-stock) | ≤ 3 business days |
+| Metric                          | Target             |
+| ------------------------------- | ------------------ |
+| Conversion rate (cold traffic)  | ≥ 2.4%             |
+| AOV                             | ≥ €420             |
+| Repeat purchase rate (12m)      | ≥ 38%              |
+| NPS                             | ≥ 70               |
+| Return rate                     | ≤ 6%               |
+| Order-to-ship lead (in-stock)   | ≤ 3 business days  |
 | Customer-service first response | ≤ 4 business hours |
-| Core Web Vitals "Good" | 100% of key pages |
-| Uptime | ≥ 99.95% |
-| Trade accounts active | ≥ 250 by month 12 |
+| Core Web Vitals "Good"          | 100% of key pages  |
+| Uptime                          | ≥ 99.95%           |
+| Trade accounts active           | ≥ 250 by month 12  |
 
 ---
 
@@ -604,10 +635,12 @@ Image strategy: AVIF first, WebP fallback; responsive `srcset`; lazy-load below 
 **A. Glossary** — AOV, GMV, DSA, OSS, BNPL, PLP, PDP, RTO, RPO, SLO, CWV.
 
 **B. Open questions for stakeholder review**
+
 1. Final currency list at launch? (proposed: EUR, DKK, SEK, USD, GBP)
 2. Net-30 trade credit — in-house or via Stripe Invoicing?
 3. Warehouse strategy: single Aalborg vs. add EU 3PL for Southern Europe?
 4. Editorial CMS: in-house WYSIWYG vs. Sanity — depends on editorial workflow.
 
 **C. Sign-off**
+
 - Product: ___ · Engineering: ___ · Design: ___ · Operations: ___ · Legal: ___

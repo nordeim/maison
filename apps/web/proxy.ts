@@ -22,12 +22,13 @@
  * Per nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth skill §3.1.
  */
 
-import { type NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { type NextRequest, NextResponse } from 'next/server';
+
+import { getSessionCookie } from 'better-auth/cookies';
 
 // Routes that require ANY authenticated session (cookie existence check only).
 // RBAC role checks happen in layout.tsx, NOT here.
-const AUTH_REQUIRED_ROUTES = ["/account", "/admin", "/checkout"];
+const AUTH_REQUIRED_ROUTES = ['/account', '/admin', '/checkout'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -42,8 +43,8 @@ export function proxy(request: NextRequest) {
   // Cookie-existence-only optimistic check (Edge-compatible, no DB access)
   const sessionCookie = getSessionCookie(request);
   if (!sessionCookie) {
-    const signInUrl = new URL("/auth/sign-in", request.nextUrl.origin);
-    signInUrl.searchParams.set("callbackUrl", pathname);
+    const signInUrl = new URL('/auth/sign-in', request.nextUrl.origin);
+    signInUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(signInUrl);
   }
 
@@ -61,6 +62,6 @@ export const config = {
      * - Public assets (images, fonts, etc.)
      * - API routes (handle their own auth)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)|api/).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)|api/).*)',
   ],
 };

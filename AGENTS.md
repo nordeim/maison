@@ -11,6 +11,7 @@ Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandi
 **Canonical visual reference:** `docs/landing_page_unified.html` — every CSS custom property and typography choice in that file is the source of truth for the design system.
 
 **Architecture skills to read before touching code:**
+
 - `skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` — generic stack patterns, 50+ anti-patterns
 - `skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md` — concrete Stillwater reference (651 tests, 11 ADRs, battle-tested)
 
@@ -18,31 +19,31 @@ Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandi
 
 ## Essential commands
 
-| Task | Command |
-|------|---------|
-| Install dependencies | `pnpm install` |
-| Dev server (all apps) | `pnpm dev` |
-| Dev server (web only) | `pnpm --filter=@maison/web dev` |
-| Build all packages | `pnpm build` |
-| Type-check everything | `pnpm check-types` |
-| Lint everything | `pnpm lint` |
-| Lint + auto-fix | `pnpm lint:fix` |
-| Format check | `pnpm format:check` |
-| Format write | `pnpm format` |
-| Unit/integration tests | `pnpm test` |
-| E2E tests | `pnpm test:e2e` (requires `pnpm build` first) |
-| Test coverage | `pnpm test:coverage` |
-| Generate migrations | `pnpm db:generate` |
-| Apply migrations | `pnpm db:migrate` |
-| Push schema directly (dev only) | `pnpm db:push` |
-| Seed database | `pnpm db:seed` |
-| Drizzle Studio GUI | `pnpm db:studio` |
-| Reset database ⚠️ | `pnpm db:reset` |
-| Start local Postgres + Redis | `docker compose up -d postgres redis` |
-| One-shot DB setup | `bash scripts/db-setup.sh` |
-| Audit deps for CVEs | `pnpm audit --audit-level=high` |
-| Bundle size analysis | `pnpm bundle-size` |
-| Lighthouse CI | `pnpm lighthouse` |
+| Task                            | Command                                       |
+| ------------------------------- | --------------------------------------------- |
+| Install dependencies            | `pnpm install`                                |
+| Dev server (all apps)           | `pnpm dev`                                    |
+| Dev server (web only)           | `pnpm --filter=@maison/web dev`               |
+| Build all packages              | `pnpm build`                                  |
+| Type-check everything           | `pnpm check-types`                            |
+| Lint everything                 | `pnpm lint`                                   |
+| Lint + auto-fix                 | `pnpm lint:fix`                               |
+| Format check                    | `pnpm format:check`                           |
+| Format write                    | `pnpm format`                                 |
+| Unit/integration tests          | `pnpm test`                                   |
+| E2E tests                       | `pnpm test:e2e` (requires `pnpm build` first) |
+| Test coverage                   | `pnpm test:coverage`                          |
+| Generate migrations             | `pnpm db:generate`                            |
+| Apply migrations                | `pnpm db:migrate`                             |
+| Push schema directly (dev only) | `pnpm db:push`                                |
+| Seed database                   | `pnpm db:seed`                                |
+| Drizzle Studio GUI              | `pnpm db:studio`                              |
+| Reset database ⚠️               | `pnpm db:reset`                               |
+| Start local Postgres + Redis    | `docker compose up -d postgres redis`         |
+| One-shot DB setup               | `bash scripts/db-setup.sh`                    |
+| Audit deps for CVEs             | `pnpm audit --audit-level=high`               |
+| Bundle size analysis            | `pnpm bundle-size`                            |
+| Lighthouse CI                   | `pnpm lighthouse`                             |
 
 **Required order before pushing:** `lint` → `check-types` → `test` → `build`. CI enforces this; doing it locally saves a round-trip.
 
@@ -191,13 +192,13 @@ The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). 
 
 ## Files to read before writing code
 
-| File | Why |
-|------|-----|
-| `docs/PRD_unified.md` | What to build (features, pages, data models) |
-| `docs/landing_page_unified.html` | How it should look (canonical design tokens, sections, copy) |
-| `PROJECT-ARCHITECTURE.md` | How to build it (ADRs, layer model, schemas) |
+| File                                                                      | Why                                                                  |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `docs/PRD_unified.md`                                                     | What to build (features, pages, data models)                         |
+| `docs/landing_page_unified.html`                                          | How it should look (canonical design tokens, sections, copy)         |
+| `PROJECT-ARCHITECTURE.md`                                                 | How to build it (ADRs, layer model, schemas)                         |
 | `skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` | Stack-specific anti-patterns (read §9 + §13 before writing new code) |
-| `skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md` | Concrete Stillwater reference (real file paths, working configs) |
+| `skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`         | Concrete Stillwater reference (real file paths, working configs)     |
 
 ---
 

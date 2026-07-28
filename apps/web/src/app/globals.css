@@ -11,9 +11,9 @@
  * Tailwind v4 uses CSS-first @theme config (no tailwind.config.js for tokens).
  */
 
-@import "@maison/ui/globals";
-@import "tailwindcss";
-@import "tw-animate-css";
+@import '@maison/ui/globals';
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* ── Tailwind v4 Theme Mapping ─────────────────────────────── */
 /* Maps Maison design tokens to Tailwind's theme namespace
@@ -121,7 +121,12 @@ body {
   line-height: var(--leading-body);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   font-weight: var(--weight-medium);
   line-height: 1.08;
@@ -165,8 +170,9 @@ h1, h2, h3, h4, h5, h6 {
   .reveal {
     opacity: 0;
     transform: translateY(24px);
-    transition: opacity var(--duration-slow) var(--ease-out),
-                transform var(--duration-slow) var(--ease-out);
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-slow) var(--ease-out);
     will-change: opacity, transform;
   }
 

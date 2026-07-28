@@ -5,19 +5,14 @@
  * Per PRD §10.1.
  */
 
-import { z } from "zod";
-import { eq, desc, asc, and, sql } from "drizzle-orm";
-import {
-  products,
-  productImages,
-  productVariants,
-  collections,
-} from "@maison/db";
-import { router, publicProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, desc, asc, and, sql } from 'drizzle-orm';
+import { products, productImages, productVariants, collections } from '@maison/db';
+import { router, publicProcedure } from '../trpc';
 
 // Note: productVariants imported for future use in PDP variant display
 
-const SORT_OPTIONS = ["featured", "newest", "price_asc", "price_desc"] as const;
+const SORT_OPTIONS = ['featured', 'newest', 'price_asc', 'price_desc'] as const;
 
 export const productsRouter = router({
   /**
@@ -27,7 +22,7 @@ export const productsRouter = router({
     .input(
       z.object({
         collection: z.string().optional(),
-        sort: z.enum(SORT_OPTIONS).default("featured"),
+        sort: z.enum(SORT_OPTIONS).default('featured'),
         cursor: z.string().uuid().optional(),
         limit: z.number().min(1).max(48).default(24),
       }),
@@ -40,11 +35,11 @@ export const productsRouter = router({
       }
 
       const orderBy =
-        input.sort === "price_asc"
+        input.sort === 'price_asc'
           ? asc(products.priceCents)
-          : input.sort === "price_desc"
+          : input.sort === 'price_desc'
             ? desc(products.priceCents)
-            : input.sort === "newest"
+            : input.sort === 'newest'
               ? desc(products.createdAt)
               : desc(products.featured);
 
@@ -79,8 +74,16 @@ export const productsRouter = router({
       const itemsToSend = hasMore ? items.slice(0, input.limit) : items;
       const nextCursor = hasMore ? itemsToSend[itemsToSend.length - 1]?.id : undefined;
 
+      // Shape at the router boundary — coerce left-join-nullable product flags to
+      // strict booleans so UI components receive a non-null contract.
       return {
-        items: itemsToSend,
+        items: itemsToSend.map((row) => ({
+          ...row,
+          collectionName: row.collectionName,
+          featured: Boolean(row.featured),
+          isNew: Boolean(row.isNew),
+          isBestseller: Boolean(row.isBestseller),
+        })),
         nextCursor,
       };
     }),
@@ -88,38 +91,41 @@ export const productsRouter = router({
   /**
    * Get a single product by slug (for PDP).
    */
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const [product] = await ctx.db
-        .select()
-        .from(products)
-        .where(and(eq(products.slug, input.slug), eq(products.isActive, true)))
-        .limit(1);
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input, ctx }) => {
+    const [product] = await ctx.db
+      .select()
+      .from(products)
+      .where(and(eq(products.slug, input.slug), eq(products.isActive, true)))
+      .limit(1);
 
-      if (!product) {
-        return null;
-      }
+    if (!product) {
+      return null;
+    }
 
-      const images = await ctx.db
-        .select()
-        .from(productImages)
-        .where(eq(productImages.productId, product.id))
-        .orderBy(asc(productImages.sortOrder));
+    const images = await ctx.db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, product.id))
+      .orderBy(asc(productImages.sortOrder));
 
-      const variants = await ctx.db
-        .select()
-        .from(productVariants)
-        .where(eq(productVariants.productId, product.id));
+    const variants = await ctx.db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.productId, product.id));
 
-      return { ...product, images, variants };
-    }),
+    return { ...product, images, variants };
+  }),
 
   /**
    * Get related products (same collection, max 4).
    */
   getRelated: publicProcedure
-    .input(z.object({ productId: z.string().uuid(), limit: z.number().min(1).max(8).default(4) }))
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        limit: z.number().min(1).max(8).default(4),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       // Get the product's collection
       const [current] = await ctx.db
@@ -161,7 +167,12 @@ export const productsRouter = router({
    * Full-text search across name, description, materials.
    */
   search: publicProcedure
-    .input(z.object({ q: z.string().min(1), limit: z.number().min(1).max(24).default(8) }))
+    .input(
+      z.object({
+        q: z.string().min(1),
+        limit: z.number().min(1).max(24).default(8),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const pattern = `%${input.q}%`;
       const results = await ctx.db

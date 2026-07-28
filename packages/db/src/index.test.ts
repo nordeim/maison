@@ -5,11 +5,11 @@
  * Does NOT test against a real database (those are integration tests).
  */
 
-import { describe, it, expect } from "vitest";
-import * as schema from "./index";
+import { describe, it, expect } from 'vitest';
+import * as schema from './index';
 
-describe("DB schema", () => {
-  it("exports all required tables", () => {
+describe('DB schema', () => {
+  it('exports all required tables', () => {
     expect(schema.users).toBeDefined();
     expect(schema.sessions).toBeDefined();
     expect(schema.accounts).toBeDefined();
@@ -28,25 +28,25 @@ describe("DB schema", () => {
     expect(schema.auditLog).toBeDefined();
   });
 
-  it("exports enum types", () => {
+  it('exports enum types', () => {
     expect(schema.userRoleEnum).toBeDefined();
     expect(schema.orderStatusEnum).toBeDefined();
     expect(schema.discountTypeEnum).toBeDefined();
     expect(schema.shippingMethodEnum).toBeDefined();
   });
 
-  it("has correct role values", () => {
-    expect(schema.userRoleEnum.enumValues).toEqual(["customer", "staff", "admin"]);
+  it('has correct role values', () => {
+    expect(schema.userRoleEnum.enumValues).toEqual(['customer', 'staff', 'admin']);
   });
 
-  it("has correct order status values", () => {
+  it('has correct order status values', () => {
     expect(schema.orderStatusEnum.enumValues).toEqual([
-      "pending",
-      "confirmed",
-      "shipped",
-      "delivered",
-      "cancelled",
-      "refunded",
+      'pending',
+      'confirmed',
+      'shipped',
+      'delivered',
+      'cancelled',
+      'refunded',
     ]);
   });
 });

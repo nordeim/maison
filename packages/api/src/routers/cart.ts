@@ -9,11 +9,11 @@
  * productId server-side.
  */
 
-import { z } from "zod";
-import { eq, and, isNull } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { carts, cartItems, products } from "@maison/db";
-import { router, publicProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, isNull } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { carts, cartItems, products } from '@maison/db';
+import { router, publicProcedure } from '../trpc';
 
 export const cartRouter = router({
   /**
@@ -24,11 +24,7 @@ export const cartRouter = router({
     .query(async ({ input, ctx }) => {
       if (!input.cartId) return null;
 
-      const [cart] = await ctx.db
-        .select()
-        .from(carts)
-        .where(eq(carts.id, input.cartId))
-        .limit(1);
+      const [cart] = await ctx.db.select().from(carts).where(eq(carts.id, input.cartId)).limit(1);
 
       if (!cart) return null;
 
@@ -72,7 +68,10 @@ export const cartRouter = router({
         .limit(1);
 
       if (!product) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Product not found',
+        });
       }
 
       // Get or create cart
@@ -80,7 +79,7 @@ export const cartRouter = router({
       if (!cartId) {
         const [newCart] = await ctx.db
           .insert(carts)
-          .values({ currency: "USD" })
+          .values({ currency: 'USD' })
           .returning({ id: carts.id });
         cartId = newCart!.id;
       }

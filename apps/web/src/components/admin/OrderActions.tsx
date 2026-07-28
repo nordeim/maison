@@ -5,10 +5,11 @@
  * Calls tRPC admin.ordersUpdateStatus mutation.
  */
 
-"use client";
+'use client';
 
-import { useState } from "react";
-import { trpc } from "@/lib/trpc/client";
+import { useState } from 'react';
+
+import { trpc } from '@/lib/trpc/client';
 
 interface OrderActionsProps {
   orderId: string;
@@ -16,12 +17,12 @@ interface OrderActionsProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirm" },
-  { value: "shipped", label: "Mark Shipped" },
-  { value: "delivered", label: "Mark Delivered" },
-  { value: "cancelled", label: "Cancel" },
-  { value: "refunded", label: "Refund" },
+  { value: 'pending', label: 'Pending' },
+  { value: 'confirmed', label: 'Confirm' },
+  { value: 'shipped', label: 'Mark Shipped' },
+  { value: 'delivered', label: 'Mark Delivered' },
+  { value: 'cancelled', label: 'Cancel' },
+  { value: 'refunded', label: 'Refund' },
 ];
 
 export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
@@ -35,11 +36,11 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
     try {
       await updateStatus.mutateAsync({
         orderId,
-        status: newStatus as "confirmed" | "shipped" | "delivered" | "cancelled" | "refunded",
+        status: newStatus as 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'refunded',
       });
-      utils.admin.ordersList.invalidate();
+      void utils.admin.ordersList.invalidate();
     } catch (err) {
-      console.error("Failed to update order status:", err);
+      console.error('Failed to update order status:', err);
     } finally {
       setIsUpdating(false);
     }
@@ -48,15 +49,15 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
   return (
     <select
       value={currentStatus}
-      onChange={(e) => handleStatusChange(e.target.value)}
+      onChange={(e) => void handleStatusChange(e.target.value)}
       disabled={isUpdating}
       style={{
-        padding: "0.35rem 0.75rem",
+        padding: '0.35rem 0.75rem',
         fontSize: 12,
-        border: "1px solid var(--line)",
-        background: "var(--bg)",
-        color: "var(--ink)",
-        cursor: isUpdating ? "wait" : "pointer",
+        border: '1px solid var(--line)',
+        background: 'var(--bg)',
+        color: 'var(--ink)',
+        cursor: isUpdating ? 'wait' : 'pointer',
       }}
       aria-label={`Update order status (currently ${currentStatus})`}
     >

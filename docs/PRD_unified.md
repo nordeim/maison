@@ -44,34 +44,34 @@ The current marketing surface (`docs/landing_page_unified.html`) communicates th
 
 ### 1.2 North-Star Metrics
 
-| Metric | Target | Rationale |
-|--------|--------|-----------|
-| **Conversion rate** (visitor → paid order) | ≥ 2.4% on cold traffic | Industry benchmark for premium home goods: 1.8–2.2% |
-| **Average order value (AOV)** | ≥ $275 (Phase 1), ≥ $420 (Phase 3) | Premium positioning justifies higher AOV |
-| **Repeat-purchase rate (12-month)** | ≥ 30% (Phase 1), ≥ 38% (Phase 3) | Loyalty is the strongest lever for premium DTC |
-| **Cart abandonment rate** | ≤ 65% | Industry average: 70% |
-| **NPS** | ≥ 50 (Phase 1), ≥ 70 (Phase 3) | Word-of-mouth drives premium DTC growth |
+| Metric                                     | Target                             | Rationale                                           |
+| ------------------------------------------ | ---------------------------------- | --------------------------------------------------- |
+| **Conversion rate** (visitor → paid order) | ≥ 2.4% on cold traffic             | Industry benchmark for premium home goods: 1.8–2.2% |
+| **Average order value (AOV)**              | ≥ $275 (Phase 1), ≥ $420 (Phase 3) | Premium positioning justifies higher AOV            |
+| **Repeat-purchase rate (12-month)**        | ≥ 30% (Phase 1), ≥ 38% (Phase 3)   | Loyalty is the strongest lever for premium DTC      |
+| **Cart abandonment rate**                  | ≤ 65%                              | Industry average: 70%                               |
+| **NPS**                                    | ≥ 50 (Phase 1), ≥ 70 (Phase 3)     | Word-of-mouth drives premium DTC growth             |
 
 ### 1.3 Business Objectives
 
-| Objective | Metric | Target |
-|-----------|--------|--------|
-| Revenue generation | Monthly GMV | $50K within 6 months, $250K within 12 months |
-| Customer acquisition | New customers / month | 500+ (Phase 1), 2,000+ (Phase 3) |
-| Brand engagement | Newsletter subscribers | 10K within 12 months |
-| Inventory velocity | Sell-through rate | ≥ 75% per quarter |
-| Operational efficiency | Orders / staff-day | ≥ 40 (admin tooling must enable this) |
+| Objective              | Metric                 | Target                                       |
+| ---------------------- | ---------------------- | -------------------------------------------- |
+| Revenue generation     | Monthly GMV            | $50K within 6 months, $250K within 12 months |
+| Customer acquisition   | New customers / month  | 500+ (Phase 1), 2,000+ (Phase 3)             |
+| Brand engagement       | Newsletter subscribers | 10K within 12 months                         |
+| Inventory velocity     | Sell-through rate      | ≥ 75% per quarter                            |
+| Operational efficiency | Orders / staff-day     | ≥ 40 (admin tooling must enable this)        |
 
 ### 1.4 Relationship to Prior Drafts
 
 This document supersedes and unifies `PRD_draft-1.md` through `PRD_draft-4.md`. Each draft contributed distinct strengths:
 
-| Draft | Contribution to Unified PRD |
-|-------|------------------------------|
-| **Draft 1** | Comprehensive functional requirements, data models, API endpoints, KPI table, release phases |
-| **Draft 2** | Production-ready tone, multi-region (EU/US/UK) scope, €5M GMV target, admin back-office emphasis |
+| Draft       | Contribution to Unified PRD                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| **Draft 1** | Comprehensive functional requirements, data models, API endpoints, KPI table, release phases       |
+| **Draft 2** | Production-ready tone, multi-region (EU/US/UK) scope, €5M GMV target, admin back-office emphasis   |
 | **Draft 3** | Detailed personas (Emma the Mindful Minimalist, James & Sarah the Home Curators), content strategy |
-| **Draft 4** | Page-by-page requirements, design system tokens, analytics event catalog, competitive references |
+| **Draft 4** | Page-by-page requirements, design system tokens, analytics event catalog, competitive references   |
 
 The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), tech stack conflicts (commits to Next.js 16 + Turborepo + Better Auth + tRPC v11 + Drizzle + Stripe, per the preferred architecture skills), and aligns the design system with the already-built `landing_page_unified.html`.
 
@@ -100,16 +100,16 @@ The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), 
 
 ### 2.3 Success Metrics by Phase
 
-| KPI | Phase 1 (MVP, 6 wks) | Phase 2 (Growth, 12 wks) | Phase 3 (Optimisation, 18 wks) |
-|-----|----------------------|--------------------------|--------------------------------|
-| Monthly revenue | $15K | $50K | $250K |
-| Conversion rate | 1.5% | 2.0% | 2.4%+ |
-| AOV | $250 | $275 | $420 |
-| Cart abandonment | < 75% | < 70% | < 65% |
-| Email open rate | 30% | 35% | 40% |
-| Return customer rate | 15% | 22% | 30%+ |
-| Page load (p95 LCP) | < 2.5s | < 2.2s | < 2.0s |
-| NPS | 40+ | 50+ | 70+ |
+| KPI                  | Phase 1 (MVP, 6 wks) | Phase 2 (Growth, 12 wks) | Phase 3 (Optimisation, 18 wks) |
+| -------------------- | -------------------- | ------------------------ | ------------------------------ |
+| Monthly revenue      | $15K                 | $50K                     | $250K                          |
+| Conversion rate      | 1.5%                 | 2.0%                     | 2.4%+                          |
+| AOV                  | $250                 | $275                     | $420                           |
+| Cart abandonment     | < 75%                | < 70%                    | < 65%                          |
+| Email open rate      | 30%                  | 35%                      | 40%                            |
+| Return customer rate | 15%                  | 22%                      | 30%+                           |
+| Page load (p95 LCP)  | < 2.5s               | < 2.2s                   | < 2.0s                         |
+| NPS                  | 40+                  | 50+                      | 70+                            |
 
 ---
 
@@ -159,10 +159,10 @@ The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), 
 
 ### 4.2 Typography
 
-| Role | Font Family | Weights | Usage |
-|------|-------------|---------|-------|
-| Display / Headings | Cormorant Garamond | 300, 400, 500, 600, 700, italic 400, italic 500 | H1–H6, product names, logo, editorial headlines |
-| Body / UI | Inter | 300, 400, 500, 600 | Paragraphs, labels, buttons, navigation, form inputs |
+| Role               | Font Family        | Weights                                         | Usage                                                |
+| ------------------ | ------------------ | ----------------------------------------------- | ---------------------------------------------------- |
+| Display / Headings | Cormorant Garamond | 300, 400, 500, 600, 700, italic 400, italic 500 | H1–H6, product names, logo, editorial headlines      |
+| Body / UI          | Inter              | 300, 400, 500, 600                              | Paragraphs, labels, buttons, navigation, form inputs |
 
 **Pairing rationale:** Cormorant Garamond provides editorial warmth and a humanist, hand-lettered quality that signals craft. Inter provides neutral, high-legibility UI text that doesn't compete with the serif. The contrast between serif display and sans body is a hallmark of editorial commerce (Aesop, Kinfolk, Hay Design).
 
@@ -170,23 +170,23 @@ The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), 
 
 These tokens are already implemented in `docs/landing_page_unified.html` and must be ported to `packages/ui/src/tokens/colors.css` in the build.
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--bg` | `#faf8f5` | Page background (warm cream) |
-| `--bg-2` | `#f3efe8` | Linen section backgrounds |
-| `--bg-3` | `#ece5d8` | Deeper linen (testimonials, journal) |
-| `--bg-card` | `#ffffff` | Product cards, modal surfaces |
-| `--bg-dark` | `#1f1b17` | Footer, newsletter, marquee |
-| `--ink` | `#1f1b17` | Primary text |
-| `--ink-2` | `#4a433b` | Secondary text |
-| `--muted` | `#8a8178` | Tertiary text, meta labels |
-| `--line` | `#e5ddd1` | Borders, dividers |
-| `--line-soft` | `#efe9df` | Subtle dividers |
-| `--clay` | `#a86b4a` | Primary accent (CTAs, links, badges) |
-| `--clay-dark` | `#8a5538` | Hover state for clay |
-| `--clay-light` | `#c17d52` | Secondary clay |
-| `--gold` | `#c4a265` | Editorial accent (hero italic, ornament) |
-| `--sage` | `#8b9a82` | Tertiary muted green (Phase 2 badges) |
+| Token          | Value     | Usage                                    |
+| -------------- | --------- | ---------------------------------------- |
+| `--bg`         | `#faf8f5` | Page background (warm cream)             |
+| `--bg-2`       | `#f3efe8` | Linen section backgrounds                |
+| `--bg-3`       | `#ece5d8` | Deeper linen (testimonials, journal)     |
+| `--bg-card`    | `#ffffff` | Product cards, modal surfaces            |
+| `--bg-dark`    | `#1f1b17` | Footer, newsletter, marquee              |
+| `--ink`        | `#1f1b17` | Primary text                             |
+| `--ink-2`      | `#4a433b` | Secondary text                           |
+| `--muted`      | `#8a8178` | Tertiary text, meta labels               |
+| `--line`       | `#e5ddd1` | Borders, dividers                        |
+| `--line-soft`  | `#efe9df` | Subtle dividers                          |
+| `--clay`       | `#a86b4a` | Primary accent (CTAs, links, badges)     |
+| `--clay-dark`  | `#8a5538` | Hover state for clay                     |
+| `--clay-light` | `#c17d52` | Secondary clay                           |
+| `--gold`       | `#c4a265` | Editorial accent (hero italic, ornament) |
+| `--sage`       | `#8b9a82` | Tertiary muted green (Phase 2 badges)    |
 
 **WCAG contrast:** All body text combinations meet WCAG AA (≥ 4.5:1). `--muted` on `--bg` (4.6:1) is the minimum acceptable contrast; do not introduce lighter muted variants.
 
@@ -203,33 +203,33 @@ These tokens are already implemented in `docs/landing_page_unified.html` and mus
 
 ### 4.5 Motion & Animation
 
-| Animation | Duration | Easing | Usage |
-|-----------|----------|--------|-------|
-| Ken Burns (hero) | 24s | ease-in-out, alternate infinite | Hero background image |
-| Marquee | 38s | linear infinite | Brand promises strip |
-| Scroll reveal | 0.9s | `cubic-bezier(0.16, 1, 0.3, 1)` | All `.reveal` elements via IntersectionObserver |
-| Image hover scale | 1.0–1.2s | ease-out | Product cards, category cards |
-| Button shine/translate | 0.45s | `cubic-bezier(0.22, 1, 0.36, 1)` | Primary CTA hover |
-| Link underline | 0.45s | ease | Nav links, footer links |
-| Stagger delay | 0.1s/item | — | Grid item reveals (data-delay attribute) |
-| Toast slide-up | 0.45s | ease | Add-to-cart confirmation |
+| Animation              | Duration  | Easing                           | Usage                                           |
+| ---------------------- | --------- | -------------------------------- | ----------------------------------------------- |
+| Ken Burns (hero)       | 24s       | ease-in-out, alternate infinite  | Hero background image                           |
+| Marquee                | 38s       | linear infinite                  | Brand promises strip                            |
+| Scroll reveal          | 0.9s      | `cubic-bezier(0.16, 1, 0.3, 1)`  | All `.reveal` elements via IntersectionObserver |
+| Image hover scale      | 1.0–1.2s  | ease-out                         | Product cards, category cards                   |
+| Button shine/translate | 0.45s     | `cubic-bezier(0.22, 1, 0.36, 1)` | Primary CTA hover                               |
+| Link underline         | 0.45s     | ease                             | Nav links, footer links                         |
+| Stagger delay          | 0.1s/item | —                                | Grid item reveals (data-delay attribute)        |
+| Toast slide-up         | 0.45s     | ease                             | Add-to-cart confirmation                        |
 
 **Reduced motion:** All animations respect `prefers-reduced-motion: reduce` (already implemented in landing page CSS; carry into build).
 
 ### 4.6 Component Library (Built on Radix UI + Tailwind v4)
 
-| Component | Source | Customisation |
-|-----------|--------|---------------|
-| Button | shadcn/ui base, restyled | Clay primary, outline, ghost variants; uppercase 13px tracking |
-| Product Card | Custom | Hover-swap images, wishlist heart, quick-add bar, badge |
-| Category Card | Custom | Image overlay with gradient, name + count, hover scale |
-| Dialog (Cart drawer) | Radix Dialog | Slide-in from right, 380px width |
-| Toast | Sonner | Bottom-center, ink background, cream text |
-| Form inputs | Radix Label + custom | Border-bottom only on newsletter; full border on checkout |
-| Dropdown (mega nav) | Radix Popover | Phase 2 — full mega-nav with category previews |
-| Tabs (PDP gallery) | Radix Tabs | Thumbnail strip + main image |
-| Select (sort, quantity) | Radix Select | Minimal, ink-on-cream |
-| Calendar (delivery estimate) | Radix Calendar | Phase 2 — lead-time visualisation |
+| Component                    | Source                   | Customisation                                                  |
+| ---------------------------- | ------------------------ | -------------------------------------------------------------- |
+| Button                       | shadcn/ui base, restyled | Clay primary, outline, ghost variants; uppercase 13px tracking |
+| Product Card                 | Custom                   | Hover-swap images, wishlist heart, quick-add bar, badge        |
+| Category Card                | Custom                   | Image overlay with gradient, name + count, hover scale         |
+| Dialog (Cart drawer)         | Radix Dialog             | Slide-in from right, 380px width                               |
+| Toast                        | Sonner                   | Bottom-center, ink background, cream text                      |
+| Form inputs                  | Radix Label + custom     | Border-bottom only on newsletter; full border on checkout      |
+| Dropdown (mega nav)          | Radix Popover            | Phase 2 — full mega-nav with category previews                 |
+| Tabs (PDP gallery)           | Radix Tabs               | Thumbnail strip + main image                                   |
+| Select (sort, quantity)      | Radix Select             | Minimal, ink-on-cream                                          |
+| Calendar (delivery estimate) | Radix Calendar           | Phase 2 — lead-time visualisation                              |
 
 ---
 
@@ -316,6 +316,7 @@ These tokens are already implemented in `docs/landing_page_unified.html` and mus
 15. **Footer** — 4-column (brand + socials, Shop, About, Help) + bottom bar (copyright, legal links)
 
 **Implementation notes:**
+
 - Hero image: `next/image` with `fetchpriority="high"`, `sizes="100vw"`, AVIF/WebP fallbacks
 - All below-the-fold images: `loading="lazy"` via `next/image` default
 - Marquee: pure CSS animation (no JS) for performance
@@ -401,113 +402,113 @@ These tokens are already implemented in `docs/landing_page_unified.html` and mus
 
 ### 7.1 Product Catalog
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| P-001 | Display products with name, price, description, images, materials, dimensions | P0 |
-| P-002 | Support multiple images per product with hover-swap on cards | P0 |
-| P-003 | Tag products as "New", "Featured", or "Bestseller" with visual badges | P0 |
-| P-004 | Associate products with collections (one-to-many) | P0 |
-| P-005 | Filter products by collection via URL query params | P0 |
-| P-006 | Sort products by featured, newest, price ascending/descending | P1 |
-| P-007 | Related products recommendation (same collection, max 4) | P1 |
-| P-008 | Product search with autocomplete (cmdk) | P2 |
-| P-009 | Quick view modal from listing page | P2 |
-| P-010 | Variant support (size, finish, material) per product | P1 |
-| P-011 | Inventory tracking with stock quantity and "made to order" lead times | P0 |
-| P-012 | SEO metadata per product (title, description, OG image) | P0 |
+| ID    | Requirement                                                                   | Priority |
+| ----- | ----------------------------------------------------------------------------- | -------- |
+| P-001 | Display products with name, price, description, images, materials, dimensions | P0       |
+| P-002 | Support multiple images per product with hover-swap on cards                  | P0       |
+| P-003 | Tag products as "New", "Featured", or "Bestseller" with visual badges         | P0       |
+| P-004 | Associate products with collections (one-to-many)                             | P0       |
+| P-005 | Filter products by collection via URL query params                            | P0       |
+| P-006 | Sort products by featured, newest, price ascending/descending                 | P1       |
+| P-007 | Related products recommendation (same collection, max 4)                      | P1       |
+| P-008 | Product search with autocomplete (cmdk)                                       | P2       |
+| P-009 | Quick view modal from listing page                                            | P2       |
+| P-010 | Variant support (size, finish, material) per product                          | P1       |
+| P-011 | Inventory tracking with stock quantity and "made to order" lead times         | P0       |
+| P-012 | SEO metadata per product (title, description, OG image)                       | P0       |
 
 ### 7.2 Shopping Cart
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| C-001 | Add/remove items to cart | P0 |
-| C-002 | Adjust item quantities (1–99) | P0 |
-| C-003 | Real-time subtotal calculation | P0 |
-| C-004 | Cart badge count in header | P0 |
-| C-005 | Persist cart across sessions (DB-backed for both anonymous and authenticated) | P0 |
-| C-006 | Cart drawer (slide-out from right) accessible from any page | P1 |
-| C-007 | Free shipping threshold progress indicator | P1 |
-| C-008 | Cart merge on login (anonymous cart → authenticated cart) | P1 |
-| C-009 | Stock validation on add-to-cart (prevent overselling) | P0 |
+| ID    | Requirement                                                                   | Priority |
+| ----- | ----------------------------------------------------------------------------- | -------- |
+| C-001 | Add/remove items to cart                                                      | P0       |
+| C-002 | Adjust item quantities (1–99)                                                 | P0       |
+| C-003 | Real-time subtotal calculation                                                | P0       |
+| C-004 | Cart badge count in header                                                    | P0       |
+| C-005 | Persist cart across sessions (DB-backed for both anonymous and authenticated) | P0       |
+| C-006 | Cart drawer (slide-out from right) accessible from any page                   | P1       |
+| C-007 | Free shipping threshold progress indicator                                    | P1       |
+| C-008 | Cart merge on login (anonymous cart → authenticated cart)                     | P1       |
+| C-009 | Stock validation on add-to-cart (prevent overselling)                         | P0       |
 
 ### 7.3 Wishlist
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| W-001 | Toggle products in/out of wishlist from product card and PDP | P0 |
-| W-002 | Wishlist badge count in header (authenticated users) | P1 |
-| W-003 | Wishlist page (`/account/wishlist`) with grid view | P1 |
-| W-004 | Move wishlist item to cart | P1 |
-| W-005 | Persist wishlist for authenticated users (DB-backed) | P1 |
-| W-006 | Anonymous wishlist via localStorage, merge on login | P2 |
+| ID    | Requirement                                                  | Priority |
+| ----- | ------------------------------------------------------------ | -------- |
+| W-001 | Toggle products in/out of wishlist from product card and PDP | P0       |
+| W-002 | Wishlist badge count in header (authenticated users)         | P1       |
+| W-003 | Wishlist page (`/account/wishlist`) with grid view           | P1       |
+| W-004 | Move wishlist item to cart                                   | P1       |
+| W-005 | Persist wishlist for authenticated users (DB-backed)         | P1       |
+| W-006 | Anonymous wishlist via localStorage, merge on login          | P2       |
 
 ### 7.4 Checkout & Payments
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| CK-001 | Multi-step checkout (Contact/Shipping → Payment → Review → Confirmation) | P0 |
-| CK-002 | Stripe payment integration (cards, Apple Pay, Google Pay) | P0 |
-| CK-003 | Order confirmation page with order number | P0 |
-| CK-004 | Email confirmation sent on order placement (React Email + Resend) | P0 |
-| CK-005 | Guest checkout support | P0 |
-| CK-006 | Promo/discount code application | P1 |
-| CK-007 | Shipping method selection (Standard / Express / White Glove) | P1 |
-| CK-008 | Tax calculation by region (Stripe Tax or manual rates) | P1 |
-| CK-009 | Address book for returning customers | P2 |
-| CK-010 | Idempotent order creation (Stripe idempotency key) | P0 |
-| CK-011 | Inventory reservation on checkout begin, release on timeout (15 min) | P1 |
-| CK-012 | Stripe webhook handling (payment_intent.succeeded, checkout.session.completed) | P0 |
+| ID     | Requirement                                                                    | Priority |
+| ------ | ------------------------------------------------------------------------------ | -------- |
+| CK-001 | Multi-step checkout (Contact/Shipping → Payment → Review → Confirmation)       | P0       |
+| CK-002 | Stripe payment integration (cards, Apple Pay, Google Pay)                      | P0       |
+| CK-003 | Order confirmation page with order number                                      | P0       |
+| CK-004 | Email confirmation sent on order placement (React Email + Resend)              | P0       |
+| CK-005 | Guest checkout support                                                         | P0       |
+| CK-006 | Promo/discount code application                                                | P1       |
+| CK-007 | Shipping method selection (Standard / Express / White Glove)                   | P1       |
+| CK-008 | Tax calculation by region (Stripe Tax or manual rates)                         | P1       |
+| CK-009 | Address book for returning customers                                           | P2       |
+| CK-010 | Idempotent order creation (Stripe idempotency key)                             | P0       |
+| CK-011 | Inventory reservation on checkout begin, release on timeout (15 min)           | P1       |
+| CK-012 | Stripe webhook handling (payment_intent.succeeded, checkout.session.completed) | P0       |
 
 ### 7.5 User Accounts & Authentication
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| U-001 | Email/password registration & login (Better Auth) | P0 |
-| U-002 | OAuth login (Google, Apple) | P1 |
-| U-003 | Magic link sign-in (email-only) | P2 |
-| U-004 | Order history with status tracking | P1 |
-| U-005 | Saved addresses CRUD | P1 |
-| U-006 | Wishlist persistence | P1 |
-| U-007 | Password reset flow (email-based, time-limited token) | P0 |
-| U-008 | Email verification on registration | P1 |
-| U-009 | Account deletion (GDPR right to erasure) | P1 |
-| U-010 | Session management (httpOnly cookies, 30-day expiry, refresh on activity) | P0 |
-| U-011 | Admin RBAC (roles: `customer`, `staff`, `admin`) | P0 |
+| ID    | Requirement                                                               | Priority |
+| ----- | ------------------------------------------------------------------------- | -------- |
+| U-001 | Email/password registration & login (Better Auth)                         | P0       |
+| U-002 | OAuth login (Google, Apple)                                               | P1       |
+| U-003 | Magic link sign-in (email-only)                                           | P2       |
+| U-004 | Order history with status tracking                                        | P1       |
+| U-005 | Saved addresses CRUD                                                      | P1       |
+| U-006 | Wishlist persistence                                                      | P1       |
+| U-007 | Password reset flow (email-based, time-limited token)                     | P0       |
+| U-008 | Email verification on registration                                        | P1       |
+| U-009 | Account deletion (GDPR right to erasure)                                  | P1       |
+| U-010 | Session management (httpOnly cookies, 30-day expiry, refresh on activity) | P0       |
+| U-011 | Admin RBAC (roles: `customer`, `staff`, `admin`)                          | P0       |
 
 ### 7.6 CMS & Content
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| CMS-001 | Sanity Studio for product content (descriptions, materials, maker stories) | P0 |
-| CMS-002 | Collection management in Sanity (name, slug, hero image, description) | P0 |
-| CMS-003 | Homepage section management (featured collection, editorial) via Sanity | P1 |
-| CMS-004 | Journal/blog content management (Sanity blogPost schema) | P1 |
-| CMS-005 | Image upload with automatic optimization (Cloudflare Images or Sanity CDN) | P0 |
-| CMS-006 | SEO metadata management per page (title, description, OG image) | P0 |
-| CMS-007 | Sanity webhook → Next.js ISR revalidation on content publish | P0 |
-| CMS-008 | Preview mode for draft content (Sanity Live Preview) | P1 |
+| ID      | Requirement                                                                | Priority |
+| ------- | -------------------------------------------------------------------------- | -------- |
+| CMS-001 | Sanity Studio for product content (descriptions, materials, maker stories) | P0       |
+| CMS-002 | Collection management in Sanity (name, slug, hero image, description)      | P0       |
+| CMS-003 | Homepage section management (featured collection, editorial) via Sanity    | P1       |
+| CMS-004 | Journal/blog content management (Sanity blogPost schema)                   | P1       |
+| CMS-005 | Image upload with automatic optimization (Cloudflare Images or Sanity CDN) | P0       |
+| CMS-006 | SEO metadata management per page (title, description, OG image)            | P0       |
+| CMS-007 | Sanity webhook → Next.js ISR revalidation on content publish               | P0       |
+| CMS-008 | Preview mode for draft content (Sanity Live Preview)                       | P1       |
 
 ### 7.7 Newsletter & Marketing
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| M-001 | Email capture form in footer and dedicated newsletter section | P0 |
-| M-002 | Integration with Klaviyo (marketing email) | P1 |
-| M-003 | Welcome email sequence for new subscribers (3 emails over 7 days) | P2 |
-| M-004 | Abandoned cart email flow (1 hour / 24 hour / 72 hour) | P2 |
-| M-005 | Instagram feed integration (static grid, Phase 2 dynamic) | P1 |
-| M-006 | Transactional emails via Resend (order confirmation, shipping, password reset) | P0 |
+| ID    | Requirement                                                                    | Priority |
+| ----- | ------------------------------------------------------------------------------ | -------- |
+| M-001 | Email capture form in footer and dedicated newsletter section                  | P0       |
+| M-002 | Integration with Klaviyo (marketing email)                                     | P1       |
+| M-003 | Welcome email sequence for new subscribers (3 emails over 7 days)              | P2       |
+| M-004 | Abandoned cart email flow (1 hour / 24 hour / 72 hour)                         | P2       |
+| M-005 | Instagram feed integration (static grid, Phase 2 dynamic)                      | P1       |
+| M-006 | Transactional emails via Resend (order confirmation, shipping, password reset) | P0       |
 
 ### 7.8 Search
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| S-001 | Search bar in header with cmdk-powered modal | P1 |
-| S-002 | Full-text search across product name, description, materials | P1 |
-| S-003 | Autocomplete suggestions (debounced 200ms) | P2 |
-| S-004 | Search results page with filter sidebar | P1 |
-| S-005 | Algolia or Meilisearch integration (Phase 2 if Postgres FTS insufficient) | P2 |
-| S-006 | "No results" state with suggested collections | P1 |
+| ID    | Requirement                                                               | Priority |
+| ----- | ------------------------------------------------------------------------- | -------- |
+| S-001 | Search bar in header with cmdk-powered modal                              | P1       |
+| S-002 | Full-text search across product name, description, materials              | P1       |
+| S-003 | Autocomplete suggestions (debounced 200ms)                                | P2       |
+| S-004 | Search results page with filter sidebar                                   | P1       |
+| S-005 | Algolia or Meilisearch integration (Phase 2 if Postgres FTS insufficient) | P2       |
+| S-006 | "No results" state with suggested collections                             | P1       |
 
 ---
 
@@ -517,30 +518,30 @@ These tokens are already implemented in `docs/landing_page_unified.html` and mus
 
 Per the preferred architecture skills (`nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` and `nextjs16-react19-tailwind4-better-auth-monorepo`), and validated against the Stillwater production codebase:
 
-| Layer | Technology | Pinned Version | Rationale |
-|-------|-----------|----------------|-----------|
-| **Monorepo tooling** | Turborepo | ≥2.10.4 | Task orchestration, caching, incremental builds |
-| **Package manager** | pnpm | 11.9.0 (via `packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge`) |
-| **Runtime** | Node.js | ≥22.0.0 | LTS required by Next.js 16 |
-| **Meta-framework** | Next.js | 16.2.x | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack |
-| **UI runtime** | React | 19.2.x | React Compiler, async params, `use()` hook |
-| **Language** | TypeScript | 5.9.x | Strict mode, `noUnusedLocals`, `erasableSyntaxOnly` |
-| **Styling** | Tailwind CSS | v4.3.x | CSS-first `@theme` config, no `tailwind.config.js` |
-| **API layer** | tRPC | v11.18.x | End-to-end type safety, server-side caller, React Query integration |
-| **ORM** | Drizzle ORM | 0.45.x | Type-safe SQL, migration system, no runtime overhead |
-| **Database** | PostgreSQL | 17 (Neon in prod, Docker locally) | Relational integrity, JSONB for flexible content, FTS for search |
-| **Authentication** | Better Auth | 1.6.23 | Replaces Auth.js v5 — better OAuth, magic links, session control |
-| **Payments** | Stripe | 22.3.x (Dahlia) | Payment Intents, Checkout, Webhooks, Stripe Tax |
-| **Background jobs** | Trigger.dev | v4 | Webhook processing, abandoned cart emails, digest emails |
-| **CMS** | Sanity | v6 (Studio) + v7 client | Headless, real-time, Live Preview, GROQ queries |
-| **Email** | Resend + React Email | 6.17 / 6.6 | Transactional emails, type-safe templates |
-| **Image CDN** | Cloudflare Images + R2 | — | On-the-fly optimization, variants, cost-effective storage |
-| **Error tracking** | Sentry | 10.63.x | Next.js integration, source maps, performance monitoring |
-| **Analytics** | PostHog | 1.396.x | Privacy-friendly, session replay, feature flags |
-| **Logging** | Axiom | — | Structured logs, OpenTelemetry-compatible |
-| **Hosting** | Vercel | — | Next.js optimised, edge functions, ISR |
-| **Database hosting** | Neon | — | Serverless Postgres, branching, point-in-time recovery |
-| **Rate limiting** | Upstash Redis | — | Serverless Redis, sliding window, fail-open pattern |
+| Layer                | Technology             | Pinned Version                      | Rationale                                                           |
+| -------------------- | ---------------------- | ----------------------------------- | ------------------------------------------------------------------- |
+| **Monorepo tooling** | Turborepo              | ≥2.10.4                             | Task orchestration, caching, incremental builds                     |
+| **Package manager**  | pnpm                   | 11.9.0 (via `packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge`)   |
+| **Runtime**          | Node.js                | ≥22.0.0                             | LTS required by Next.js 16                                          |
+| **Meta-framework**   | Next.js                | 16.2.x                              | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack   |
+| **UI runtime**       | React                  | 19.2.x                              | React Compiler, async params, `use()` hook                          |
+| **Language**         | TypeScript             | 5.9.x                               | Strict mode, `noUnusedLocals`, `erasableSyntaxOnly`                 |
+| **Styling**          | Tailwind CSS           | v4.3.x                              | CSS-first `@theme` config, no `tailwind.config.js`                  |
+| **API layer**        | tRPC                   | v11.18.x                            | End-to-end type safety, server-side caller, React Query integration |
+| **ORM**              | Drizzle ORM            | 0.45.x                              | Type-safe SQL, migration system, no runtime overhead                |
+| **Database**         | PostgreSQL             | 17 (Neon in prod, Docker locally)   | Relational integrity, JSONB for flexible content, FTS for search    |
+| **Authentication**   | Better Auth            | 1.6.23                              | Replaces Auth.js v5 — better OAuth, magic links, session control    |
+| **Payments**         | Stripe                 | 22.3.x (Dahlia)                     | Payment Intents, Checkout, Webhooks, Stripe Tax                     |
+| **Background jobs**  | Trigger.dev            | v4                                  | Webhook processing, abandoned cart emails, digest emails            |
+| **CMS**              | Sanity                 | v6 (Studio) + v7 client             | Headless, real-time, Live Preview, GROQ queries                     |
+| **Email**            | Resend + React Email   | 6.17 / 6.6                          | Transactional emails, type-safe templates                           |
+| **Image CDN**        | Cloudflare Images + R2 | —                                   | On-the-fly optimization, variants, cost-effective storage           |
+| **Error tracking**   | Sentry                 | 10.63.x                             | Next.js integration, source maps, performance monitoring            |
+| **Analytics**        | PostHog                | 1.396.x                             | Privacy-friendly, session replay, feature flags                     |
+| **Logging**          | Axiom                  | —                                   | Structured logs, OpenTelemetry-compatible                           |
+| **Hosting**          | Vercel                 | —                                   | Next.js optimised, edge functions, ISR                              |
+| **Database hosting** | Neon                   | —                                   | Serverless Postgres, branching, point-in-time recovery              |
+| **Rate limiting**    | Upstash Redis          | —                                   | Serverless Redis, sliding window, fail-open pattern                 |
 
 ### 8.2 Monorepo Structure (Turborepo)
 
@@ -644,15 +645,15 @@ maison/
 
 > Full ADRs are documented in `PROJECT-ARCHITECTURE.md` §1.3. Summary here:
 
-| ADR | Decision | Rationale |
-|-----|----------|-----------|
-| ADR-001 | Turborepo monorepo over single-app | Shared packages (db, auth, ui) across web + studio + workers; proven in Stillwater |
-| ADR-002 | Better Auth over Auth.js v5 | Better OAuth reliability, magic links built-in, simpler session model; per Stillwater lessons |
-| ADR-003 | tRPC v11 over REST/GraphQL | End-to-end type safety without codegen; server-side caller for RSC; React Query integration |
-| ADR-004 | Drizzle ORM over Prisma | SQL-first, smaller bundle, no Rust binary, better edge runtime support |
-| ADR-005 | Sanity CMS over Strapi/Contentful | Real-time preview, GROQ queries, excellent Next.js integration; proven in Stillwater |
-| ADR-006 | `proxy.ts` over `middleware.ts` | Next.js 16 breaking change — `proxy.ts` is the new convention; supports async |
-| ADR-007 | Self-hosted fonts (woff2) over Google Fonts | Privacy, performance (no third-party connection), layout stability |
+| ADR     | Decision                                    | Rationale                                                                                     |
+| ------- | ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| ADR-001 | Turborepo monorepo over single-app          | Shared packages (db, auth, ui) across web + studio + workers; proven in Stillwater            |
+| ADR-002 | Better Auth over Auth.js v5                 | Better OAuth reliability, magic links built-in, simpler session model; per Stillwater lessons |
+| ADR-003 | tRPC v11 over REST/GraphQL                  | End-to-end type safety without codegen; server-side caller for RSC; React Query integration   |
+| ADR-004 | Drizzle ORM over Prisma                     | SQL-first, smaller bundle, no Rust binary, better edge runtime support                        |
+| ADR-005 | Sanity CMS over Strapi/Contentful           | Real-time preview, GROQ queries, excellent Next.js integration; proven in Stillwater          |
+| ADR-006 | `proxy.ts` over `middleware.ts`             | Next.js 16 breaking change — `proxy.ts` is the new convention; supports async                 |
+| ADR-007 | Self-hosted fonts (woff2) over Google Fonts | Privacy, performance (no third-party connection), layout stability                            |
 
 ---
 
@@ -684,6 +685,7 @@ erDiagram
 ### 9.2 Key Tables
 
 #### `users` (Better Auth managed)
+
 - `id` text PK
 - `email` text unique not null
 - `email_verified` boolean default false
@@ -694,6 +696,7 @@ erDiagram
 - `updated_at` timestamptz default now()
 
 #### `sessions` (Better Auth managed)
+
 - `id` text PK
 - `user_id` text FK → users
 - `expires_at` timestamptz
@@ -701,6 +704,7 @@ erDiagram
 - `user_agent` text
 
 #### `customers`
+
 - `id` uuid PK default gen_random_uuid()
 - `user_id` text FK → users (one-to-one)
 - `first_name` text
@@ -711,6 +715,7 @@ erDiagram
 - `created_at` timestamptz
 
 #### `addresses`
+
 - `id` uuid PK
 - `customer_id` uuid FK → customers
 - `label` text (Home, Work, etc.)
@@ -724,6 +729,7 @@ erDiagram
 - `is_default_billing` boolean default false
 
 #### `collections`
+
 - `id` uuid PK
 - `slug` text unique not null
 - `name` text not null
@@ -738,6 +744,7 @@ erDiagram
 - `updated_at` timestamptz
 
 #### `products`
+
 - `id` uuid PK
 - `slug` text unique not null
 - `name` text not null
@@ -761,6 +768,7 @@ erDiagram
 - `updated_at` timestamptz
 
 #### `product_variants`
+
 - `id` uuid PK
 - `product_id` uuid FK → products
 - `sku` text unique not null
@@ -771,6 +779,7 @@ erDiagram
 - `is_active` boolean default true
 
 #### `product_images`
+
 - `id` uuid PK
 - `product_id` uuid FK → products
 - `url` text not null
@@ -778,6 +787,7 @@ erDiagram
 - `sort_order` integer default 0
 
 #### `carts`
+
 - `id` uuid PK
 - `customer_id` uuid FK → customers (nullable for anonymous carts)
 - `anonymous_id` text (cookie ID, nullable)
@@ -786,6 +796,7 @@ erDiagram
 - `updated_at` timestamptz
 
 #### `cart_items`
+
 - `id` uuid PK
 - `cart_id` uuid FK → carts
 - `product_id` uuid FK → products
@@ -794,6 +805,7 @@ erDiagram
 - `created_at` timestamptz
 
 #### `orders`
+
 - `id` uuid PK
 - `order_number` text unique not null (human-readable, e.g., "MAI-2026-00142")
 - `customer_id` uuid FK → customers (nullable for guest orders)
@@ -819,6 +831,7 @@ erDiagram
 - `updated_at` timestamptz default now()
 
 #### `line_items`
+
 - `id` uuid PK
 - `order_id` uuid FK → orders
 - `product_id` uuid FK → products (snapshot reference)
@@ -830,6 +843,7 @@ erDiagram
 - `image_url` text (snapshot)
 
 #### `wishlist_items`
+
 - `id` uuid PK
 - `customer_id` uuid FK → customers
 - `product_id` uuid FK → products
@@ -837,6 +851,7 @@ erDiagram
 - Unique constraint on (customer_id, product_id)
 
 #### `discounts` (Phase 2)
+
 - `id` uuid PK
 - `code` text unique not null
 - `type` enum('percentage', 'fixed', 'free_shipping')
@@ -849,6 +864,7 @@ erDiagram
 - `is_active` boolean default true
 
 #### `audit_log` (admin actions)
+
 - `id` uuid PK
 - `actor_user_id` text FK → users
 - `action` text (e.g., 'product.update', 'order.refund')
@@ -874,66 +890,66 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 
 ### 10.1 Public Routers (no auth)
 
-| Procedure | Type | Input | Output | Purpose |
-|-----------|------|-------|--------|---------|
-| `products.list` | query | `{ collection?, sort?, cursor?, limit? }` | `{ items[], nextCursor? }` | Paginated product listing |
-| `products.getBySlug` | query | `{ slug }` | `Product` | Single product for PDP |
-| `products.getRelated` | query | `{ productId, limit? }` | `Product[]` | Related products (same collection) |
-| `products.search` | query | `{ q, limit? }` | `Product[]` | Full-text search |
-| `collections.list` | query | — | `Collection[]` | All active collections |
-| `collections.getBySlug` | query | `{ slug }` | `Collection & { products }` | Collection + its products |
-| `cart.get` | query | `{ cartId? }` | `Cart & { items }` | Current cart contents |
-| `cart.addItem` | mutation | `{ cartId?, productId, variantId?, quantity }` | `{ cartId, cart }` | Add to cart (creates cart if none) |
-| `cart.updateItem` | mutation | `{ cartId, itemId, quantity }` | `Cart` | Update quantity or remove (qty=0) |
-| `cart.merge` | mutation | `{ anonymousCartId, customerCartId }` | `Cart` | Merge anonymous cart into customer cart on login |
-| `newsletter.subscribe` | mutation | `{ email, source? }` | `{ success }` | Subscribe to newsletter (syncs to Klaviyo) |
-| `contact.submit` | mutation | `{ name, email, message }` | `{ success }` | Contact form (sends email via Resend) |
+| Procedure               | Type     | Input                                          | Output                      | Purpose                                          |
+| ----------------------- | -------- | ---------------------------------------------- | --------------------------- | ------------------------------------------------ |
+| `products.list`         | query    | `{ collection?, sort?, cursor?, limit? }`      | `{ items[], nextCursor? }`  | Paginated product listing                        |
+| `products.getBySlug`    | query    | `{ slug }`                                     | `Product`                   | Single product for PDP                           |
+| `products.getRelated`   | query    | `{ productId, limit? }`                        | `Product[]`                 | Related products (same collection)               |
+| `products.search`       | query    | `{ q, limit? }`                                | `Product[]`                 | Full-text search                                 |
+| `collections.list`      | query    | —                                              | `Collection[]`              | All active collections                           |
+| `collections.getBySlug` | query    | `{ slug }`                                     | `Collection & { products }` | Collection + its products                        |
+| `cart.get`              | query    | `{ cartId? }`                                  | `Cart & { items }`          | Current cart contents                            |
+| `cart.addItem`          | mutation | `{ cartId?, productId, variantId?, quantity }` | `{ cartId, cart }`          | Add to cart (creates cart if none)               |
+| `cart.updateItem`       | mutation | `{ cartId, itemId, quantity }`                 | `Cart`                      | Update quantity or remove (qty=0)                |
+| `cart.merge`            | mutation | `{ anonymousCartId, customerCartId }`          | `Cart`                      | Merge anonymous cart into customer cart on login |
+| `newsletter.subscribe`  | mutation | `{ email, source? }`                           | `{ success }`               | Subscribe to newsletter (syncs to Klaviyo)       |
+| `contact.submit`        | mutation | `{ name, email, message }`                     | `{ success }`               | Contact form (sends email via Resend)            |
 
 ### 10.2 Customer Routers (auth required)
 
-| Procedure | Type | Input | Output | Purpose |
-|-----------|------|-------|--------|---------|
-| `account.getProfile` | query | — | `Customer` | Current customer profile |
-| `account.updateProfile` | mutation | `{ firstName?, lastName?, phone? }` | `Customer` | Update profile |
-| `account.deleteAccount` | mutation | `{ confirmEmail }` | `{ success }` | GDPR right to erasure |
-| `account.listOrders` | query | `{ cursor? }` | `{ items[], nextCursor? }` | Order history |
-| `account.getOrder` | query | `{ orderNumber }` | `Order & { lineItems }` | Order detail |
-| `account.listAddresses` | query | — | `Address[]` | Saved addresses |
-| `account.upsertAddress` | mutation | `AddressInput` | `Address` | Create/update address |
-| `account.deleteAddress` | mutation | `{ addressId }` | `{ success }` | Delete address |
-| `wishlist.list` | query | — | `Product[]` | Wishlist contents |
-| `wishlist.toggle` | mutation | `{ productId }` | `{ isWishlisted }` | Add/remove wishlist item |
+| Procedure                      | Type     | Input                                         | Output                      | Purpose                                     |
+| ------------------------------ | -------- | --------------------------------------------- | --------------------------- | ------------------------------------------- |
+| `account.getProfile`           | query    | —                                             | `Customer`                  | Current customer profile                    |
+| `account.updateProfile`        | mutation | `{ firstName?, lastName?, phone? }`           | `Customer`                  | Update profile                              |
+| `account.deleteAccount`        | mutation | `{ confirmEmail }`                            | `{ success }`               | GDPR right to erasure                       |
+| `account.listOrders`           | query    | `{ cursor? }`                                 | `{ items[], nextCursor? }`  | Order history                               |
+| `account.getOrder`             | query    | `{ orderNumber }`                             | `Order & { lineItems }`     | Order detail                                |
+| `account.listAddresses`        | query    | —                                             | `Address[]`                 | Saved addresses                             |
+| `account.upsertAddress`        | mutation | `AddressInput`                                | `Address`                   | Create/update address                       |
+| `account.deleteAddress`        | mutation | `{ addressId }`                               | `{ success }`               | Delete address                              |
+| `wishlist.list`                | query    | —                                             | `Product[]`                 | Wishlist contents                           |
+| `wishlist.toggle`              | mutation | `{ productId }`                               | `{ isWishlisted }`          | Add/remove wishlist item                    |
 | `checkout.createPaymentIntent` | mutation | `{ cartId, shippingAddress, shippingMethod }` | `{ clientSecret, orderId }` | Create Stripe PaymentIntent + pending order |
-| `checkout.confirmOrder` | mutation | `{ orderId, paymentIntentId }` | `{ orderNumber }` | Confirm order after Stripe confirmation |
-| `checkout.applyDiscount` | mutation | `{ cartId, code }` | `Cart` | Apply promo code |
+| `checkout.confirmOrder`        | mutation | `{ orderId, paymentIntentId }`                | `{ orderNumber }`           | Confirm order after Stripe confirmation     |
+| `checkout.applyDiscount`       | mutation | `{ cartId, code }`                            | `Cart`                      | Apply promo code                            |
 
 ### 10.3 Admin Routers (RBAC: `staff` or `admin`)
 
-| Procedure | Type | Input | Output | Purpose |
-|-----------|------|-------|--------|---------|
-| `admin.products.list` | query | `{ search?, collection?, status? }` | `Product[]` | Admin product table |
-| `admin.products.create` | mutation | `ProductInput` | `Product` | Create product |
-| `admin.products.update` | mutation | `{ id, ...fields }` | `Product` | Update product |
-| `admin.products.delete` | mutation | `{ id }` | `{ success }` | Soft-delete (is_active = false) |
-| `admin.collections.*` | — | — | — | Collection CRUD (mirror of products) |
-| `admin.orders.list` | query | `{ status?, dateRange? }` | `Order[]` | Admin order list |
-| `admin.orders.updateStatus` | mutation | `{ id, status, trackingNumber? }` | `Order` | Fulfillment actions |
-| `admin.orders.refund` | mutation | `{ id, amountCents?, reason }` | `Order` | Stripe refund (admin only) |
-| `admin.customers.list` | query | `{ search? }` | `Customer[]` | Customer directory |
-| `admin.customers.get` | query | `{ id }` | `Customer & { orders }` | Customer detail |
-| `admin.inventory.list` | query | `{ lowStockOnly? }` | `Variant[]` | Stock levels |
-| `admin.inventory.update` | mutation | `{ variantId, stockQuantity }` | `Variant` | Restock |
-| `admin.discounts.*` | — | — | — | Discount CRUD (Phase 2) |
-| `admin.auditLog.list` | query | `{ actorId?, action?, dateRange? }` | `AuditLog[]` | Admin action history |
+| Procedure                   | Type     | Input                               | Output                  | Purpose                              |
+| --------------------------- | -------- | ----------------------------------- | ----------------------- | ------------------------------------ |
+| `admin.products.list`       | query    | `{ search?, collection?, status? }` | `Product[]`             | Admin product table                  |
+| `admin.products.create`     | mutation | `ProductInput`                      | `Product`               | Create product                       |
+| `admin.products.update`     | mutation | `{ id, ...fields }`                 | `Product`               | Update product                       |
+| `admin.products.delete`     | mutation | `{ id }`                            | `{ success }`           | Soft-delete (is_active = false)      |
+| `admin.collections.*`       | —        | —                                   | —                       | Collection CRUD (mirror of products) |
+| `admin.orders.list`         | query    | `{ status?, dateRange? }`           | `Order[]`               | Admin order list                     |
+| `admin.orders.updateStatus` | mutation | `{ id, status, trackingNumber? }`   | `Order`                 | Fulfillment actions                  |
+| `admin.orders.refund`       | mutation | `{ id, amountCents?, reason }`      | `Order`                 | Stripe refund (admin only)           |
+| `admin.customers.list`      | query    | `{ search? }`                       | `Customer[]`            | Customer directory                   |
+| `admin.customers.get`       | query    | `{ id }`                            | `Customer & { orders }` | Customer detail                      |
+| `admin.inventory.list`      | query    | `{ lowStockOnly? }`                 | `Variant[]`             | Stock levels                         |
+| `admin.inventory.update`    | mutation | `{ variantId, stockQuantity }`      | `Variant`               | Restock                              |
+| `admin.discounts.*`         | —        | —                                   | —                       | Discount CRUD (Phase 2)              |
+| `admin.auditLog.list`       | query    | `{ actorId?, action?, dateRange? }` | `AuditLog[]`            | Admin action history                 |
 
 ### 10.4 Webhook Endpoints (Route Handlers, not tRPC)
 
-| Endpoint | Source | Purpose |
-|----------|--------|---------|
-| `POST /api/webhooks/stripe` | Stripe | `payment_intent.succeeded`, `checkout.session.completed`, `charge.refunded` |
-| `POST /api/webhooks/sanity` | Sanity | Content publish → ISR revalidation |
-| `POST /api/auth/[...all]` | Better Auth | Auth callbacks (sign-in, sign-out, OAuth) |
-| `GET /api/og/[...slug]` | Internal | Dynamic OpenGraph image generation (`@vercel/og`) |
+| Endpoint                    | Source      | Purpose                                                                     |
+| --------------------------- | ----------- | --------------------------------------------------------------------------- |
+| `POST /api/webhooks/stripe` | Stripe      | `payment_intent.succeeded`, `checkout.session.completed`, `charge.refunded` |
+| `POST /api/webhooks/sanity` | Sanity      | Content publish → ISR revalidation                                          |
+| `POST /api/auth/[...all]`   | Better Auth | Auth callbacks (sign-in, sign-out, OAuth)                                   |
+| `GET /api/og/[...slug]`     | Internal    | Dynamic OpenGraph image generation (`@vercel/og`)                           |
 
 ---
 
@@ -941,16 +957,16 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 
 ### 11.1 Performance
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| LCP (Largest Contentful Paint) | < 2.0s (p75) | Lighthouse CI, Vercel Analytics |
-| INP (Interaction to Next Paint) | < 200ms | Web Vitals |
-| CLS (Cumulative Layout Shift) | < 0.1 | Web Vitals |
-| TTFB (Time to First Byte) | < 600ms | Vercel Edge |
-| Lighthouse Performance score | ≥ 90 | Lighthouse CI in PR checks |
-| JS bundle (initial route) | < 200KB gzipped | `@next/bundle-analyzer` |
-| Image format | AVIF (primary), WebP (fallback), JPG (legacy) | `next/image` defaults |
-| Font loading | Self-hosted woff2 with `font-display: swap` | No third-party font CDN |
+| Metric                          | Target                                        | Measurement                     |
+| ------------------------------- | --------------------------------------------- | ------------------------------- |
+| LCP (Largest Contentful Paint)  | < 2.0s (p75)                                  | Lighthouse CI, Vercel Analytics |
+| INP (Interaction to Next Paint) | < 200ms                                       | Web Vitals                      |
+| CLS (Cumulative Layout Shift)   | < 0.1                                         | Web Vitals                      |
+| TTFB (Time to First Byte)       | < 600ms                                       | Vercel Edge                     |
+| Lighthouse Performance score    | ≥ 90                                          | Lighthouse CI in PR checks      |
+| JS bundle (initial route)       | < 200KB gzipped                               | `@next/bundle-analyzer`         |
+| Image format                    | AVIF (primary), WebP (fallback), JPG (legacy) | `next/image` defaults           |
+| Font loading                    | Self-hosted woff2 with `font-display: swap`   | No third-party font CDN         |
 
 ### 11.2 SEO
 
@@ -987,18 +1003,18 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 
 ### 12.1 Security Posture (OWASP 2025 Top 10)
 
-| Threat | Mitigation | Enforcement |
-|--------|-----------|-------------|
-| A01 — Broken Access Control | Better Auth sessions, RBAC roles, `proxy.ts` route protection | tRPC middleware + `proxy.ts` |
-| A02 — Cryptographic Failures | TLS 1.3, AES-256 at rest (Neon), no plaintext secrets | Vercel auto-TLS, Neon encryption |
-| A03 — Injection | Drizzle parameterised queries, Zod input validation | tRPC input parsers, ESLint rules |
-| A04 — Insecure Design | Threat modelling per feature, secure-by-default patterns | Pre-PR review checklist |
-| A05 — Security Misconfiguration | `next.config.ts` CSP headers, `proxy.ts` security headers | CI gate (CSP verify test, per Stillwater) |
-| A06 — Vulnerable Components | `pnpm audit --audit-level=high` in CI, `minimumReleaseAge: 1440` (supply-chain guard) | `pnpm-workspace.yaml`, CI workflow |
-| A07 — Auth Failures | Better Auth, rate-limited login, account lockout after 5 failed attempts | Better Auth config + Upstash rate limit |
-| A08 — Data Integrity Failures | Signed Sanity webhooks, Stripe webhook signature verification | Webhook route handlers |
-| A09 — Logging Failures | Structured logs to Axiom, Sentry for errors, audit log for admin actions | `packages/api/src/middleware` |
-| A10 — SSRF | Egress allowlist on server-side fetches (Stripe, Sanity, Resend only) | `next.config.ts` + runtime checks |
+| Threat                          | Mitigation                                                                            | Enforcement                               |
+| ------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------- |
+| A01 — Broken Access Control     | Better Auth sessions, RBAC roles, `proxy.ts` route protection                         | tRPC middleware + `proxy.ts`              |
+| A02 — Cryptographic Failures    | TLS 1.3, AES-256 at rest (Neon), no plaintext secrets                                 | Vercel auto-TLS, Neon encryption          |
+| A03 — Injection                 | Drizzle parameterised queries, Zod input validation                                   | tRPC input parsers, ESLint rules          |
+| A04 — Insecure Design           | Threat modelling per feature, secure-by-default patterns                              | Pre-PR review checklist                   |
+| A05 — Security Misconfiguration | `next.config.ts` CSP headers, `proxy.ts` security headers                             | CI gate (CSP verify test, per Stillwater) |
+| A06 — Vulnerable Components     | `pnpm audit --audit-level=high` in CI, `minimumReleaseAge: 1440` (supply-chain guard) | `pnpm-workspace.yaml`, CI workflow        |
+| A07 — Auth Failures             | Better Auth, rate-limited login, account lockout after 5 failed attempts              | Better Auth config + Upstash rate limit   |
+| A08 — Data Integrity Failures   | Signed Sanity webhooks, Stripe webhook signature verification                         | Webhook route handlers                    |
+| A09 — Logging Failures          | Structured logs to Axiom, Sentry for errors, audit log for admin actions              | `packages/api/src/middleware`             |
+| A10 — SSRF                      | Egress allowlist on server-side fetches (Stripe, Sanity, Resend only)                 | `next.config.ts` + runtime checks         |
 
 ### 12.2 PCI DSS
 
@@ -1035,24 +1051,24 @@ Enforced via `next.config.ts` headers + verified by CI test (per Stillwater patt
 
 ## 13. Third-Party Integrations
 
-| Service | Purpose | Tier | Phase |
-|---------|---------|------|-------|
-| **Stripe** | Payments (cards, Apple Pay, Google Pay), Tax, Webhooks | Essential | 1 |
-| **Vercel** | Hosting, Edge functions, ISR, Analytics | Essential | 1 |
-| **Neon** | Serverless PostgreSQL 17 | Essential | 1 |
-| **Sanity** | Headless CMS (products, collections, journal, homepage content) | Essential | 1 |
-| **Cloudflare Images + R2** | Image CDN, media storage | Essential | 1 |
-| **Resend** | Transactional email (order confirmations, password reset) | Essential | 1 |
-| **React Email** | Type-safe email templates | Essential | 1 |
-| **Better Auth** | Authentication (email/password, OAuth, sessions) | Essential | 1 |
-| **Upstash Redis** | Rate limiting, idempotency keys | Essential | 1 |
-| **Trigger.dev** | Background jobs (abandoned cart, digests) | Essential | 1 |
-| **Sentry** | Error tracking, performance monitoring | Essential | 1 |
-| **PostHog** | Product analytics, session replay, feature flags | Essential | 1 |
-| **Axiom** | Structured log aggregation | Essential | 1 |
-| **Klaviyo** | Marketing email (newsletter, abandoned cart) | Growth | 2 |
-| **Algolia** | Faceted product search (if Postgres FTS insufficient) | Growth | 2 |
-| **Google Places API** | Address autocomplete at checkout | Growth | 2 |
+| Service                    | Purpose                                                         | Tier      | Phase |
+| -------------------------- | --------------------------------------------------------------- | --------- | ----- |
+| **Stripe**                 | Payments (cards, Apple Pay, Google Pay), Tax, Webhooks          | Essential | 1     |
+| **Vercel**                 | Hosting, Edge functions, ISR, Analytics                         | Essential | 1     |
+| **Neon**                   | Serverless PostgreSQL 17                                        | Essential | 1     |
+| **Sanity**                 | Headless CMS (products, collections, journal, homepage content) | Essential | 1     |
+| **Cloudflare Images + R2** | Image CDN, media storage                                        | Essential | 1     |
+| **Resend**                 | Transactional email (order confirmations, password reset)       | Essential | 1     |
+| **React Email**            | Type-safe email templates                                       | Essential | 1     |
+| **Better Auth**            | Authentication (email/password, OAuth, sessions)                | Essential | 1     |
+| **Upstash Redis**          | Rate limiting, idempotency keys                                 | Essential | 1     |
+| **Trigger.dev**            | Background jobs (abandoned cart, digests)                       | Essential | 1     |
+| **Sentry**                 | Error tracking, performance monitoring                          | Essential | 1     |
+| **PostHog**                | Product analytics, session replay, feature flags                | Essential | 1     |
+| **Axiom**                  | Structured log aggregation                                      | Essential | 1     |
+| **Klaviyo**                | Marketing email (newsletter, abandoned cart)                    | Growth    | 2     |
+| **Algolia**                | Faceted product search (if Postgres FTS insufficient)           | Growth    | 2     |
+| **Google Places API**      | Address autocomplete at checkout                                | Growth    | 2     |
 
 ---
 
@@ -1060,27 +1076,27 @@ Enforced via `next.config.ts` headers + verified by CI test (per Stillwater patt
 
 ### 14.1 Events Catalog (PostHog)
 
-| Event | Trigger | Properties |
-|-------|---------|------------|
-| `page_view` | Any page load (RSC render) | `path`, `referrer`, `utm_params` |
-| `product_view` | PDP loaded | `product_id`, `collection`, `price_cents` |
-| `product_list_view` | PLP loaded | `collection`, `sort`, `filters`, `result_count` |
-| `search` | Search performed | `query`, `results_count` |
-| `add_to_cart` | Add to bag clicked | `product_id`, `variant_id`, `price_cents`, `quantity`, `source` (card/pdp/quickview) |
-| `remove_from_cart` | Item removed | `product_id`, `quantity` |
-| `begin_checkout` | Checkout step 1 reached | `cart_value_cents`, `item_count` |
-| `add_shipping_info` | Shipping step completed | `shipping_method`, `shipping_cost_cents` |
-| `add_payment_info` | Payment step completed | `payment_method` (card/apple_pay/google_pay) |
-| `purchase` | Order confirmed | `order_id`, `order_number`, `total_cents`, `items`, `coupon` |
-| `wishlist_add` | Heart clicked | `product_id`, `source` |
-| `wishlist_remove` | Heart unclicked | `product_id` |
-| `newsletter_signup` | Subscribe form submitted | `source` (footer/newsletter_section/popup) |
-| `collection_view` | Collection page loaded | `collection_slug` |
-| `journal_view` | Journal article loaded | `article_slug`, `category`, `read_time` |
-| `contact_submit` | Contact form submitted | — |
-| `account_created` | Registration completed | `method` (email/google/apple) |
-| `account_signed_in` | Sign-in completed | `method` |
-| `refund_processed` | Admin refunds order | `order_id`, `amount_cents` (admin event) |
+| Event               | Trigger                    | Properties                                                                           |
+| ------------------- | -------------------------- | ------------------------------------------------------------------------------------ |
+| `page_view`         | Any page load (RSC render) | `path`, `referrer`, `utm_params`                                                     |
+| `product_view`      | PDP loaded                 | `product_id`, `collection`, `price_cents`                                            |
+| `product_list_view` | PLP loaded                 | `collection`, `sort`, `filters`, `result_count`                                      |
+| `search`            | Search performed           | `query`, `results_count`                                                             |
+| `add_to_cart`       | Add to bag clicked         | `product_id`, `variant_id`, `price_cents`, `quantity`, `source` (card/pdp/quickview) |
+| `remove_from_cart`  | Item removed               | `product_id`, `quantity`                                                             |
+| `begin_checkout`    | Checkout step 1 reached    | `cart_value_cents`, `item_count`                                                     |
+| `add_shipping_info` | Shipping step completed    | `shipping_method`, `shipping_cost_cents`                                             |
+| `add_payment_info`  | Payment step completed     | `payment_method` (card/apple_pay/google_pay)                                         |
+| `purchase`          | Order confirmed            | `order_id`, `order_number`, `total_cents`, `items`, `coupon`                         |
+| `wishlist_add`      | Heart clicked              | `product_id`, `source`                                                               |
+| `wishlist_remove`   | Heart unclicked            | `product_id`                                                                         |
+| `newsletter_signup` | Subscribe form submitted   | `source` (footer/newsletter_section/popup)                                           |
+| `collection_view`   | Collection page loaded     | `collection_slug`                                                                    |
+| `journal_view`      | Journal article loaded     | `article_slug`, `category`, `read_time`                                              |
+| `contact_submit`    | Contact form submitted     | —                                                                                    |
+| `account_created`   | Registration completed     | `method` (email/google/apple)                                                        |
+| `account_signed_in` | Sign-in completed          | `method`                                                                             |
+| `refund_processed`  | Admin refunds order        | `order_id`, `amount_cents` (admin event)                                             |
 
 ### 14.2 Dashboards
 
@@ -1098,34 +1114,34 @@ Enforced via `next.config.ts` headers + verified by CI test (per Stillwater patt
 
 ### 15.1 Collections (8)
 
-| Collection | Slug | Description | Product Count |
-|-----------|------|-------------|---------------|
-| Lighting | `lighting` | Sculptural forms that cast warmth and shadow | 28 |
-| Ceramics | `ceramics` | Handcrafted vessels shaped by patient hands | 24 |
-| Furniture | `furniture` | Timeless pieces built for generations | 42 |
-| Textiles | `textiles` | Natural fibers woven with intention | 36 |
-| Objects & Vases | `objects` | Curated details that complete a space | 18 |
-| Seasonal Collection | `seasonal` | Limited pieces inspired by the changing light | 12 |
-| New Arrivals | `new-arrivals` | The latest additions to our collection | 15 |
-| Curated Gifts | `gifts` | Thoughtfully selected pieces for giving | 22 |
+| Collection          | Slug           | Description                                   | Product Count |
+| ------------------- | -------------- | --------------------------------------------- | ------------- |
+| Lighting            | `lighting`     | Sculptural forms that cast warmth and shadow  | 28            |
+| Ceramics            | `ceramics`     | Handcrafted vessels shaped by patient hands   | 24            |
+| Furniture           | `furniture`    | Timeless pieces built for generations         | 42            |
+| Textiles            | `textiles`     | Natural fibers woven with intention           | 36            |
+| Objects & Vases     | `objects`      | Curated details that complete a space         | 18            |
+| Seasonal Collection | `seasonal`     | Limited pieces inspired by the changing light | 12            |
+| New Arrivals        | `new-arrivals` | The latest additions to our collection        | 15            |
+| Curated Gifts       | `gifts`        | Thoughtfully selected pieces for giving       | 22            |
 
 ### 15.2 Initial Products (13 SKUs, seeding data)
 
-| Product | Collection | Price | Materials | Badges |
-|---------|-----------|-------|-----------|--------|
-| Arc Pendant Light | Lighting | $485 | Solid brass, natural Belgian linen | Featured |
-| Orb Table Lamp | Lighting | $295 | Mouth-blown glass, solid bronze | New |
-| Berg Floor Lamp | Lighting | $620 | Aged brass, rice paper shade | — |
-| Large Sculptural Vessel | Ceramics | $320 | High-fire stoneware, natural ash glaze | Featured |
-| Everyday Serving Bowl | Ceramics | $145 | Stoneware, food-safe glaze | — |
-| Harvest Dining Table | Furniture | $2,850 | Solid white oak, natural oil finish | Featured |
-| Halden Linen Armchair | Furniture | $890 | Solid oak, washed linen (sand) | Bestseller |
-| SolSide Oak Table | Furniture | $540 | Solid FSC oak, linseed finish | — |
-| Washed Linen Throw | Textiles | $195 | 100% washed European linen | Bestseller |
-| Hand-Felted Wool Cushion | Textiles | $165 | 100% New Zealand wool, linen back | — |
-| Sculptural Bud Vase | Objects | $85 | Stoneware, matte white glaze | — |
-| Winter Hearth Candle | Seasonal | $65 | Soy wax, cotton wick, stoneware vessel | — |
-| Curated Gift Box | Gifts | $225 | Stoneware, soy candle, linen, wooden box | — |
+| Product                  | Collection | Price  | Materials                                | Badges     |
+| ------------------------ | ---------- | ------ | ---------------------------------------- | ---------- |
+| Arc Pendant Light        | Lighting   | $485   | Solid brass, natural Belgian linen       | Featured   |
+| Orb Table Lamp           | Lighting   | $295   | Mouth-blown glass, solid bronze          | New        |
+| Berg Floor Lamp          | Lighting   | $620   | Aged brass, rice paper shade             | —          |
+| Large Sculptural Vessel  | Ceramics   | $320   | High-fire stoneware, natural ash glaze   | Featured   |
+| Everyday Serving Bowl    | Ceramics   | $145   | Stoneware, food-safe glaze               | —          |
+| Harvest Dining Table     | Furniture  | $2,850 | Solid white oak, natural oil finish      | Featured   |
+| Halden Linen Armchair    | Furniture  | $890   | Solid oak, washed linen (sand)           | Bestseller |
+| SolSide Oak Table        | Furniture  | $540   | Solid FSC oak, linseed finish            | —          |
+| Washed Linen Throw       | Textiles   | $195   | 100% washed European linen               | Bestseller |
+| Hand-Felted Wool Cushion | Textiles   | $165   | 100% New Zealand wool, linen back        | —          |
+| Sculptural Bud Vase      | Objects    | $85    | Stoneware, matte white glaze             | —          |
+| Winter Hearth Candle     | Seasonal   | $65    | Soy wax, cotton wick, stoneware vessel   | —          |
+| Curated Gift Box         | Gifts      | $225   | Stoneware, soy candle, linen, wooden box | —          |
 
 These products are seeded via `packages/db/src/seed/index.ts` and match the products rendered in `docs/landing_page_unified.html`.
 
@@ -1135,12 +1151,12 @@ These products are seeded via `packages/db/src/seed/index.ts` and match the prod
 
 ### 16.1 Responsive Breakpoints
 
-| Breakpoint | Width | Layout Changes |
-|-----------|-------|----------------|
-| Mobile | < 640px | Single column, hamburger drawer, stacked grids, swipeable carousels |
-| Tablet | 640–1023px | 2-column product grid, side-by-side featured, condensed nav |
-| Desktop | 1024–1439px | 4-column products, full nav, 12-col asymmetric collections |
-| Wide | ≥ 1440px | Max-width containers (1280px), increased section padding |
+| Breakpoint | Width       | Layout Changes                                                      |
+| ---------- | ----------- | ------------------------------------------------------------------- |
+| Mobile     | < 640px     | Single column, hamburger drawer, stacked grids, swipeable carousels |
+| Tablet     | 640–1023px  | 2-column product grid, side-by-side featured, condensed nav         |
+| Desktop    | 1024–1439px | 4-column products, full nav, 12-col asymmetric collections          |
+| Wide       | ≥ 1440px    | Max-width containers (1280px), increased section padding            |
 
 ### 16.2 Key Responsive Behaviours (matching landing page)
 
@@ -1173,14 +1189,14 @@ These products are seeded via `packages/db/src/seed/index.ts` and match the prod
 
 ### 17.1 Test Distribution
 
-| Category | Framework | Location | Target Coverage |
-|----------|-----------|----------|-----------------|
-| Unit tests (business logic) | Vitest | `packages/*/src/**/*.test.ts` | 80% |
-| Component tests | Vitest + Testing Library | `apps/web/src/components/**/*.test.tsx` | 70% |
-| Integration tests (tRPC routers with test DB) | Vitest + testcontainers | `packages/api/src/**/*.integration.test.ts` | Critical paths |
-| E2E tests (user journeys) | Playwright | `e2e/*.spec.ts` | All P0 user stories |
-| Accessibility tests | `@axe-core/playwright` | `e2e/accessibility.spec.ts` | All pages |
-| Visual regression | Playwright screenshots | `e2e/visual/*.spec.ts` | Key pages |
+| Category                                      | Framework                | Location                                    | Target Coverage     |
+| --------------------------------------------- | ------------------------ | ------------------------------------------- | ------------------- |
+| Unit tests (business logic)                   | Vitest                   | `packages/*/src/**/*.test.ts`               | 80%                 |
+| Component tests                               | Vitest + Testing Library | `apps/web/src/components/**/*.test.tsx`     | 70%                 |
+| Integration tests (tRPC routers with test DB) | Vitest + testcontainers  | `packages/api/src/**/*.integration.test.ts` | Critical paths      |
+| E2E tests (user journeys)                     | Playwright               | `e2e/*.spec.ts`                             | All P0 user stories |
+| Accessibility tests                           | `@axe-core/playwright`   | `e2e/accessibility.spec.ts`                 | All pages           |
+| Visual regression                             | Playwright screenshots   | `e2e/visual/*.spec.ts`                      | Key pages           |
 
 ### 17.2 Critical E2E Scenarios
 
@@ -1224,7 +1240,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 
 ### Phase 0 — Foundation (Weeks 1–2)
 
-- [ ] Turborepo monorepo scaffold (apps/web, apps/studio, packages/*, services/workers, tooling/*)
+- [ ] Turborepo monorepo scaffold (apps/web, apps/studio, packages/_, services/workers, tooling/_)
 - [ ] `packages/db` — Drizzle schema, migrations, seed (8 collections, 13 products)
 - [ ] `packages/auth` — Better Auth config (email/password, sessions, RBAC)
 - [ ] `packages/ui` — Design tokens (colors.css, typography.css), self-hosted fonts
@@ -1283,18 +1299,18 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 
 ## 19. Risks & Mitigations
 
-| Risk | Impact | Likelihood | Mitigation |
-|------|--------|-----------|------------|
-| Low initial traffic | High | High | SEO investment, paid social (Instagram/Pinterest), influencer partnerships with design bloggers |
-| Payment processing issues | High | Low | Stripe fallback (no single point of failure), thorough E2E test coverage of checkout, idempotency keys |
-| Image loading performance | Medium | Medium | Cloudflare Images (AVIF/WebP), `next/image` responsive srcset, lazy loading, blur placeholders |
-| Inventory sync issues (overselling) | High | Medium | PostgreSQL advisory locks on checkout (per Stillwater pattern), real-time stock checks, 15-min reservation timeout |
-| Scope creep | Medium | High | Strict phase gating, MVP-first mindset, non-goals explicitly documented in §2.2 |
-| Mobile UX gaps | Medium | Medium | Mobile-first design, device testing matrix (iPhone SE → iPad Pro), Playwright mobile viewport tests |
-| Supply chain delays (maker lead times) | Medium | Medium | Lead time displayed on PDP, "made to order" badge, order status transparency, Trigger.dev delay notification emails |
-| Better Auth maturity (newer than Auth.js) | Low | Low | Comprehensive E2E auth tests, Stillwater production validation, fallback to Auth.js v5 if critical bug |
-| Sanity pricing at scale | Low | Low | Monitor usage, fallback to Strapi self-hosted if needed |
-| Supply chain attack (npm package) | High | Low | `minimumReleaseAge: 1440` in `pnpm-workspace.yaml`, `pnpm audit` in CI, dependabot alerts |
+| Risk                                      | Impact | Likelihood | Mitigation                                                                                                          |
+| ----------------------------------------- | ------ | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| Low initial traffic                       | High   | High       | SEO investment, paid social (Instagram/Pinterest), influencer partnerships with design bloggers                     |
+| Payment processing issues                 | High   | Low        | Stripe fallback (no single point of failure), thorough E2E test coverage of checkout, idempotency keys              |
+| Image loading performance                 | Medium | Medium     | Cloudflare Images (AVIF/WebP), `next/image` responsive srcset, lazy loading, blur placeholders                      |
+| Inventory sync issues (overselling)       | High   | Medium     | PostgreSQL advisory locks on checkout (per Stillwater pattern), real-time stock checks, 15-min reservation timeout  |
+| Scope creep                               | Medium | High       | Strict phase gating, MVP-first mindset, non-goals explicitly documented in §2.2                                     |
+| Mobile UX gaps                            | Medium | Medium     | Mobile-first design, device testing matrix (iPhone SE → iPad Pro), Playwright mobile viewport tests                 |
+| Supply chain delays (maker lead times)    | Medium | Medium     | Lead time displayed on PDP, "made to order" badge, order status transparency, Trigger.dev delay notification emails |
+| Better Auth maturity (newer than Auth.js) | Low    | Low        | Comprehensive E2E auth tests, Stillwater production validation, fallback to Auth.js v5 if critical bug              |
+| Sanity pricing at scale                   | Low    | Low        | Monitor usage, fallback to Strapi self-hosted if needed                                                             |
+| Supply chain attack (npm package)         | High   | Low        | `minimumReleaseAge: 1440` in `pnpm-workspace.yaml`, `pnpm audit` in CI, dependabot alerts                           |
 
 ---
 
@@ -1312,63 +1328,63 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 
 ### B. Browser Support Matrix
 
-| Browser | Minimum Version |
-|---------|----------------|
-| Chrome | Last 2 versions |
-| Firefox | Last 2 versions |
-| Safari | 16+ (for `:has()` selector) |
-| Edge | Last 2 versions |
-| Mobile Safari (iOS) | 16+ |
-| Chrome for Android | Last 2 versions |
+| Browser             | Minimum Version             |
+| ------------------- | --------------------------- |
+| Chrome              | Last 2 versions             |
+| Firefox             | Last 2 versions             |
+| Safari              | 16+ (for `:has()` selector) |
+| Edge                | Last 2 versions             |
+| Mobile Safari (iOS) | 16+                         |
+| Chrome for Android  | Last 2 versions             |
 
 ### C. Environment Variables Summary
 
 > Full documentation in `PROJECT-ARCHITECTURE.md` §9.2 and `.env.example` at repo root.
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | Yes | Pooled Postgres connection (app queries) |
-| `DATABASE_URL_UNPOOLED` | Yes | Direct Postgres connection (migrations only) |
-| `BETTER_AUTH_SECRET` | Yes | Auth session signing (min 32 chars) |
-| `BETTER_AUTH_URL` | Yes | App URL for auth callbacks |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Phase 2 | Google OAuth |
-| `STRIPE_SECRET_KEY` | Yes | Server-side Stripe API |
-| `STRIPE_WEBHOOK_SECRET` | Yes | Stripe webhook signature verification |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Yes | Client-side Stripe Elements |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Yes | Sanity project ID |
-| `NEXT_PUBLIC_SANITY_DATASET` | Yes | Sanity dataset (usually `production`) |
-| `SANITY_API_TOKEN` | Yes | Server-side Sanity read token |
-| `SANITY_WEBHOOK_SECRET` | Yes | Sanity webhook signature verification |
-| `RESEND_API_KEY` | Yes | Transactional email |
-| `EMAIL_FROM` | Yes | From address for transactional emails |
-| `TRIGGER_SECRET_KEY` | Yes | Trigger.dev background jobs |
-| `UPSTASH_REDIS_REST_URL` | Yes | Rate limiting, idempotency |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes | Upstash auth |
-| `SENTRY_DSN` | Optional | Error tracking (app runs without if unset) |
-| `NEXT_PUBLIC_POSTHOG_KEY` | Yes | Product analytics |
-| `NEXT_PUBLIC_POSTHOG_HOST` | Yes | PostHog host (usually `https://app.posthog.com`) |
-| `AXIOM_TOKEN` | Optional | Structured logging |
-| `CLOUDFLARE_ACCOUNT_ID` | Yes | Image CDN |
-| `CLOUDFLARE_IMAGES_TOKEN` | Yes | Cloudflare Images API |
-| `CLOUDFLARE_R2_*` | Yes | Media storage |
-| `NEXT_PUBLIC_APP_URL` | Yes | Canonical app URL |
+| Variable                                    | Required | Purpose                                          |
+| ------------------------------------------- | -------- | ------------------------------------------------ |
+| `DATABASE_URL`                              | Yes      | Pooled Postgres connection (app queries)         |
+| `DATABASE_URL_UNPOOLED`                     | Yes      | Direct Postgres connection (migrations only)     |
+| `BETTER_AUTH_SECRET`                        | Yes      | Auth session signing (min 32 chars)              |
+| `BETTER_AUTH_URL`                           | Yes      | App URL for auth callbacks                       |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Phase 2  | Google OAuth                                     |
+| `STRIPE_SECRET_KEY`                         | Yes      | Server-side Stripe API                           |
+| `STRIPE_WEBHOOK_SECRET`                     | Yes      | Stripe webhook signature verification            |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`        | Yes      | Client-side Stripe Elements                      |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`             | Yes      | Sanity project ID                                |
+| `NEXT_PUBLIC_SANITY_DATASET`                | Yes      | Sanity dataset (usually `production`)            |
+| `SANITY_API_TOKEN`                          | Yes      | Server-side Sanity read token                    |
+| `SANITY_WEBHOOK_SECRET`                     | Yes      | Sanity webhook signature verification            |
+| `RESEND_API_KEY`                            | Yes      | Transactional email                              |
+| `EMAIL_FROM`                                | Yes      | From address for transactional emails            |
+| `TRIGGER_SECRET_KEY`                        | Yes      | Trigger.dev background jobs                      |
+| `UPSTASH_REDIS_REST_URL`                    | Yes      | Rate limiting, idempotency                       |
+| `UPSTASH_REDIS_REST_TOKEN`                  | Yes      | Upstash auth                                     |
+| `SENTRY_DSN`                                | Optional | Error tracking (app runs without if unset)       |
+| `NEXT_PUBLIC_POSTHOG_KEY`                   | Yes      | Product analytics                                |
+| `NEXT_PUBLIC_POSTHOG_HOST`                  | Yes      | PostHog host (usually `https://app.posthog.com`) |
+| `AXIOM_TOKEN`                               | Optional | Structured logging                               |
+| `CLOUDFLARE_ACCOUNT_ID`                     | Yes      | Image CDN                                        |
+| `CLOUDFLARE_IMAGES_TOKEN`                   | Yes      | Cloudflare Images API                            |
+| `CLOUDFLARE_R2_*`                           | Yes      | Media storage                                    |
+| `NEXT_PUBLIC_APP_URL`                       | Yes      | Canonical app URL                                |
 
 ### D. Glossary
 
-| Term | Definition |
-|------|-----------|
-| **AOV** | Average Order Value — total revenue / order count |
-| **Considered living** | Brand philosophy: intentional, slow, quality-over-quantity consumption |
-| **GMV** | Gross Merchandise Value — total order value before fees/refunds |
-| **Hygge** | Danish concept of coziness, contentment, and warm simplicity |
-| **ISR** | Incremental Static Regeneration — Next.js feature for periodic page re-rendering |
-| **PDP** | Product Detail Page (`/product/{slug}`) |
-| **PLP** | Product Listing Page (`/products`) |
-| **RSC** | React Server Component — renders on server, ships zero JS |
-| **RBAC** | Role-Based Access Control — `customer` / `staff` / `admin` roles |
-| **Trade program** | Phase 3 feature: designer tier with 10–20% discount |
-| **White Glove delivery** | Premium shipping: in-home setup, packaging removal (2-week lead time) |
+| Term                     | Definition                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **AOV**                  | Average Order Value — total revenue / order count                                |
+| **Considered living**    | Brand philosophy: intentional, slow, quality-over-quantity consumption           |
+| **GMV**                  | Gross Merchandise Value — total order value before fees/refunds                  |
+| **Hygge**                | Danish concept of coziness, contentment, and warm simplicity                     |
+| **ISR**                  | Incremental Static Regeneration — Next.js feature for periodic page re-rendering |
+| **PDP**                  | Product Detail Page (`/product/{slug}`)                                          |
+| **PLP**                  | Product Listing Page (`/products`)                                               |
+| **RSC**                  | React Server Component — renders on server, ships zero JS                        |
+| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `admin` roles                 |
+| **Trade program**        | Phase 3 feature: designer tier with 10–20% discount                              |
+| **White Glove delivery** | Premium shipping: in-home setup, packaging removal (2-week lead time)            |
 
 ---
 
-*End of Unified PRD v1.0. For the engineering blueprint, see `PROJECT-ARCHITECTURE.md`. For developer onboarding, see `README.md` and `AGENTS.md`. For AI agent instructions, see `CLAUDE.md`.*
+_End of Unified PRD v1.0. For the engineering blueprint, see `PROJECT-ARCHITECTURE.md`. For developer onboarding, see `README.md` and `AGENTS.md`. For AI agent instructions, see `CLAUDE.md`._

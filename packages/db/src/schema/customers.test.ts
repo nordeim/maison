@@ -6,15 +6,15 @@
  * the migration SQL added them. This test validates they exist.
  */
 
-import { describe, it, expect } from "vitest";
-import { customers } from "./customers";
+import { describe, it, expect } from 'vitest';
+import { customers } from './customers';
 
-describe("customers schema", () => {
-  it("has loyaltyTier column", () => {
+describe('customers schema', () => {
+  it('has loyaltyTier column', () => {
     expect(customers.loyaltyTier).toBeDefined();
   });
 
-  it("has tradeDiscountPercent column", () => {
+  it('has tradeDiscountPercent column', () => {
     expect(customers.tradeDiscountPercent).toBeDefined();
   });
 
@@ -24,12 +24,12 @@ describe("customers schema", () => {
     expect(column).toBeDefined();
   });
 
-  it("tradeDiscountPercent defaults to 0", () => {
+  it('tradeDiscountPercent defaults to 0', () => {
     const column = customers.tradeDiscountPercent;
     expect(column).toBeDefined();
   });
 
-  it("has all original columns", () => {
+  it('has all original columns', () => {
     expect(customers.id).toBeDefined();
     expect(customers.userId).toBeDefined();
     expect(customers.firstName).toBeDefined();

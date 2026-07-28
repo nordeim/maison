@@ -8,11 +8,11 @@
  * at checkout via the customers.trade_discount_percent column.
  */
 
-import { z } from "zod";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { tradeApplications, customers, users } from "@maison/db";
-import { router, protectedProcedure, adminProcedure, adminWriteProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, desc, sql } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { tradeApplications, customers, users } from '@maison/db';
+import { router, protectedProcedure, adminProcedure, adminWriteProcedure } from '../trpc';
 
 export const tradeRouter = router({
   /**
@@ -25,7 +25,7 @@ export const tradeRouter = router({
         lastName: z.string().min(1).max(50),
         company: z.string().min(1).max(100),
         role: z.string().min(1).max(50),
-        website: z.string().url().optional().or(z.literal("")),
+        website: z.string().url().optional().or(z.literal('')),
         instagram: z.string().max(50).optional(),
         projectTypes: z.string().max(200).optional(),
       }),
@@ -40,13 +40,13 @@ export const tradeRouter = router({
 
       if (existing) {
         throw new TRPCError({
-          code: "CONFLICT",
+          code: 'CONFLICT',
           message:
-            existing.status === "pending"
-              ? "You already have a pending application."
-              : existing.status === "approved"
-                ? "Your trade application has already been approved."
-                : "Your previous application was rejected. Please contact us.",
+            existing.status === 'pending'
+              ? 'You already have a pending application.'
+              : existing.status === 'approved'
+                ? 'Your trade application has already been approved.'
+                : 'Your previous application was rejected. Please contact us.',
         });
       }
 
@@ -63,7 +63,7 @@ export const tradeRouter = router({
           instagram: input.instagram || null,
           projectTypes: input.projectTypes || null,
           discountPercent: 10, // default; admin can adjust on approval
-          status: "pending",
+          status: 'pending',
         })
         .returning({ id: tradeApplications.id });
 
@@ -85,15 +85,33 @@ export const tradeRouter = router({
 
   /**
    * Admin: list all applications.
+   *
+   * Shaped at the router boundary: `discountPercent` is nullable in the schema
+   * (`.default(10)` only applies on insert), so coerce to the documented default
+   * to give admin pages a non-null contract.
    */
   list: adminProcedure
-    .input(z.object({ status: z.enum(["pending", "approved", "rejected", "all"]).default("all") }))
+    .input(
+      z.object({
+        status: z.enum(['pending', 'approved', 'rejected', 'all']).default('all'),
+      }),
+    )
     .query(async ({ input, ctx }) => {
-      const whereClause = input.status === "all" ? undefined : eq(tradeApplications.status, input.status);
+      const whereClause =
+        input.status === 'all' ? undefined : eq(tradeApplications.status, input.status);
 
-      return whereClause
-        ? ctx.db.select().from(tradeApplications).where(whereClause).orderBy(desc(tradeApplications.createdAt))
-        : ctx.db.select().from(tradeApplications).orderBy(desc(tradeApplications.createdAt));
+      const rows = whereClause
+        ? await ctx.db
+            .select()
+            .from(tradeApplications)
+            .where(whereClause)
+            .orderBy(desc(tradeApplications.createdAt))
+        : await ctx.db.select().from(tradeApplications).orderBy(desc(tradeApplications.createdAt));
+
+      return rows.map((row) => ({
+        ...row,
+        discountPercent: row.discountPercent ?? 10,
+      }));
     }),
 
   /**
@@ -111,7 +129,7 @@ export const tradeRouter = router({
       const [application] = await ctx.db
         .update(tradeApplications)
         .set({
-          status: "approved",
+          status: 'approved',
           discountPercent: input.discountPercent,
           reviewedBy: ctx.session.user.id,
           reviewedAt: new Date(),
@@ -145,7 +163,7 @@ export const tradeRouter = router({
       await ctx.db
         .update(tradeApplications)
         .set({
-          status: "rejected",
+          status: 'rejected',
           reviewedBy: ctx.session.user.id,
           reviewedAt: new Date(),
           notes: input.notes,

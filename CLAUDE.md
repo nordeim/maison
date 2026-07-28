@@ -9,6 +9,7 @@
 **Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (target architecture: Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The current state is **documentation-complete, code-to-be-scaffolded** — the unified PRD (`docs/PRD_unified.md`), unified landing page mockup (`docs/landing_page_unified.html`), and this documentation suite are committed; the application packages are to be built per the PRD §8.2 file hierarchy.
 
 **Stack version pins** (do not deviate without ADR):
+
 - Node.js ≥ 22.0.0
 - pnpm 11.9.0 (via `packageManager` field)
 - Next.js 16.2.x
@@ -43,21 +44,25 @@ If you skip any of these, you will reproduce bugs that have already been solved.
 When asked to implement a feature, follow this discipline:
 
 ### 1. Understand before acting
+
 - Restate the task in your own words. If ambiguous, ask one batched question (don't drip questions).
 - Identify which PRD section this maps to. If it doesn't map, the feature may be out of scope — flag it.
 - Check the existing codebase for patterns to follow (Don't invent novel patterns when a proven one exists).
 
 ### 2. Plan, then execute
+
 - Write a TODO list before touching files. Each item should be a single, testable change.
 - Identify the blast radius of each change. A schema change touches: migration → seed → tRPC router → RSC → Client Component → E2E test.
 - Prefer editing existing files over creating new ones. Never create documentation files unless explicitly requested.
 
 ### 3. Verify, don't assume
+
 - After every change, run the relevant verification: `pnpm check-types`, `pnpm test`, `pnpm lint`.
 - For UI changes, open the page in a browser (or use Playwright snapshot) — don't claim it works based on code review alone.
 - For DB changes, run the migration both up AND down. A migration that can't roll back is a production incident waiting to happen.
 
 ### 4. Leave the codebase better than you found it
+
 - If you spot a bug in unrelated code while working, fix it (or file an issue). Don't leave landmines.
 - If a test is flaky, investigate — don't disable it.
 - If a comment is stale, update it.
@@ -67,48 +72,56 @@ When asked to implement a feature, follow this discipline:
 ## Code Style Rules (Enforced)
 
 ### TypeScript
+
 - **Strict mode** — `strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true`, `erasableSyntaxOnly: true`.
 - **No `any` in production code.** Use `unknown` + type guard, or define a proper type. `any` in tests is acceptable for mocks.
 - **No `// @ts-ignore`** — use `// @ts-expect-error` with a reason, or fix the type.
 - **Prefer `interface` for object shapes, `type` for unions/intersections/mapped types.**
 
 ### React 19
+
 - **No `forwardRef`.** Pass `ref` as a normal prop. (React 19 made refs regular props.)
 - **Use `use()` for async values**, not `useEffect` + `useState`. `use()` suspends; `useEffect` doesn't.
 - **Server Components by default.** Only add `"use client"` when you need state, effects, or browser APIs. Keep Client Components small and leaf-level.
 - **No default exports for components** — named exports only (except `page.tsx` / `route.ts` which Next.js requires to be default).
 
 ### Next.js 16
+
 - **`proxy.ts`, not `middleware.ts`.** File lives at `apps/web/proxy.ts`. Supports async.
 - **Async params:** `async function Page({ params }: { params: Promise<{ slug: string }> })` — you MUST `await params`.
 - **Turbopack for dev** (`next dev --turbopack`). Webpack still used for `next build` unless `--turbopack` passed.
 - **`generateMetadata` is async** — `export async function generateMetadata({ params }): Promise<Metadata>`.
 
 ### Tailwind v4 (CSS-first)
+
 - **No `tailwind.config.js` or `tailwind.config.ts`.** Tokens live in `apps/web/src/app/globals.css` under `@theme { ... }`.
 - **Use `@tailwindcss/postcss`** in `postcss.config.mjs`. Do NOT add `autoprefixer` (Tailwind v4 handles it).
 - **Custom utilities** in `@layer utilities { ... }` within `globals.css`.
 - **The `prettier-plugin-tailwindcss`** auto-sorts classes on format — don't fight it.
 
 ### tRPC v11
+
 - **Every procedure has a Zod input parser.** Never accept untyped input.
 - **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. This calls the router directly (no HTTP round-trip).
 - **Client-side via React Query** — `apps/web/src/lib/trpc/client.tsx` exports `trpc` and `TRPCProvider`.
 - **Rate limiting middleware fails OPEN** — if Redis is down, allow the request. Log for review. Do NOT change to fail-closed.
 
 ### Drizzle ORM
+
 - **One file per table** in `packages/db/src/schema/`. Re-export from `index.ts`.
 - **Money in cents (integer), not dollars.** Column names end in `_cents`. Display logic divides by 100.
 - **`DATABASE_URL_UNPOOLED` for migrations, `DATABASE_URL` for queries.** Never swap these. PgBouncer (pooled) breaks prepared statements in migration scripts.
 - **`db:push` is dev-only.** Never run in production. Always use `db:migrate` for prod.
 
 ### Better Auth
+
 - **Config in `packages/auth/src/config.ts`.** Web app imports via `@maison/auth`.
 - **Sessions in PostgreSQL, not JWTs.** Enables revocation.
 - **`BETTER_AUTH_URL` must be set in production** — config throws at module load if unset (intentional fail-fast).
 - **RBAC roles:** `customer`, `staff`, `admin`. Checked in tRPC middleware (not `proxy.ts` — proxy only checks "is authenticated").
 
 ### Stripe
+
 - **Payment Intents, not legacy Tokens.** Always.
 - **Idempotency keys on every mutating call.** Client generates UUID, passes as `x-idempotency-key` header. Stored in `orders.stripe_idempotency_key` (UNIQUE).
 - **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `STRIPE_WEBHOOK_SECRET`.
@@ -201,23 +214,23 @@ Full instructions: `docs/ssh-warpper_SKILL.md`.
 
 ## Common Mistakes To Avoid
 
-| Mistake | Correct Approach |
-|---------|------------------|
-| Creating `middleware.ts` | Create `proxy.ts` (Next.js 16 rename) |
-| Adding `tailwind.config.js` | Add tokens to `globals.css` `@theme` (Tailwind v4 CSS-first) |
-| Using `forwardRef` | Pass `ref` as a normal prop (React 19) |
-| Forgetting `await params` | Page params are `Promise<...>` — always await |
-| Storing money as `numeric` | Store as `integer` cents (`_cents` suffix) |
-| Using `DATABASE_URL` for migrations | Use `DATABASE_URL_UNPOOLED` (PgBouncer breaks prepared statements) |
-| `db:push` in production | Always use `db:migrate` in prod; `db:push` is dev-only |
-| Rate limiter failing closed | Fail OPEN — allow requests if Redis is down, log for review |
-| `any` type in production | Use `unknown` + type guard, or define a proper type |
-| Default export for components | Named export (except `page.tsx` / `route.ts` which Next.js requires) |
-| `"use client"` at top of layout | Keep layouts as Server Components; push `"use client"` to leaf components |
-| Google Fonts CDN | Self-host woff2 in `packages/ui/src/fonts/` (privacy + performance) |
-| Stripe Tokens (legacy) | Use Payment Intents (current standard, supports Apple Pay / Google Pay) |
+| Mistake                                 | Correct Approach                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| Creating `middleware.ts`                | Create `proxy.ts` (Next.js 16 rename)                                        |
+| Adding `tailwind.config.js`             | Add tokens to `globals.css` `@theme` (Tailwind v4 CSS-first)                 |
+| Using `forwardRef`                      | Pass `ref` as a normal prop (React 19)                                       |
+| Forgetting `await params`               | Page params are `Promise<...>` — always await                                |
+| Storing money as `numeric`              | Store as `integer` cents (`_cents` suffix)                                   |
+| Using `DATABASE_URL` for migrations     | Use `DATABASE_URL_UNPOOLED` (PgBouncer breaks prepared statements)           |
+| `db:push` in production                 | Always use `db:migrate` in prod; `db:push` is dev-only                       |
+| Rate limiter failing closed             | Fail OPEN — allow requests if Redis is down, log for review                  |
+| `any` type in production                | Use `unknown` + type guard, or define a proper type                          |
+| Default export for components           | Named export (except `page.tsx` / `route.ts` which Next.js requires)         |
+| `"use client"` at top of layout         | Keep layouts as Server Components; push `"use client"` to leaf components    |
+| Google Fonts CDN                        | Self-host woff2 in `packages/ui/src/fonts/` (privacy + performance)          |
+| Stripe Tokens (legacy)                  | Use Payment Intents (current standard, supports Apple Pay / Google Pay)      |
 | Skipping webhook signature verification | Always verify with `STRIPE_WEBHOOK_SECRET` — never trust unverified webhooks |
-| Generic SaaS copy ("Empower your…") | Write like a human editor: "Objects of Quiet Beauty" |
+| Generic SaaS copy ("Empower your…")     | Write like a human editor: "Objects of Quiet Beauty"                         |
 
 ---
 

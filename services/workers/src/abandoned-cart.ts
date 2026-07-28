@@ -13,13 +13,13 @@
  */
 
 export const abandonedCartJobSpec = {
-  name: "abandoned-cart",
-  trigger: { cron: "*/30 * * * *" }, // every 30 min
+  name: 'abandoned-cart',
+  trigger: { cron: '*/30 * * * *' }, // every 30 min
   concurrency: 5,
-  retry: { limit: 3, backoff: "exponential" },
+  retry: { limit: 3, backoff: 'exponential' },
 } as const;
 
 // Phase 1: implement with @trigger.dev/sdk/v4 task runner
 export async function abandonedCartHandler(): Promise<void> {
-  console.log("[jobs] abandoned-cart: stub — would query carts abandoned in last 30 min");
+  console.log('[jobs] abandoned-cart: stub — would query carts abandoned in last 30 min');
 }

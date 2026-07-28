@@ -1,5 +1,5 @@
-export { appRouter, type AppRouter } from "./root";
-export { createContext, type TRPCContext } from "./context";
+export { appRouter, type AppRouter } from './root';
+export { createContext, type TRPCContext } from './context';
 export {
   router,
   middleware,
@@ -7,4 +7,4 @@ export {
   protectedProcedure,
   adminProcedure,
   adminWriteProcedure,
-} from "./trpc";
+} from './trpc';

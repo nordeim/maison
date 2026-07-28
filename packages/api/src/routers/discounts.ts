@@ -7,10 +7,10 @@
  * Per PRD §4.4 (CK-006: Promo/discount code application).
  */
 
-import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
-import { discounts } from "@maison/db";
-import { router, publicProcedure, adminProcedure, adminWriteProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, sql } from 'drizzle-orm';
+import { discounts } from '@maison/db';
+import { router, publicProcedure, adminProcedure, adminWriteProcedure } from '../trpc';
 
 export const discountsRouter = router({
   /**
@@ -34,28 +34,37 @@ export const discountsRouter = router({
         .limit(1);
 
       if (!discount) {
-        return { valid: false, error: "Invalid discount code." } as const;
+        return { valid: false, error: 'Invalid discount code.' } as const;
       }
 
       // Check date range
       const now = new Date();
       if (discount.startsAt && now < discount.startsAt) {
-        return { valid: false, error: "This discount code is not yet active." } as const;
+        return {
+          valid: false,
+          error: 'This discount code is not yet active.',
+        } as const;
       }
       if (discount.endsAt && now > discount.endsAt) {
-        return { valid: false, error: "This discount code has expired." } as const;
+        return {
+          valid: false,
+          error: 'This discount code has expired.',
+        } as const;
       }
 
       // Check usage limit
       if (discount.maxUses !== null && discount.usesCount >= discount.maxUses) {
-        return { valid: false, error: "This discount code has reached its usage limit." } as const;
+        return {
+          valid: false,
+          error: 'This discount code has reached its usage limit.',
+        } as const;
       }
 
       // Check minimum order
       if (discount.minOrderCents > 0 && input.subtotalCents < discount.minOrderCents) {
-        const minFormatted = new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
+        const minFormatted = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
         }).format(discount.minOrderCents / 100);
         return {
           valid: false,
@@ -68,13 +77,13 @@ export const discountsRouter = router({
       let freeShipping = false;
 
       switch (discount.type) {
-        case "percentage":
+        case 'percentage':
           discountAmountCents = Math.round(input.subtotalCents * (discount.value / 100));
           break;
-        case "fixed":
+        case 'fixed':
           discountAmountCents = Math.min(discount.value, input.subtotalCents);
           break;
-        case "free_shipping":
+        case 'free_shipping':
           freeShipping = true;
           break;
       }
@@ -94,7 +103,10 @@ export const discountsRouter = router({
    * List all discounts (admin only).
    */
   list: adminProcedure.query(async ({ ctx }) => {
-    return ctx.db.select().from(discounts).orderBy(sql`${discounts.createdAt} DESC`);
+    return ctx.db
+      .select()
+      .from(discounts)
+      .orderBy(sql`${discounts.createdAt} DESC`);
   }),
 
   /**
@@ -103,8 +115,12 @@ export const discountsRouter = router({
   create: adminWriteProcedure
     .input(
       z.object({
-        code: z.string().min(1).max(50).transform((s) => s.toUpperCase().trim()),
-        type: z.enum(["percentage", "fixed", "free_shipping"]),
+        code: z
+          .string()
+          .min(1)
+          .max(50)
+          .transform((s) => s.toUpperCase().trim()),
+        type: z.enum(['percentage', 'fixed', 'free_shipping']),
         value: z.number().int().min(0),
         minOrderCents: z.number().int().min(0).default(0),
         maxUses: z.number().int().positive().nullable().optional(),
@@ -135,10 +151,7 @@ export const discountsRouter = router({
   deactivate: adminWriteProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
-      await ctx.db
-        .update(discounts)
-        .set({ isActive: false })
-        .where(eq(discounts.id, input.id));
+      await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
       return { success: true };
     }),
 });

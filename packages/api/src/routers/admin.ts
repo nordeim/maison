@@ -6,8 +6,8 @@
  * Mutation procedures require admin role (adminWriteProcedure).
  */
 
-import { z } from "zod";
-import { eq, desc, asc, and, ilike, sql, count } from "drizzle-orm";
+import { z } from 'zod';
+import { eq, desc, asc, and, ilike, sql, count } from 'drizzle-orm';
 import {
   products,
   productVariants,
@@ -20,8 +20,8 @@ import {
   auditLog,
   discounts,
   cartItems,
-} from "@maison/db";
-import { router, adminProcedure, adminWriteProcedure } from "../trpc";
+} from '@maison/db';
+import { router, adminProcedure, adminWriteProcedure } from '../trpc';
 
 export const adminRouter = router({
   /**
@@ -104,7 +104,7 @@ export const adminRouter = router({
       z.object({
         search: z.string().optional(),
         collection: z.string().optional(),
-        status: z.enum(["active", "inactive", "all"]).default("all"),
+        status: z.enum(['active', 'inactive', 'all']).default('all'),
         limit: z.number().min(1).max(100).default(50),
       }),
     )
@@ -117,9 +117,9 @@ export const adminRouter = router({
       if (input.collection) {
         conditions.push(eq(collections.slug, input.collection));
       }
-      if (input.status === "active") {
+      if (input.status === 'active') {
         conditions.push(eq(products.isActive, true));
-      } else if (input.status === "inactive") {
+      } else if (input.status === 'inactive') {
         conditions.push(eq(products.isActive, false));
       }
 
@@ -182,16 +182,13 @@ export const adminRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const [product] = await ctx.db
-        .insert(products)
-        .values(input)
-        .returning({ id: products.id });
+      const [product] = await ctx.db.insert(products).values(input).returning({ id: products.id });
 
       // Write audit log
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "product.create",
-        entityType: "product",
+        action: 'product.create',
+        entityType: 'product',
         entityId: product!.id,
         diff: input,
       });
@@ -225,8 +222,8 @@ export const adminRouter = router({
 
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "product.update",
-        entityType: "product",
+        action: 'product.update',
+        entityType: 'product',
         entityId: id,
         diff: updates,
       });
@@ -240,12 +237,14 @@ export const adminRouter = router({
   ordersList: adminProcedure
     .input(
       z.object({
-        status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled", "refunded", "all"]).default("all"),
+        status: z
+          .enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded', 'all'])
+          .default('all'),
         limit: z.number().min(1).max(100).default(50),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const whereClause = input.status === "all" ? undefined : eq(orders.status, input.status);
+      const whereClause = input.status === 'all' ? undefined : eq(orders.status, input.status);
 
       const items = whereClause
         ? await ctx.db
@@ -286,7 +285,7 @@ export const adminRouter = router({
     .input(
       z.object({
         orderId: z.string().uuid(),
-        status: z.enum(["confirmed", "shipped", "delivered", "cancelled", "refunded"]),
+        status: z.enum(['confirmed', 'shipped', 'delivered', 'cancelled', 'refunded']),
         trackingNumber: z.string().optional(),
       }),
     )
@@ -296,25 +295,22 @@ export const adminRouter = router({
         updatedAt: new Date(),
       };
 
-      if (input.status === "shipped") {
+      if (input.status === 'shipped') {
         updates.shippedAt = new Date();
         if (input.trackingNumber) {
           updates.trackingNumber = input.trackingNumber;
         }
       }
-      if (input.status === "delivered") {
+      if (input.status === 'delivered') {
         updates.deliveredAt = new Date();
       }
 
-      await ctx.db
-        .update(orders)
-        .set(updates)
-        .where(eq(orders.id, input.orderId));
+      await ctx.db.update(orders).set(updates).where(eq(orders.id, input.orderId));
 
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "order.update_status",
-        entityType: "order",
+        action: 'order.update_status',
+        entityType: 'order',
         entityId: input.orderId,
         diff: { status: input.status, trackingNumber: input.trackingNumber },
       });
@@ -326,7 +322,12 @@ export const adminRouter = router({
    * List customers (admin view).
    */
   customersList: adminProcedure
-    .input(z.object({ search: z.string().optional(), limit: z.number().min(1).max(100).default(50) }))
+    .input(
+      z.object({
+        search: z.string().optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const conditions = [];
       if (input.search) {
@@ -335,6 +336,9 @@ export const adminRouter = router({
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
+      // Shape at the router boundary — `users.email` is nullable in the Better
+      // Auth schema, so the left join yields `string | null`. Coerce to a
+      // non-null string for the admin customer list contract.
       const items = whereClause
         ? await ctx.db
             .select({
@@ -366,7 +370,10 @@ export const adminRouter = router({
             .orderBy(desc(customers.createdAt))
             .limit(input.limit);
 
-      return { items, total: items.length };
+      return {
+        items: items.map((row) => ({ ...row, email: row.email ?? '' })),
+        total: items.length,
+      };
     }),
 
   /**
@@ -429,8 +436,8 @@ export const adminRouter = router({
 
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "inventory.restock",
-        entityType: "variant",
+        action: 'inventory.restock',
+        entityType: 'variant',
         entityId: input.variantId,
         diff: { stockQuantity: input.stockQuantity },
       });
@@ -442,10 +449,7 @@ export const adminRouter = router({
    * List all discount codes (admin only).
    */
   discountsList: adminProcedure.query(async ({ ctx }) => {
-    const allDiscounts = await ctx.db
-      .select()
-      .from(discounts)
-      .orderBy(desc(discounts.createdAt));
+    const allDiscounts = await ctx.db.select().from(discounts).orderBy(desc(discounts.createdAt));
 
     return allDiscounts;
   }),
@@ -456,8 +460,12 @@ export const adminRouter = router({
   discountsCreate: adminWriteProcedure
     .input(
       z.object({
-        code: z.string().min(1).max(50).transform((s) => s.toUpperCase().trim()),
-        type: z.enum(["percentage", "fixed", "free_shipping"]),
+        code: z
+          .string()
+          .min(1)
+          .max(50)
+          .transform((s) => s.toUpperCase().trim()),
+        type: z.enum(['percentage', 'fixed', 'free_shipping']),
         value: z.number().int().min(0),
         minOrderCents: z.number().int().min(0).default(0),
         maxUses: z.number().int().positive().nullable().optional(),
@@ -482,8 +490,8 @@ export const adminRouter = router({
 
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "discount.create",
-        entityType: "discount",
+        action: 'discount.create',
+        entityType: 'discount',
         entityId: discount!.id,
         diff: input,
       });
@@ -497,15 +505,12 @@ export const adminRouter = router({
   discountsDeactivate: adminWriteProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
-      await ctx.db
-        .update(discounts)
-        .set({ isActive: false })
-        .where(eq(discounts.id, input.id));
+      await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
 
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
-        action: "discount.deactivate",
-        entityType: "discount",
+        action: 'discount.deactivate',
+        entityType: 'discount',
         entityId: input.id,
       });
 
@@ -533,7 +538,7 @@ export const adminRouter = router({
         ORDER BY DATE(${orders.placedAt})
       `);
 
-      return (result as Array<Record<string, unknown>>).map((row) => ({
+      return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
         date: row.date as string,
         orderCount: Number(row.order_count),
         revenueCents: Number(row.revenue_cents),
@@ -561,7 +566,7 @@ export const adminRouter = router({
         LIMIT ${input.limit}
       `);
 
-      return (result as Array<Record<string, unknown>>).map((row) => ({
+      return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
         productName: row.product_name as string,
         productSlug: row.product_slug as string,
         unitsSold: Number(row.units_sold),
@@ -579,9 +584,7 @@ export const adminRouter = router({
       .from(orders)
       .where(sql`${orders.status} NOT IN ('cancelled', 'refunded')`);
 
-    const totalCarts = await ctx.db
-      .select({ count: count() })
-      .from(cartItems);
+    const totalCarts = await ctx.db.select({ count: count() }).from(cartItems);
 
     return {
       productViews: 0, // Phase 3.1: PostHog integration
@@ -606,7 +609,7 @@ export const adminRouter = router({
       LIMIT 12
     `);
 
-    return (result as Array<Record<string, unknown>>).map((row) => ({
+    return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
       cohortMonth: row.cohort_month as string,
       newCustomers: Number(row.new_customers),
     }));

@@ -34,13 +34,7 @@
     "test": {
       "dependsOn": [],
       "outputs": ["coverage/**"],
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "test/**/*.ts",
-        "test/**/*.tsx",
-        "vitest.config.*"
-      ]
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx", "vitest.config.*"]
     },
     "test:e2e": {
       "dependsOn": ["build"],

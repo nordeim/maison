@@ -10,18 +10,18 @@
  * NOT in proxy.ts (proxy only checks "is authenticated").
  */
 
-import type { UserRole } from "@maison/db";
+import type { UserRole } from '@maison/db';
 
-export type { UserRole } from "@maison/db";
+export type { UserRole } from '@maison/db';
 
 /** All valid roles (mirrors userRoleEnum.enumValues). */
-export const ROLES = ["customer", "staff", "admin"] as const satisfies readonly UserRole[];
+export const ROLES = ['customer', 'staff', 'admin'] as const satisfies readonly UserRole[];
 
 /** Roles that grant admin access (read or write). */
-export const ADMIN_ROLES = ["staff", "admin"] as const satisfies readonly UserRole[];
+export const ADMIN_ROLES = ['staff', 'admin'] as const satisfies readonly UserRole[];
 
 /** Roles that grant admin WRITE access (mutations). */
-export const ADMIN_WRITE_ROLES = ["admin"] as const satisfies readonly UserRole[];
+export const ADMIN_WRITE_ROLES = ['admin'] as const satisfies readonly UserRole[];
 
 /**
  * Check if a role grants admin READ access.
@@ -43,5 +43,5 @@ export function canWriteAdmin(role: UserRole | undefined | null): boolean {
  * Check if a role is a valid UserRole.
  */
 export function isValidRole(role: unknown): role is UserRole {
-  return typeof role === "string" && (ROLES as readonly string[]).includes(role);
+  return typeof role === 'string' && (ROLES as readonly string[]).includes(role);
 }

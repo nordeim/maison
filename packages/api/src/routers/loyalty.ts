@@ -8,11 +8,11 @@
  * Tiers: member (0), silver (500), gold (2000), platinum (5000).
  */
 
-import { z } from "zod";
-import { eq, desc } from "drizzle-orm";
-import { loyaltyAccounts, loyaltyTransactions, customers, users } from "@maison/db";
-import { router, protectedProcedure, adminProcedure } from "../trpc";
-import { sql } from "drizzle-orm";
+import { z } from 'zod';
+import { eq, desc } from 'drizzle-orm';
+import { loyaltyAccounts, loyaltyTransactions, customers, users } from '@maison/db';
+import { router, protectedProcedure, adminProcedure } from '../trpc';
+import { sql } from 'drizzle-orm';
 
 const TIER_THRESHOLDS = {
   member: 0,
@@ -22,17 +22,17 @@ const TIER_THRESHOLDS = {
 } as const;
 
 const TIER_PERKS = {
-  member: "Earn 1 point per $1 spent",
-  silver: "1.25× points + free shipping over $100",
-  gold: "1.5× points + free shipping over $75 + early access",
-  platinum: "2× points + free shipping + exclusive releases + personal shopper",
+  member: 'Earn 1 point per $1 spent',
+  silver: '1.25× points + free shipping over $100',
+  gold: '1.5× points + free shipping over $75 + early access',
+  platinum: '2× points + free shipping + exclusive releases + personal shopper',
 } as const;
 
 function calculateTier(lifetimePoints: number): keyof typeof TIER_THRESHOLDS {
-  if (lifetimePoints >= TIER_THRESHOLDS.platinum) return "platinum";
-  if (lifetimePoints >= TIER_THRESHOLDS.gold) return "gold";
-  if (lifetimePoints >= TIER_THRESHOLDS.silver) return "silver";
-  return "member";
+  if (lifetimePoints >= TIER_THRESHOLDS.platinum) return 'platinum';
+  if (lifetimePoints >= TIER_THRESHOLDS.gold) return 'gold';
+  if (lifetimePoints >= TIER_THRESHOLDS.silver) return 'silver';
+  return 'member';
 }
 
 export const loyaltyRouter = router({
@@ -146,9 +146,7 @@ export const loyaltyRouter = router({
 function formatLoyaltyAccount(account: typeof loyaltyAccounts.$inferSelect) {
   const currentTier = account.tier as keyof typeof TIER_THRESHOLDS;
   const nextTier = getNextTier(currentTier);
-  const pointsToNextTier = nextTier
-    ? TIER_THRESHOLDS[nextTier] - account.lifetimePoints
-    : 0;
+  const pointsToNextTier = nextTier ? TIER_THRESHOLDS[nextTier] - account.lifetimePoints : 0;
 
   return {
     pointsBalance: account.pointsBalance,
@@ -170,7 +168,7 @@ function formatLoyaltyAccount(account: typeof loyaltyAccounts.$inferSelect) {
 }
 
 function getNextTier(current: keyof typeof TIER_THRESHOLDS): keyof typeof TIER_THRESHOLDS | null {
-  const tiers: (keyof typeof TIER_THRESHOLDS)[] = ["member", "silver", "gold", "platinum"];
+  const tiers: (keyof typeof TIER_THRESHOLDS)[] = ['member', 'silver', 'gold', 'platinum'];
   const idx = tiers.indexOf(current);
   return idx < tiers.length - 1 ? tiers[idx + 1]! : null;
 }

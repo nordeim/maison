@@ -28,15 +28,14 @@ if ! docker compose ps postgres 2>/dev/null | grep -q "running"; then
   sleep 5
 fi
 
-# 3. Generate migrations (if schema changed)
-echo "→ Generating Drizzle migrations…"
-pnpm db:generate
-
-# 4. Apply migrations
+# 3. Apply migrations
+# (Note: pnpm db:generate is NOT included here — it requires schema
+# snapshots to produce incremental delta. Run db:generate manually when
+# adding migration changes and commit the result.)
 echo "→ Applying migrations…"
 pnpm db:migrate
 
-# 5. Seed initial data (8 collections, 13 products)
+# 3. Seed initial data (8 collections, 13 products)
 echo "→ Seeding initial catalog…"
 pnpm db:seed
 

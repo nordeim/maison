@@ -1,0 +1,9 @@
+# Exclude the following from Prettier formatting/checking.
+# Patterns use the no-slash gitignore form, which Prettier's matcher
+# applies to both direct-path globs and directory traversal.
+docs
+backup
+Project_Brief.md
+previous_session_summary.md
+Project_Brief_previous.md
+nextjs-typescript_SKILL.md

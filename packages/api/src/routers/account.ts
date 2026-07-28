@@ -5,9 +5,9 @@
  * Real implementation with DB queries (not stubs).
  */
 
-import { z } from "zod";
-import { eq, desc, and } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { eq, desc, and } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
 import {
   customers,
   orders,
@@ -16,8 +16,9 @@ import {
   products,
   productImages,
   addresses,
-} from "@maison/db";
-import { router, protectedProcedure } from "../trpc";
+  type DrizzleDB,
+} from '@maison/db';
+import { router, protectedProcedure } from '../trpc';
 
 export const accountRouter = router({
   /**
@@ -104,15 +105,18 @@ export const accountRouter = router({
       .orderBy(desc(orders.placedAt));
 
     // Group by order (the join produces multiple rows per order)
-    const orderMap = new Map<string, {
-      id: string;
-      orderNumber: string;
-      status: string;
-      totalCents: number;
-      currency: string;
-      placedAt: Date | null;
-      itemCount: number;
-    }>();
+    const orderMap = new Map<
+      string,
+      {
+        id: string;
+        orderNumber: string;
+        status: string;
+        totalCents: number;
+        currency: string;
+        placedAt: Date | null;
+        itemCount: number;
+      }
+    >();
 
     for (const row of customerOrders) {
       if (!row.id) continue;
@@ -157,10 +161,7 @@ export const accountRouter = router({
 
       if (!order) return null;
 
-      const items = await ctx.db
-        .select()
-        .from(lineItems)
-        .where(eq(lineItems.orderId, order.id));
+      const items = await ctx.db.select().from(lineItems).where(eq(lineItems.orderId, order.id));
 
       return { ...order, items };
     }),
@@ -283,7 +284,11 @@ export const accountRouter = router({
           .insert(customers)
           .values({ userId: ctx.session.user.id })
           .returning({ id: customers.id });
-        if (!newCustomer) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create customer record" });
+        if (!newCustomer)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create customer record',
+          });
 
         // If setting as default, unset other defaults first
         if (input.isDefaultShipping || input.isDefaultBilling) {
@@ -397,7 +402,10 @@ export const accountRouter = router({
       if (customer) {
         await ctx.db
           .update(customers)
-          .set({ newsletterSubscribed: input.subscribed, updatedAt: new Date() })
+          .set({
+            newsletterSubscribed: input.subscribed,
+            updatedAt: new Date(),
+          })
           .where(eq(customers.id, customer.id));
       } else {
         await ctx.db.insert(customers).values({
@@ -414,7 +422,7 @@ export const accountRouter = router({
  * Helper: toggle wishlist item for a customer.
  */
 async function toggleWishlistInternal(
-  db: Parameters<Parameters<typeof router>[0]["query"]>[0]["ctx"]["db"],
+  db: DrizzleDB,
   customerId: string,
   productSlug: string,
 ): Promise<{ isWishlisted: boolean }> {
@@ -425,7 +433,7 @@ async function toggleWishlistInternal(
     .where(eq(products.slug, productSlug))
     .limit(1);
 
-  if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+  if (!product) throw new TRPCError({ code: 'NOT_FOUND', message: 'Product not found' });
 
   // Check if already in wishlist
   const [existing] = await db
@@ -435,9 +443,7 @@ async function toggleWishlistInternal(
     .limit(1);
 
   if (existing) {
-    await db
-      .delete(wishlistItems)
-      .where(eq(wishlistItems.id, existing.id));
+    await db.delete(wishlistItems).where(eq(wishlistItems.id, existing.id));
     return { isWishlisted: false };
   }
 

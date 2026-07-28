@@ -5,20 +5,20 @@
  * Exported type AppRouter is used by the client for type-safe calls.
  */
 
-import { router } from "./trpc";
-import { productsRouter } from "./routers/products";
-import { collectionsRouter } from "./routers/collections";
-import { cartRouter } from "./routers/cart";
-import { accountRouter } from "./routers/account";
-import { checkoutRouter } from "./routers/checkout";
-import { newsletterRouter } from "./routers/newsletter";
-import { contactRouter } from "./routers/contact";
-import { adminRouter } from "./routers/admin";
-import { discountsRouter } from "./routers/discounts";
-import { reviewsRouter } from "./routers/reviews";
-import { giftCardsRouter } from "./routers/gift-cards";
-import { tradeRouter } from "./routers/trade";
-import { loyaltyRouter } from "./routers/loyalty";
+import { router } from './trpc';
+import { productsRouter } from './routers/products';
+import { collectionsRouter } from './routers/collections';
+import { cartRouter } from './routers/cart';
+import { accountRouter } from './routers/account';
+import { checkoutRouter } from './routers/checkout';
+import { newsletterRouter } from './routers/newsletter';
+import { contactRouter } from './routers/contact';
+import { adminRouter } from './routers/admin';
+import { discountsRouter } from './routers/discounts';
+import { reviewsRouter } from './routers/reviews';
+import { giftCardsRouter } from './routers/gift-cards';
+import { tradeRouter } from './routers/trade';
+import { loyaltyRouter } from './routers/loyalty';
 
 export const appRouter = router({
   products: productsRouter,

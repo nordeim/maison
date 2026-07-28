@@ -12,8 +12,8 @@
  * on missing env vars (they don't execute real queries).
  */
 
-import { createEnv } from "@t3-oss/env-core";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
 
 /**
  * Build-context fallback: next build and vitest don't have real env vars.
@@ -21,54 +21,51 @@ import { z } from "zod";
  */
 function isBuildContext(): boolean {
   return (
-    process.env["NEXT_PHASE"] === "phase-production-build" ||
-    process.env["NODE_ENV"] === "test"
+    process.env['NEXT_PHASE'] === 'phase-production-build' || process.env['NODE_ENV'] === 'test'
   );
 }
 
 const PLACEHOLDERS = {
-  DATABASE_URL: "postgresql://placeholder@localhost:5432/placeholder",
-  DATABASE_URL_UNPOOLED: "postgresql://placeholder@localhost:5432/placeholder",
-  BETTER_AUTH_SECRET: "placeholder-secret-at-least-32-characters-long",
-  BETTER_AUTH_URL: "http://localhost:3000",
-  GOOGLE_CLIENT_ID: "placeholder.apps.googleusercontent.com",
-  GOOGLE_CLIENT_SECRET: "placeholder",
-  STRIPE_SECRET_KEY: "sk_test_placeholder",
-  STRIPE_WEBHOOK_SECRET: "whsec_placeholder",
-  RESEND_API_KEY: "re_placeholder",
-  EMAIL_FROM: "hello@maison-living.com",
-  TRIGGER_SECRET_KEY: "tr_dev_placeholder",
-  UPSTASH_REDIS_REST_URL: "https://placeholder.upstash.io",
-  UPSTASH_REDIS_REST_TOKEN: "placeholder",
-  SANITY_API_TOKEN: "placeholder",
-  SANITY_WEBHOOK_SECRET: "placeholder",
-  CLOUDFLARE_ACCOUNT_ID: "placeholder",
-  CLOUDFLARE_IMAGES_TOKEN: "placeholder",
-  CLOUDFLARE_R2_ACCESS_KEY_ID: "placeholder",
-  CLOUDFLARE_R2_SECRET_ACCESS_KEY: "placeholder",
-  CLOUDFLARE_R2_BUCKET: "maison-media",
-  CLOUDFLARE_R2_ENDPOINT: "https://placeholder.r2.cloudflarestorage.com",
+  DATABASE_URL: 'postgresql://placeholder@localhost:5432/placeholder',
+  DATABASE_URL_UNPOOLED: 'postgresql://placeholder@localhost:5432/placeholder',
+  BETTER_AUTH_SECRET: 'placeholder-secret-at-least-32-characters-long',
+  BETTER_AUTH_URL: 'http://localhost:3000',
+  GOOGLE_CLIENT_ID: 'placeholder.apps.googleusercontent.com',
+  GOOGLE_CLIENT_SECRET: 'placeholder',
+  STRIPE_SECRET_KEY: 'sk_test_placeholder',
+  STRIPE_WEBHOOK_SECRET: 'whsec_placeholder',
+  RESEND_API_KEY: 're_placeholder',
+  EMAIL_FROM: 'hello@maison-living.com',
+  TRIGGER_SECRET_KEY: 'tr_dev_placeholder',
+  UPSTASH_REDIS_REST_URL: 'https://placeholder.upstash.io',
+  UPSTASH_REDIS_REST_TOKEN: 'placeholder',
+  SANITY_API_TOKEN: 'placeholder',
+  SANITY_WEBHOOK_SECRET: 'placeholder',
+  CLOUDFLARE_ACCOUNT_ID: 'placeholder',
+  CLOUDFLARE_IMAGES_TOKEN: 'placeholder',
+  CLOUDFLARE_R2_ACCESS_KEY_ID: 'placeholder',
+  CLOUDFLARE_R2_SECRET_ACCESS_KEY: 'placeholder',
+  CLOUDFLARE_R2_BUCKET: 'maison-media',
+  CLOUDFLARE_R2_ENDPOINT: 'https://placeholder.r2.cloudflarestorage.com',
 } as const;
 
 const serverSchema = {
   // Database
-  DATABASE_URL: z
-    .string()
-    .refine((s) => s.startsWith("postgres"), "Must be a postgresql:// URL"),
+  DATABASE_URL: z.string().refine((s) => s.startsWith('postgres'), 'Must be a postgresql:// URL'),
   DATABASE_URL_UNPOOLED: z
     .string()
-    .refine((s) => s.startsWith("postgres"), "Must be a postgresql:// URL"),
+    .refine((s) => s.startsWith('postgres'), 'Must be a postgresql:// URL'),
 
   // Auth (Better Auth)
   BETTER_AUTH_SECRET: z
     .string()
-    .min(32, "BETTER_AUTH_SECRET must be at least 32 characters")
+    .min(32, 'BETTER_AUTH_SECRET must be at least 32 characters')
     .superRefine((val, ctx) => {
-      const weak = ["dev-secret", "test-secret", "ci-dummy", "change-me", "placeholder-secret"];
+      const weak = ['dev-secret', 'test-secret', 'ci-dummy', 'change-me', 'placeholder-secret'];
       if (weak.some((w) => val.toLowerCase().includes(w))) {
         ctx.addIssue({
-          code: "custom",
-          message: "Weak secret rejected — use: openssl rand -base64 32",
+          code: 'custom',
+          message: 'Weak secret rejected — use: openssl rand -base64 32',
         });
       }
     }),
@@ -77,19 +74,19 @@ const serverSchema = {
   GOOGLE_CLIENT_SECRET: z.string(),
 
   // Stripe
-  STRIPE_SECRET_KEY: z.string().startsWith("sk_"),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_"),
+  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
 
   // Sanity
   SANITY_API_TOKEN: z.string(),
   SANITY_WEBHOOK_SECRET: z.string(),
 
   // Email
-  RESEND_API_KEY: z.string().startsWith("re_"),
+  RESEND_API_KEY: z.string().startsWith('re_'),
   EMAIL_FROM: z.string().email(),
 
   // Background jobs
-  TRIGGER_SECRET_KEY: z.string().startsWith("tr_"),
+  TRIGGER_SECRET_KEY: z.string().startsWith('tr_'),
 
   // Redis
   UPSTASH_REDIS_REST_URL: z.string().url(),
@@ -110,14 +107,12 @@ const serverSchema = {
   CLOUDFLARE_R2_ENDPOINT: z.string().url(),
 
   // App
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 };
 
 const clientSchema = {
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith("pk_"),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
   NEXT_PUBLIC_SANITY_PROJECT_ID: z.string(),
   NEXT_PUBLIC_SANITY_DATASET: z.string(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string(),
@@ -134,54 +129,54 @@ function loadEnv() {
   if (isBuildContext()) {
     const serverEntries = Object.entries(serverSchema).map(([key]) => [
       key,
-      process.env[key] ?? PLACEHOLDERS[key as keyof typeof PLACEHOLDERS] ?? "placeholder",
+      process.env[key] ?? PLACEHOLDERS[key as keyof typeof PLACEHOLDERS] ?? 'placeholder',
     ]);
     const clientEntries = Object.entries(clientSchema).map(([key]) => [
       key,
-      process.env[key] ?? "placeholder",
+      process.env[key] ?? 'placeholder',
     ]);
     return Object.fromEntries([...serverEntries, ...clientEntries]) as Record<string, string>;
   }
 
   return createEnv({
-    clientPrefix: "NEXT_PUBLIC_",
+    clientPrefix: 'NEXT_PUBLIC_',
     server: serverSchema,
     client: clientSchema,
     runtimeEnv: {
-      DATABASE_URL: process.env["DATABASE_URL"],
-      DATABASE_URL_UNPOOLED: process.env["DATABASE_URL_UNPOOLED"],
-      BETTER_AUTH_SECRET: process.env["BETTER_AUTH_SECRET"],
-      BETTER_AUTH_URL: process.env["BETTER_AUTH_URL"],
-      GOOGLE_CLIENT_ID: process.env["GOOGLE_CLIENT_ID"],
-      GOOGLE_CLIENT_SECRET: process.env["GOOGLE_CLIENT_SECRET"],
-      STRIPE_SECRET_KEY: process.env["STRIPE_SECRET_KEY"],
-      STRIPE_WEBHOOK_SECRET: process.env["STRIPE_WEBHOOK_SECRET"],
-      SANITY_API_TOKEN: process.env["SANITY_API_TOKEN"],
-      SANITY_WEBHOOK_SECRET: process.env["SANITY_WEBHOOK_SECRET"],
-      RESEND_API_KEY: process.env["RESEND_API_KEY"],
-      EMAIL_FROM: process.env["EMAIL_FROM"],
-      TRIGGER_SECRET_KEY: process.env["TRIGGER_SECRET_KEY"],
-      UPSTASH_REDIS_REST_URL: process.env["UPSTASH_REDIS_REST_URL"],
-      UPSTASH_REDIS_REST_TOKEN: process.env["UPSTASH_REDIS_REST_TOKEN"],
-      SENTRY_DSN: process.env["SENTRY_DSN"],
-      SENTRY_AUTH_TOKEN: process.env["SENTRY_AUTH_TOKEN"],
-      AXIOM_TOKEN: process.env["AXIOM_TOKEN"],
-      AXIOM_DATASET: process.env["AXIOM_DATASET"],
-      CLOUDFLARE_ACCOUNT_ID: process.env["CLOUDFLARE_ACCOUNT_ID"],
-      CLOUDFLARE_IMAGES_TOKEN: process.env["CLOUDFLARE_IMAGES_TOKEN"],
-      CLOUDFLARE_R2_ACCESS_KEY_ID: process.env["CLOUDFLARE_R2_ACCESS_KEY_ID"],
-      CLOUDFLARE_R2_SECRET_ACCESS_KEY: process.env["CLOUDFLARE_R2_SECRET_ACCESS_KEY"],
-      CLOUDFLARE_R2_BUCKET: process.env["CLOUDFLARE_R2_BUCKET"],
-      CLOUDFLARE_R2_ENDPOINT: process.env["CLOUDFLARE_R2_ENDPOINT"],
-      NODE_ENV: process.env["NODE_ENV"],
-      NEXT_PUBLIC_APP_URL: process.env["NEXT_PUBLIC_APP_URL"],
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env["NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"],
-      NEXT_PUBLIC_SANITY_PROJECT_ID: process.env["NEXT_PUBLIC_SANITY_PROJECT_ID"],
-      NEXT_PUBLIC_SANITY_DATASET: process.env["NEXT_PUBLIC_SANITY_DATASET"],
-      NEXT_PUBLIC_POSTHOG_KEY: process.env["NEXT_PUBLIC_POSTHOG_KEY"],
-      NEXT_PUBLIC_POSTHOG_HOST: process.env["NEXT_PUBLIC_POSTHOG_HOST"],
-      NEXT_PUBLIC_SENTRY_DSN: process.env["NEXT_PUBLIC_SENTRY_DSN"],
-      NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL: process.env["NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL"],
+      DATABASE_URL: process.env['DATABASE_URL'],
+      DATABASE_URL_UNPOOLED: process.env['DATABASE_URL_UNPOOLED'],
+      BETTER_AUTH_SECRET: process.env['BETTER_AUTH_SECRET'],
+      BETTER_AUTH_URL: process.env['BETTER_AUTH_URL'],
+      GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
+      GOOGLE_CLIENT_SECRET: process.env['GOOGLE_CLIENT_SECRET'],
+      STRIPE_SECRET_KEY: process.env['STRIPE_SECRET_KEY'],
+      STRIPE_WEBHOOK_SECRET: process.env['STRIPE_WEBHOOK_SECRET'],
+      SANITY_API_TOKEN: process.env['SANITY_API_TOKEN'],
+      SANITY_WEBHOOK_SECRET: process.env['SANITY_WEBHOOK_SECRET'],
+      RESEND_API_KEY: process.env['RESEND_API_KEY'],
+      EMAIL_FROM: process.env['EMAIL_FROM'],
+      TRIGGER_SECRET_KEY: process.env['TRIGGER_SECRET_KEY'],
+      UPSTASH_REDIS_REST_URL: process.env['UPSTASH_REDIS_REST_URL'],
+      UPSTASH_REDIS_REST_TOKEN: process.env['UPSTASH_REDIS_REST_TOKEN'],
+      SENTRY_DSN: process.env['SENTRY_DSN'],
+      SENTRY_AUTH_TOKEN: process.env['SENTRY_AUTH_TOKEN'],
+      AXIOM_TOKEN: process.env['AXIOM_TOKEN'],
+      AXIOM_DATASET: process.env['AXIOM_DATASET'],
+      CLOUDFLARE_ACCOUNT_ID: process.env['CLOUDFLARE_ACCOUNT_ID'],
+      CLOUDFLARE_IMAGES_TOKEN: process.env['CLOUDFLARE_IMAGES_TOKEN'],
+      CLOUDFLARE_R2_ACCESS_KEY_ID: process.env['CLOUDFLARE_R2_ACCESS_KEY_ID'],
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: process.env['CLOUDFLARE_R2_SECRET_ACCESS_KEY'],
+      CLOUDFLARE_R2_BUCKET: process.env['CLOUDFLARE_R2_BUCKET'],
+      CLOUDFLARE_R2_ENDPOINT: process.env['CLOUDFLARE_R2_ENDPOINT'],
+      NODE_ENV: process.env['NODE_ENV'],
+      NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env['NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'],
+      NEXT_PUBLIC_SANITY_PROJECT_ID: process.env['NEXT_PUBLIC_SANITY_PROJECT_ID'],
+      NEXT_PUBLIC_SANITY_DATASET: process.env['NEXT_PUBLIC_SANITY_DATASET'],
+      NEXT_PUBLIC_POSTHOG_KEY: process.env['NEXT_PUBLIC_POSTHOG_KEY'],
+      NEXT_PUBLIC_POSTHOG_HOST: process.env['NEXT_PUBLIC_POSTHOG_HOST'],
+      NEXT_PUBLIC_SENTRY_DSN: process.env['NEXT_PUBLIC_SENTRY_DSN'],
+      NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL: process.env['NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL'],
     },
   });
 }

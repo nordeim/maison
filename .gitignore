@@ -6,6 +6,7 @@ __pycache__/
 dist/
 build/
 target/
+backup/
 
 # Dependencies
 .venv/

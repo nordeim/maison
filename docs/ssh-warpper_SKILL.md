@@ -80,11 +80,13 @@ chmod 600 ~/.ssh/id_github
 ### 4. The wrapper script
 
 The wrapper script is included in this skill at:
+
 ```
 skills/how-to-git-push-using-ssh-wrapper/scripts/ssh_git_wrapper_v3.py
 ```
 
 A canonical copy also lives at:
+
 ```
 docs/ssh_git_wrapper_v3.py
 ```
@@ -136,6 +138,7 @@ GIT_SSH_COMMAND="/path/to/ssh_git_wrapper_v3.py -i ~/.ssh/id_github -o StrictHos
 ```
 
 **Expected output on success:**
+
 ```
 To github.com:user/repo.git
    abc1234..def5678  main -> main
@@ -159,6 +162,7 @@ ssh_git_wrapper_v3.py -i ~/.ssh/id_github -o StrictHostKeyChecking=accept-new gi
 ```
 
 The wrapper:
+
 1. Parses SSH flags (`-i`, `-o`, `-p`, `-l`, `-v`, etc.)
 2. Extracts the host (`git@github.com`) and the remote command (`git-receive-pack 'user/repo.git'`)
 3. Connects to GitHub via Paramiko using the specified key
@@ -167,12 +171,12 @@ The wrapper:
 
 ### Key flags
 
-| Flag | Purpose |
-|---|---|
-| `-i ~/.ssh/id_github` | Path to the SSH private key (supports `~` expansion) |
+| Flag                                  | Purpose                                                          |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `-i ~/.ssh/id_github`                 | Path to the SSH private key (supports `~` expansion)             |
 | `-o StrictHostKeyChecking=accept-new` | Auto-accept new host keys, reject changed keys (MITM protection) |
-| `-o StrictHostKeyChecking=no` | Accept any host key (less secure, use only for testing) |
-| `-v` / `-vv` / `-vvv` | Increase verbosity (WARNING / INFO / DEBUG) |
+| `-o StrictHostKeyChecking=no`         | Accept any host key (less secure, use only for testing)          |
+| `-v` / `-vv` / `-vvv`                 | Increase verbosity (WARNING / INFO / DEBUG)                      |
 
 ---
 
@@ -236,6 +240,7 @@ if i + 1 < len(args):
 **Fixes:**
 
 1. **Verify the key file exists and has correct permissions:**
+
    ```bash
    ls -la ~/.ssh/id_github
    # Must show: -rw------- (mode 600)
@@ -243,6 +248,7 @@ if i + 1 < len(args):
    ```
 
 2. **Verify the key is in OpenSSH format:**
+
    ```bash
    head -1 ~/.ssh/id_github
    # Must show: -----BEGIN OPENSSH PRIVATE KEY-----
@@ -251,6 +257,7 @@ if i + 1 < len(args):
    ```
 
 3. **Verify the public key is added to GitHub:** The corresponding public key must be registered at https://github.com/settings/keys. Check with:
+
    ```bash
    ssh-keygen -y -f ~/.ssh/id_github  # Extracts public key from private
    # Compare with what's registered on GitHub
@@ -366,11 +373,13 @@ git status -sb
 In restricted environments, `python3` on `PATH` is often a virtualenv, while `pip` installs to system Python. The wrapper's `#!/usr/bin/env python3` shebang uses whichever `python3` is on `PATH` — so paramiko MUST be installed into that specific Python.
 
 **Verification command:**
+
 ```bash
 python3 -c "import paramiko; print('OK', paramiko.__version__)"
 ```
 
 If this fails, find the venv's pip:
+
 ```bash
 which python3                          # Find the python3 path
 ls $(dirname $(which python3))/pip*    # Find the venv's pip
@@ -382,6 +391,7 @@ $(which python3) -m pip install paramiko  # Install into the right Python
 The original wrapper script (and the `v3_readme.md` documentation) does NOT account for Git passing the remote command as a single string. The `shlex.join()` call on a single-element list produces a re-quoted string that GitHub's git-shell rejects with "Invalid command".
 
 **Always check for this bug first** when you see:
+
 ```
 Invalid command: 'git-receive-pack '"'"'user/repo.git'"'"''
 ```
@@ -391,6 +401,7 @@ The fix is to normalize via `shlex.split()` → `shlex.join()` for single-argume
 ### Lesson 3: SSH key permissions are non-negotiable
 
 Paramiko (like OpenSSH) refuses to use private keys that are readable by group or other. Always:
+
 ```bash
 chmod 600 ~/.ssh/id_github
 ```
@@ -408,6 +419,7 @@ For first-time pushes to GitHub, `accept-new` is the correct choice. It writes t
 ### Lesson 5: Change remote URL from HTTPS to SSH
 
 Many repos are cloned via HTTPS. The wrapper only works with SSH URLs. Always check and convert:
+
 ```bash
 git remote -v
 # If HTTPS: https://github.com/user/repo.git
@@ -422,6 +434,7 @@ Per the wrapper's known limitations, always use `-o StrictHostKeyChecking=accept
 ### Lesson 7: Commit the wrapper script fix
 
 If you had to apply the `shlex.join()` fix to the wrapper, commit and push it so future agents don't hit the same bug. In the Stillwater project, this was commit `39298e4`:
+
 ```
 fix(ssh-wrapper): normalise Git remote command quoting for GitHub
 ```
@@ -448,10 +461,10 @@ GIT_SSH_COMMAND="/path/to/ssh_git_wrapper_v3.py -i ~/.ssh/id_github -o StrictHos
 
 ## Files in This Skill
 
-| File | Purpose |
-|---|---|
-| `SKILL.md` | This document — instructions for performing `git push` via the SSH wrapper |
-| `scripts/ssh_git_wrapper_v3.py` | The wrapper script (executable, with the `shlex.join()` fix applied) |
+| File                            | Purpose                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `SKILL.md`                      | This document — instructions for performing `git push` via the SSH wrapper |
+| `scripts/ssh_git_wrapper_v3.py` | The wrapper script (executable, with the `shlex.join()` fix applied)       |
 
 ## Canonical Source
 

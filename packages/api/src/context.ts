@@ -6,9 +6,9 @@
  * (per nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth skill §15.20).
  */
 
-import { db } from "@maison/db";
-import { auth } from "@maison/auth";
-import type { TRPCContext } from "./trpc";
+import { db } from '@maison/db';
+import { auth } from '@maison/auth';
+import type { TRPCContext } from './trpc';
 
 const SESSION_LOOKUP_TIMEOUT_MS = 5_000;
 
@@ -22,7 +22,7 @@ async function getSessionWithTimeout(headers: Headers) {
 
 export async function createContext({ req }: { req: Request }): Promise<TRPCContext> {
   const session = await getSessionWithTimeout(req.headers);
-  return { db, session: session as TRPCContext["session"], req };
+  return { db, session: session as TRPCContext['session'], req };
 }
 
-export type { TRPCContext } from "./trpc";
+export type { TRPCContext } from './trpc';

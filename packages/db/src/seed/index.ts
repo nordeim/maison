@@ -10,18 +10,15 @@
  * Usage: pnpm db:seed  (from repo root)
  */
 
-import { db } from "../index";
-import { collections, products, productVariants, productImages } from "../schema";
-import { eq } from "drizzle-orm";
-import { seedCollections } from "./fixtures/collections";
-import {
-  seedProducts,
-  productCollectionMap,
-  productImagesMap,
-} from "./fixtures/products";
+import './env'; // Load .env before db client reads DATABASE_URL
+import { db } from '../index';
+import { collections, products, productVariants, productImages } from '../schema';
+import { eq } from 'drizzle-orm';
+import { seedCollections } from './fixtures/collections';
+import { seedProducts, productCollectionMap, productImagesMap } from './fixtures/products';
 
 async function seed() {
-  console.log("── Maison seed ──────────────────────────────────────────");
+  console.log('── Maison seed ──────────────────────────────────────────');
 
   // 1. Collections
   console.log(`→ Upserting ${seedCollections.length} collections…`);
@@ -50,9 +47,7 @@ async function seed() {
   console.log(`→ Upserting ${seedProducts.length} products…`);
   for (const product of seedProducts) {
     const collectionSlug = productCollectionMap[product.slug!];
-    const collectionId = collectionSlug
-      ? (collectionBySlug.get(collectionSlug) ?? null)
-      : null;
+    const collectionId = collectionSlug ? (collectionBySlug.get(collectionSlug) ?? null) : null;
 
     const [existing] = await db
       .select()
@@ -98,7 +93,7 @@ async function seed() {
     }
 
     // 3b. Default variant (single, no options — covers stock for the product)
-    const sku = product.slug!.toUpperCase().replace(/-/g, "-").slice(0, 20);
+    const sku = product.slug!.toUpperCase().replace(/-/g, '-').slice(0, 20);
     const [existingVariant] = await db
       .select()
       .from(productVariants)
@@ -109,7 +104,7 @@ async function seed() {
       await db.insert(productVariants).values({
         productId,
         sku,
-        name: "Default",
+        name: 'Default',
         stockQuantity: 25, // reasonable default for seed
         leadTimeDays: 0,
         isActive: true,
@@ -117,16 +112,18 @@ async function seed() {
     }
   }
 
-  console.log("── ✓ Seed complete ──────────────────────────────────────");
+  console.log('── ✓ Seed complete ──────────────────────────────────────');
   console.log(`  Collections: ${seedCollections.length}`);
   console.log(`  Products:    ${seedProducts.length}`);
   console.log(`  Variants:    ${seedProducts.length} (1 default per product)`);
-  console.log(`  Images:      ${Object.values(productImagesMap).reduce((a, b) => a + b.length, 0)}`);
+  console.log(
+    `  Images:      ${Object.values(productImagesMap).reduce((a, b) => a + b.length, 0)}`,
+  );
 
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error("Seed failed:", err);
+  console.error('Seed failed:', err);
   process.exit(1);
 });

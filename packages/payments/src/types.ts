@@ -2,7 +2,7 @@
  * Maison — Payment types
  */
 
-import type Stripe from "stripe";
+import type Stripe from 'stripe';
 
 export interface CreatePaymentIntentInput {
   amountCents: number;

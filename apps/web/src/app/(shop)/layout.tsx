@@ -10,15 +10,11 @@
  * The CartProvider and CartDrawer are in the root layout (available everywhere).
  */
 
-import { AnnouncementBar } from "@/components/shop/AnnouncementBar";
-import { Header } from "@/components/shop/Header";
-import { Footer } from "@/components/shop/Footer";
+import { AnnouncementBar } from '@/components/shop/AnnouncementBar';
+import { Footer } from '@/components/shop/Footer';
+import { Header } from '@/components/shop/Header';
 
-export default function ShopLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AnnouncementBar />

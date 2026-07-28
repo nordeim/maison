@@ -4,11 +4,11 @@
  * Lists all promo codes with create form (Client Component).
  */
 
-import { api } from "@/lib/trpc/server";
-import { DiscountManager } from "@/components/admin/DiscountManager";
+import { DiscountManager } from '@/components/admin/DiscountManager';
+import { api } from '@/lib/trpc/server';
 
 export default async function AdminDiscountsPage() {
-  let discounts: Array<{
+  let discounts: {
     id: string;
     code: string;
     type: string;
@@ -19,17 +19,27 @@ export default async function AdminDiscountsPage() {
     isActive: boolean;
     startsAt: Date | null;
     endsAt: Date | null;
-  }> = [];
+  }[] = [];
 
   try {
-    discounts = await api().admin.discountsList();
+    const caller = await api();
+    discounts = await caller.admin.discountsList();
   } catch (err) {
-    console.error("[admin discounts] Failed to fetch:", err);
+    console.error('[admin discounts] Failed to fetch:', err);
   }
 
   return (
     <div>
-      <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.5rem", fontWeight: 500, marginBottom: "1.5rem" }}>Discount Codes</h2>
+      <h2
+        style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: '1.5rem',
+          fontWeight: 500,
+          marginBottom: '1.5rem',
+        }}
+      >
+        Discount Codes
+      </h2>
 
       <DiscountManager initialDiscounts={discounts} />
     </div>

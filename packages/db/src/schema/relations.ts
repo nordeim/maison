@@ -5,21 +5,21 @@
  * Allows: db.query.customers.findMany({ with: { orders: true } })
  */
 
-import { relations } from "drizzle-orm";
-import { users } from "./users";
-import { sessions } from "./sessions";
-import { accounts } from "./accounts";
-import { customers } from "./customers";
-import { addresses } from "./addresses";
-import { collections } from "./collections";
-import { products } from "./products";
-import { productVariants } from "./product-variants";
-import { productImages } from "./product-images";
-import { carts } from "./carts";
-import { cartItems } from "./cart-items";
-import { orders } from "./orders";
-import { lineItems } from "./line-items";
-import { wishlistItems } from "./wishlist-items";
+import { relations } from 'drizzle-orm';
+import { users } from './users';
+import { sessions } from './sessions';
+import { accounts } from './accounts';
+import { customers } from './customers';
+import { addresses } from './addresses';
+import { collections } from './collections';
+import { products } from './products';
+import { productVariants } from './product-variants';
+import { productImages } from './product-images';
+import { carts } from './carts';
+import { cartItems } from './cart-items';
+import { orders } from './orders';
+import { lineItems } from './line-items';
+import { wishlistItems } from './wishlist-items';
 
 export const userRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
@@ -44,7 +44,10 @@ export const customerRelations = relations(customers, ({ one, many }) => ({
 }));
 
 export const addressRelations = relations(addresses, ({ one }) => ({
-  customer: one(customers, { fields: [addresses.customerId], references: [customers.id] }),
+  customer: one(customers, {
+    fields: [addresses.customerId],
+    references: [customers.id],
+  }),
 }));
 
 export const collectionRelations = relations(collections, ({ many }) => ({
@@ -75,13 +78,19 @@ export const productImageRelations = relations(productImages, ({ one }) => ({
 }));
 
 export const cartRelations = relations(carts, ({ one, many }) => ({
-  customer: one(customers, { fields: [carts.customerId], references: [customers.id] }),
+  customer: one(customers, {
+    fields: [carts.customerId],
+    references: [customers.id],
+  }),
   items: many(cartItems),
 }));
 
 export const cartItemRelations = relations(cartItems, ({ one }) => ({
   cart: one(carts, { fields: [cartItems.cartId], references: [carts.id] }),
-  product: one(products, { fields: [cartItems.productId], references: [products.id] }),
+  product: one(products, {
+    fields: [cartItems.productId],
+    references: [products.id],
+  }),
   variant: one(productVariants, {
     fields: [cartItems.variantId],
     references: [productVariants.id],
@@ -89,13 +98,19 @@ export const cartItemRelations = relations(cartItems, ({ one }) => ({
 }));
 
 export const orderRelations = relations(orders, ({ one, many }) => ({
-  customer: one(customers, { fields: [orders.customerId], references: [customers.id] }),
+  customer: one(customers, {
+    fields: [orders.customerId],
+    references: [customers.id],
+  }),
   lineItems: many(lineItems),
 }));
 
 export const lineItemRelations = relations(lineItems, ({ one }) => ({
   order: one(orders, { fields: [lineItems.orderId], references: [orders.id] }),
-  product: one(products, { fields: [lineItems.productId], references: [products.id] }),
+  product: one(products, {
+    fields: [lineItems.productId],
+    references: [products.id],
+  }),
   variant: one(productVariants, {
     fields: [lineItems.variantId],
     references: [productVariants.id],

@@ -7,18 +7,18 @@
  * Usage: pnpm db:reset
  */
 
-import { db } from "../index";
-import { sql } from "drizzle-orm";
+import { db } from '../index';
+import { sql } from 'drizzle-orm';
 
 async function reset() {
-  const isProduction = process.env["NODE_ENV"] === "production";
+  const isProduction = process.env['NODE_ENV'] === 'production';
   if (isProduction) {
-    console.error("✗ Refusing to reset database in production.");
+    console.error('✗ Refusing to reset database in production.');
     process.exit(1);
   }
 
-  console.log("⚠️  Resetting database — ALL DATA WILL BE LOST ⚠️");
-  console.log("  Dropping all tables in public schema…");
+  console.log('⚠️  Resetting database — ALL DATA WILL BE LOST ⚠️');
+  console.log('  Dropping all tables in public schema…');
 
   await db.execute(sql`
     DROP SCHEMA public CASCADE;
@@ -27,11 +27,11 @@ async function reset() {
     GRANT ALL ON SCHEMA public TO public;
   `);
 
-  console.log("✓ Schema dropped. Run `pnpm db:push` then `pnpm db:seed` to rebuild.");
+  console.log('✓ Schema dropped. Run `pnpm db:push` then `pnpm db:seed` to rebuild.');
   process.exit(0);
 }
 
 reset().catch((err) => {
-  console.error("Reset failed:", err);
+  console.error('Reset failed:', err);
   process.exit(1);
 });

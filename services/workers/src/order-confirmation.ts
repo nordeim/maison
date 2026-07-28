@@ -8,10 +8,10 @@
  */
 
 export const orderConfirmationJobSpec = {
-  name: "order-confirmation",
-  trigger: { event: "order.created" },
+  name: 'order-confirmation',
+  trigger: { event: 'order.created' },
   concurrency: 10,
-  retry: { limit: 5, backoff: "exponential" },
+  retry: { limit: 5, backoff: 'exponential' },
 } as const;
 
 export async function orderConfirmationHandler(payload: {
@@ -19,5 +19,5 @@ export async function orderConfirmationHandler(payload: {
   customerEmail: string;
   customerName?: string;
 }): Promise<void> {
-  console.log("[jobs] order-confirmation: stub — would send email for", payload.orderNumber);
+  console.log('[jobs] order-confirmation: stub — would send email for', payload.orderNumber);
 }

@@ -6,8 +6,8 @@
  * needed after authentication.
  */
 
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 export default function CallbackPage() {
-  redirect("/account");
+  redirect('/account');
 }

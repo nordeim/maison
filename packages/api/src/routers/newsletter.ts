@@ -4,9 +4,9 @@
  * Public procedure for email capture. Syncs to Klaviyo in Phase 2.
  */
 
-import { z } from "zod";
-import { router, publicProcedure, middleware } from "../trpc";
-import { rateLimitMiddleware } from "../middleware/rateLimit";
+import { z } from 'zod';
+import { router, publicProcedure, middleware } from '../trpc';
+import { rateLimitMiddleware } from '../middleware/rateLimit';
 
 const rateLimited = publicProcedure.use(rateLimitMiddleware);
 
@@ -15,7 +15,7 @@ export const newsletterRouter = router({
     .input(
       z.object({
         email: z.string().email(),
-        source: z.enum(["footer", "newsletter_section", "popup"]).default("footer"),
+        source: z.enum(['footer', 'newsletter_section', 'popup']).default('footer'),
       }),
     )
     .mutation(async ({ input }) => {

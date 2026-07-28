@@ -11,17 +11,17 @@ The latest release of @react-email/components is "1.0.12".
 
 Your `packages/email/package.json` declares a dependency on **`@react-email/components@^6.6.5`**, but **that version never existed**. The `@react-email/components` package only ever published versions in the `0.0.x` range (early on) and then the `1.0.x` range, topping out at **1.0.12** — after which it was **officially deprecated** [[6]][[18]][[24]].
 
-The version `6.6.5` was almost certainly a mistake conflating it with the **`react-email`** package (the CLI/framework package), which *is* versioned in the `6.x` range (currently at **6.9.1**) [[5]][[33]].
+The version `6.6.5` was almost certainly a mistake conflating it with the **`react-email`** package (the CLI/framework package), which _is_ versioned in the `6.x` range (currently at **6.9.1**) [[5]][[33]].
 
 ### What happened in the ecosystem
 
 On **April 16, 2026**, React Email 6.0.0 was released, which **unified all components and rendering utilities into the single `react-email` package** [[1]][[27]][[31]]. As a result:
 
-| Old Package | Status | Replacement |
-|---|---|---|
-| `@react-email/components` | **Deprecated** (last: 1.0.12) [[53]][[61]] | `react-email` (v6.x) |
-| `@react-email/render` | Merged into `react-email` | `react-email` |
-| `@react-email/preview-server` | Moved | `@react-email/ui` [[28]] |
+| Old Package                   | Status                                     | Replacement              |
+| ----------------------------- | ------------------------------------------ | ------------------------ |
+| `@react-email/components`     | **Deprecated** (last: 1.0.12) [[53]][[61]] | `react-email` (v6.x)     |
+| `@react-email/render`         | Merged into `react-email`                  | `react-email`            |
+| `@react-email/preview-server` | Moved                                      | `@react-email/ui` [[28]] |
 
 All component imports (`Button`, `Html`, `Head`, `Container`, `Tailwind`, `render`, etc.) now come directly from `"react-email"` [[37]][[49]].
 
@@ -101,10 +101,10 @@ pnpm --filter=@maison/email dev
 
 While you're in there, the install log surfaced two other items:
 
-| Warning | Action |
-|---|---|
-| `@testing-library/jest-dom@6.10.0` deprecated — *"Incorrect minor release with breaking changes (Node ≥22 and required @testing-library/dom peer). Use 6.9.1 for the 6.x line, or upgrade to 7.0.0."* | Your root `package.json` already pins `^6.9.1`, but the caret allows `6.10.0`. Pin it to **`6.9.1`** exactly, or jump to **`^7.0.0`**. |
-| `pnpm 11.9.0 → 11.17.0` update available | Run `pnpm add -g pnpm` and update the `"packageManager"` field in root `package.json` to `"pnpm@11.17.0"`. |
+| Warning                                                                                                                                                                                               | Action                                                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `@testing-library/jest-dom@6.10.0` deprecated — _"Incorrect minor release with breaking changes (Node ≥22 and required @testing-library/dom peer). Use 6.9.1 for the 6.x line, or upgrade to 7.0.0."_ | Your root `package.json` already pins `^6.9.1`, but the caret allows `6.10.0`. Pin it to **`6.9.1`** exactly, or jump to **`^7.0.0`**. |
+| `pnpm 11.9.0 → 11.17.0` update available                                                                                                                                                              | Run `pnpm add -g pnpm` and update the `"packageManager"` field in root `package.json` to `"pnpm@11.17.0"`.                             |
 
 ---
 

@@ -6,18 +6,18 @@
  * Admin: list all gift cards.
  */
 
-import { z } from "zod";
-import { eq, and, desc } from "drizzle-orm";
-import { giftCards, customers } from "@maison/db";
-import { router, publicProcedure, protectedProcedure, adminProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, desc } from 'drizzle-orm';
+import { giftCards, customers } from '@maison/db';
+import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc';
 
 /**
  * Generate a unique gift card code: MAIS-GC-XXXX-XXXX
  */
 function generateGiftCardCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars (0/O, 1/I)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0/O, 1/I)
   const part = () =>
-    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   return `MAIS-GC-${part()}-${part()}`;
 }
 
@@ -38,17 +38,20 @@ export const giftCardsRouter = router({
         .limit(1);
 
       if (!card) {
-        return { valid: false, error: "Invalid gift card code." } as const;
+        return { valid: false, error: 'Invalid gift card code.' } as const;
       }
 
       // Check expiry
       if (card.expiresAt && new Date() > card.expiresAt) {
-        return { valid: false, error: "This gift card has expired." } as const;
+        return { valid: false, error: 'This gift card has expired.' } as const;
       }
 
       // Check balance
       if (card.balanceCents <= 0) {
-        return { valid: false, error: "This gift card has no remaining balance." } as const;
+        return {
+          valid: false,
+          error: 'This gift card has no remaining balance.',
+        } as const;
       }
 
       return {
@@ -107,7 +110,7 @@ export const giftCardsRouter = router({
           code,
           initialBalanceCents: input.amountCents,
           balanceCents: input.amountCents,
-          currency: "USD",
+          currency: 'USD',
           purchaserCustomerId: customerId,
           purchaserEmail: ctx.session.user.email,
           recipientEmail: input.recipientEmail,

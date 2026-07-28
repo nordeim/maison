@@ -4,9 +4,9 @@
  * Public procedure for contact form submissions. Sends email via Resend.
  */
 
-import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
-import { rateLimitMiddleware } from "../middleware/rateLimit";
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
+import { rateLimitMiddleware } from '../middleware/rateLimit';
 
 const rateLimited = publicProcedure.use(rateLimitMiddleware);
 

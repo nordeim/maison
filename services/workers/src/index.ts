@@ -21,4 +21,4 @@
 // export { weeklyDigest } from "./weekly-digest";
 // export { inventoryAlert } from "./inventory-alert";
 
-console.log("[workers] Maison job registry loaded (Phase 0 stubs — no jobs registered yet)");
+console.log('[workers] Maison job registry loaded (Phase 0 stubs — no jobs registered yet)');

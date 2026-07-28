@@ -6,12 +6,12 @@
  */
 
 export const weeklyDigestJobSpec = {
-  name: "weekly-digest",
-  trigger: { cron: "0 9 * * 0" }, // Sunday 9am
+  name: 'weekly-digest',
+  trigger: { cron: '0 9 * * 0' }, // Sunday 9am
   concurrency: 1, // sequential, batches by recipient
   retry: { limit: 2 },
 } as const;
 
 export async function weeklyDigestHandler(): Promise<void> {
-  console.log("[jobs] weekly-digest: stub — would send Sunday newsletter");
+  console.log('[jobs] weekly-digest: stub — would send Sunday newsletter');
 }

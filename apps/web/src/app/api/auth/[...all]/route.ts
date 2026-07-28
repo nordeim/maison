@@ -5,7 +5,8 @@
  * from this single catch-all handler.
  */
 
-import { auth } from "@maison/auth";
-import { toNextJsHandler } from "better-auth/next-js";
+import { toNextJsHandler } from 'better-auth/next-js';
+
+import { auth } from '@maison/auth';
 
 export const { GET, POST } = toNextJsHandler(auth);

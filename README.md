@@ -30,20 +30,20 @@ The brand embodies "considered living" — offering handcrafted objects that pri
 
 ## Key Features
 
-| ✨ | Feature | Description |
-|----|---------|-------------|
-| 🎨 | **Editorial commerce design** | Cormorant Garamond + Inter, warm cream/terracotta palette, no generic SaaS patterns |
-| 🛋️ | **Curated catalog** | 8 collections, 13 initial SKUs across Lighting, Ceramics, Furniture, Textiles, Objects, Seasonal, Gifts |
-| 🛒 | **Full checkout flow** | Stripe Payment Intents, Apple Pay + Google Pay, idempotent order creation, 3-step UX |
-| 👤 | **Customer accounts** | Better Auth (email/password + OAuth), order history, wishlist, saved addresses |
-| 🛠️ | **Admin back-office** | RBAC-gated (`staff`/`admin`), product CRUD, order fulfillment, inventory, audit log |
-| 📝 | **Headless CMS** | Sanity Studio for product content, journal, maker stories, homepage sections |
-| 🔍 | **Type-safe API** | tRPC v11 end-to-end types, no codegen, server-side caller for RSC |
-| 🗄️ | **Type-safe ORM** | Drizzle ORM 0.45 with PostgreSQL 17, version-controlled migrations |
-| ⚡ | **Next.js 16 RSC** | Server Components by default, `proxy.ts` auth, Turbopack, ISR |
-| 🎭 | **Anti-generic UI** | Per `avant-garde-design-v4` skill: no bento grids, no mesh gradients, no glassmorphism |
-| 📊 | **Analytics + observability** | PostHog product analytics, Sentry errors, Axiom logs, structured audit trail |
-| 🔒 | **OWASP 2025 hardened** | CSP, rate limiting, signed webhooks, supply-chain guardrails (`minimumReleaseAge`) |
+| ✨  | Feature                       | Description                                                                                             |
+| --- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 🎨  | **Editorial commerce design** | Cormorant Garamond + Inter, warm cream/terracotta palette, no generic SaaS patterns                     |
+| 🛋️  | **Curated catalog**           | 8 collections, 13 initial SKUs across Lighting, Ceramics, Furniture, Textiles, Objects, Seasonal, Gifts |
+| 🛒  | **Full checkout flow**        | Stripe Payment Intents, Apple Pay + Google Pay, idempotent order creation, 3-step UX                    |
+| 👤  | **Customer accounts**         | Better Auth (email/password + OAuth), order history, wishlist, saved addresses                          |
+| 🛠️  | **Admin back-office**         | RBAC-gated (`staff`/`admin`), product CRUD, order fulfillment, inventory, audit log                     |
+| 📝  | **Headless CMS**              | Sanity Studio for product content, journal, maker stories, homepage sections                            |
+| 🔍  | **Type-safe API**             | tRPC v11 end-to-end types, no codegen, server-side caller for RSC                                       |
+| 🗄️  | **Type-safe ORM**             | Drizzle ORM 0.45 with PostgreSQL 17, version-controlled migrations                                      |
+| ⚡  | **Next.js 16 RSC**            | Server Components by default, `proxy.ts` auth, Turbopack, ISR                                           |
+| 🎭  | **Anti-generic UI**           | Per `avant-garde-design-v4` skill: no bento grids, no mesh gradients, no glassmorphism                  |
+| 📊  | **Analytics + observability** | PostHog product analytics, Sentry errors, Axiom logs, structured audit trail                            |
+| 🔒  | **OWASP 2025 hardened**       | CSP, rate limiting, signed webhooks, supply-chain guardrails (`minimumReleaseAge`)                      |
 
 ---
 
@@ -51,29 +51,29 @@ The brand embodies "considered living" — offering handcrafted objects that pri
 
 ### Tech Stack
 
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| Monorepo | Turborepo | ≥2.10.4 | Task orchestration, caching |
-| Package manager | pnpm | 11.9.0 | Workspace protocol, supply-chain guardrails |
-| Runtime | Node.js | ≥22.0.0 | LTS required by Next.js 16 |
-| Meta-framework | Next.js | 16.2.x | App Router, RSC, `proxy.ts`, Turbopack |
-| UI runtime | React | 19.2.x | React Compiler, async params |
-| Language | TypeScript | 5.9.x | Strict mode, `erasableSyntaxOnly` |
-| Styling | Tailwind CSS | v4.3.x | CSS-first `@theme`, no config file |
-| API | tRPC | v11.18.x | End-to-end type safety |
-| ORM | Drizzle ORM | 0.45.x | Type-safe SQL, migrations |
-| Database | PostgreSQL | 17 (Neon prod / Docker dev) | Relational data, FTS |
-| Auth | Better Auth | 1.6.23 | Sessions, OAuth, magic links |
-| Payments | Stripe | 22.3.x (Dahlia) | Payment Intents, Tax, Webhooks |
-| Background jobs | Trigger.dev | v4 | Abandoned cart, digests |
-| CMS | Sanity | v6 Studio + v7 client | Headless content |
-| Email | Resend + React Email | 6.17 / 6.6 | Transactional emails |
-| Image CDN | Cloudflare Images + R2 | — | On-the-fly optimization |
-| Error tracking | Sentry | 10.63.x | Next.js integration |
-| Analytics | PostHog | 1.396.x | Product analytics |
-| Hosting | Vercel | — | Next.js-optimised, Edge |
-| Database hosting | Neon | — | Serverless Postgres, branching |
-| Rate limiting | Upstash Redis | — | Sliding window, fail-open |
+| Layer            | Technology             | Version                     | Purpose                                     |
+| ---------------- | ---------------------- | --------------------------- | ------------------------------------------- |
+| Monorepo         | Turborepo              | ≥2.10.4                     | Task orchestration, caching                 |
+| Package manager  | pnpm                   | 11.9.0                      | Workspace protocol, supply-chain guardrails |
+| Runtime          | Node.js                | ≥22.0.0                     | LTS required by Next.js 16                  |
+| Meta-framework   | Next.js                | 16.2.x                      | App Router, RSC, `proxy.ts`, Turbopack      |
+| UI runtime       | React                  | 19.2.x                      | React Compiler, async params                |
+| Language         | TypeScript             | 5.9.x                       | Strict mode, `erasableSyntaxOnly`           |
+| Styling          | Tailwind CSS           | v4.3.x                      | CSS-first `@theme`, no config file          |
+| API              | tRPC                   | v11.18.x                    | End-to-end type safety                      |
+| ORM              | Drizzle ORM            | 0.45.x                      | Type-safe SQL, migrations                   |
+| Database         | PostgreSQL             | 17 (Neon prod / Docker dev) | Relational data, FTS                        |
+| Auth             | Better Auth            | 1.6.23                      | Sessions, OAuth, magic links                |
+| Payments         | Stripe                 | 22.3.x (Dahlia)             | Payment Intents, Tax, Webhooks              |
+| Background jobs  | Trigger.dev            | v4                          | Abandoned cart, digests                     |
+| CMS              | Sanity                 | v6 Studio + v7 client       | Headless content                            |
+| Email            | Resend + React Email   | 6.17 / 6.6                  | Transactional emails                        |
+| Image CDN        | Cloudflare Images + R2 | —                           | On-the-fly optimization                     |
+| Error tracking   | Sentry                 | 10.63.x                     | Next.js integration                         |
+| Analytics        | PostHog                | 1.396.x                     | Product analytics                           |
+| Hosting          | Vercel                 | —                           | Next.js-optimised, Edge                     |
+| Database hosting | Neon                   | —                           | Serverless Postgres, branching              |
+| Rate limiting    | Upstash Redis          | —                           | Sliding window, fail-open                   |
 
 ### System Topology
 
@@ -273,24 +273,24 @@ Open `http://localhost:3000` — you should see the homepage hero ("Objects of Q
 
 All variables are documented in `.env.example` with inline comments. Critical ones:
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | ✅ | Pooled Postgres (Neon pooler or Docker) |
-| `DATABASE_URL_UNPOOLED` | ✅ | Direct Postgres — **migrations only** (PgBouncer breaks prepared statements) |
-| `BETTER_AUTH_SECRET` | ✅ | Session signing key (min 32 chars) |
-| `BETTER_AUTH_URL` | ✅ | App URL for auth callbacks (`http://localhost:3000` in dev) |
-| `STRIPE_SECRET_KEY` | ✅ | Server-side Stripe API |
-| `STRIPE_WEBHOOK_SECRET` | ✅ | Stripe webhook signature verification |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅ | Client-side Stripe Elements |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | ✅ | Sanity project ID |
-| `NEXT_PUBLIC_SANITY_DATASET` | ✅ | Sanity dataset (usually `production`) |
-| `SANITY_API_TOKEN` | ✅ | Server-side Sanity read token |
-| `RESEND_API_KEY` | ✅ | Transactional email |
-| `EMAIL_FROM` | ✅ | From address (e.g. `hello@maison-living.com`) |
-| `UPSTASH_REDIS_REST_URL` | ✅ | Rate limiting, idempotency keys |
-| `TRIGGER_SECRET_KEY` | ✅ | Background jobs (abandoned cart, digests) |
-| `NEXT_PUBLIC_POSTHOG_KEY` | ✅ | Product analytics |
-| `SENTRY_DSN` | ⚪ Optional | Error tracking (app runs without if unset) |
+| Variable                             | Required    | Purpose                                                                      |
+| ------------------------------------ | ----------- | ---------------------------------------------------------------------------- |
+| `DATABASE_URL`                       | ✅          | Pooled Postgres (Neon pooler or Docker)                                      |
+| `DATABASE_URL_UNPOOLED`              | ✅          | Direct Postgres — **migrations only** (PgBouncer breaks prepared statements) |
+| `BETTER_AUTH_SECRET`                 | ✅          | Session signing key (min 32 chars)                                           |
+| `BETTER_AUTH_URL`                    | ✅          | App URL for auth callbacks (`http://localhost:3000` in dev)                  |
+| `STRIPE_SECRET_KEY`                  | ✅          | Server-side Stripe API                                                       |
+| `STRIPE_WEBHOOK_SECRET`              | ✅          | Stripe webhook signature verification                                        |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅          | Client-side Stripe Elements                                                  |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`      | ✅          | Sanity project ID                                                            |
+| `NEXT_PUBLIC_SANITY_DATASET`         | ✅          | Sanity dataset (usually `production`)                                        |
+| `SANITY_API_TOKEN`                   | ✅          | Server-side Sanity read token                                                |
+| `RESEND_API_KEY`                     | ✅          | Transactional email                                                          |
+| `EMAIL_FROM`                         | ✅          | From address (e.g. `hello@maison-living.com`)                                |
+| `UPSTASH_REDIS_REST_URL`             | ✅          | Rate limiting, idempotency keys                                              |
+| `TRIGGER_SECRET_KEY`                 | ✅          | Background jobs (abandoned cart, digests)                                    |
+| `NEXT_PUBLIC_POSTHOG_KEY`            | ✅          | Product analytics                                                            |
+| `SENTRY_DSN`                         | ⚪ Optional | Error tracking (app runs without if unset)                                   |
 
 See `PROJECT-ARCHITECTURE.md` §9.2 for the complete environment variable reference.
 
@@ -309,14 +309,14 @@ pnpm test:coverage     # Coverage report (target: 80% packages/api, 90% packages
 
 ### Coverage Targets
 
-| Package | Target | Rationale |
-|---------|--------|-----------|
-| `packages/db` | 80% | Schema integrity critical |
-| `packages/api` | 85% | Business logic critical |
-| `packages/auth` | 90% | Security critical |
-| `packages/payments` | 90% | Money critical |
-| `apps/web/src/lib` | 75% | Server-side callers |
-| `apps/web/src/components` | 60% | Visual components, hard to unit test |
+| Package                   | Target | Rationale                            |
+| ------------------------- | ------ | ------------------------------------ |
+| `packages/db`             | 80%    | Schema integrity critical            |
+| `packages/api`            | 85%    | Business logic critical              |
+| `packages/auth`           | 90%    | Security critical                    |
+| `packages/payments`       | 90%    | Money critical                       |
+| `apps/web/src/lib`        | 75%    | Server-side callers                  |
+| `apps/web/src/components` | 60%    | Visual components, hard to unit test |
 
 ### Pre-Ship Checklist (8-Gate CI)
 
@@ -337,24 +337,24 @@ Every PR must pass all 8 gates before merge:
 
 ### Typography
 
-| Role | Font | Weights | Usage |
-|------|------|---------|-------|
+| Role    | Font               | Weights                 | Usage                                           |
+| ------- | ------------------ | ----------------------- | ----------------------------------------------- |
 | Display | Cormorant Garamond | 300–700, italic 400/500 | H1–H6, product names, logo, editorial headlines |
-| Body | Inter | 300, 400, 500, 600 | Paragraphs, labels, buttons, nav, forms |
+| Body    | Inter              | 300, 400, 500, 600      | Paragraphs, labels, buttons, nav, forms         |
 
 Fonts are **self-hosted** as woff2 in `packages/ui/src/fonts/` (no Google Fonts CDN — privacy + performance).
 
 ### Color Tokens (CSS Custom Properties)
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--bg` | `#faf8f5` | Page background (warm cream) |
-| `--bg-2` | `#f3efe8` | Linen section backgrounds |
-| `--bg-dark` | `#1f1b17` | Footer, newsletter, marquee |
-| `--ink` | `#1f1b17` | Primary text |
-| `--clay` | `#a86b4a` | Primary accent (CTAs, links, badges) |
-| `--gold` | `#c4a265` | Editorial accent (hero italic, ornament) |
-| `--sage` | `#8b9a82` | Tertiary muted green |
+| Token       | Hex       | Usage                                    |
+| ----------- | --------- | ---------------------------------------- |
+| `--bg`      | `#faf8f5` | Page background (warm cream)             |
+| `--bg-2`    | `#f3efe8` | Linen section backgrounds                |
+| `--bg-dark` | `#1f1b17` | Footer, newsletter, marquee              |
+| `--ink`     | `#1f1b17` | Primary text                             |
+| `--clay`    | `#a86b4a` | Primary accent (CTAs, links, badges)     |
+| `--gold`    | `#c4a265` | Editorial accent (hero italic, ornament) |
+| `--sage`    | `#8b9a82` | Tertiary muted green                     |
 
 Full token reference: `packages/ui/src/tokens/colors.css` (once scaffolded) and `docs/landing_page_unified.html` (canonical source).
 
@@ -435,12 +435,12 @@ REFACTOR → Clean up the code while keeping the test green
 
 ## Project Status
 
-| Phase | Status | Key Deliverables |
-|-------|--------|------------------|
-| Phase 0 — Foundation | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (16 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (8), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml` |
-| Phase 1 — MVP | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
-| Phase 2 — Growth | ✅ Complete | Wishlist persistence (DB-backed for auth, localStorage for anon, WishlistButton on ProductCard + PDP), promo codes (discounts router + checkout promo field + admin discount management), product search (SearchModal with "/" shortcut + search results page), address book CRUD (full create/edit/delete with default flags), account settings (profile edit, newsletter toggle, GDPR deletion stub), full About page (hero, narrative, 4 values, founder profile, sustainability, CTA), admin product create form, admin discount management (create/deactivate codes with audit_log), 20 E2E tests (added search + about editorial content) |
-| Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 22 E2E tests |
+| Phase                  | Status      | Key Deliverables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (16 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (8), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                            |
+| Phase 1 — MVP          | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
+| Phase 2 — Growth       | ✅ Complete | Wishlist persistence (DB-backed for auth, localStorage for anon, WishlistButton on ProductCard + PDP), promo codes (discounts router + checkout promo field + admin discount management), product search (SearchModal with "/" shortcut + search results page), address book CRUD (full create/edit/delete with default flags), account settings (profile edit, newsletter toggle, GDPR deletion stub), full About page (hero, narrative, 4 values, founder profile, sustainability, CTA), admin product create form, admin discount management (create/deactivate codes with audit_log), 20 E2E tests (added search + about editorial content)                                                                                                                           |
+| Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 22 E2E tests                                                                                                                                                                                                                             |
 
 **Current progress:** Phase 3 Optimisation complete. The platform now includes product reviews, gift cards, trade program, multi-currency display, loyalty program, and a full admin analytics dashboard. All 4 phases (Foundation, MVP, Growth, Optimisation) are complete. The Maison e-commerce platform is production-ready.
 
@@ -448,29 +448,29 @@ REFACTOR → Clean up the code while keeping the test green
 
 ## Documentation
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [`README.md`](./README.md) | Project overview, quick start, deployment | All visitors |
-| [`docs/PRD_unified.md`](./docs/PRD_unified.md) | Product requirements, features, metrics | Product, engineering |
-| [`PROJECT-ARCHITECTURE.md`](./PROJECT-ARCHITECTURE.md) | Engineering blueprint, ADRs, schemas, security | Senior engineers, tech leads |
-| [`AGENTS.md`](./AGENTS.md) | High-signal facts for AI coding agents | AI agents (Claude, Cursor, Copilot) |
-| [`CLAUDE.md`](./CLAUDE.md) | Claude Code-specific instructions | Claude Code |
-| [`docs/landing_page_unified.html`](./docs/landing_page_unified.html) | Canonical visual reference for the storefront | Designers, frontend engineers |
-| [`skills/skills-catalog.md`](./skills/skills-catalog.md) | 196 skills organised by category | All contributors |
+| Document                                                             | Purpose                                        | Audience                            |
+| -------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------- |
+| [`README.md`](./README.md)                                           | Project overview, quick start, deployment      | All visitors                        |
+| [`docs/PRD_unified.md`](./docs/PRD_unified.md)                       | Product requirements, features, metrics        | Product, engineering                |
+| [`PROJECT-ARCHITECTURE.md`](./PROJECT-ARCHITECTURE.md)               | Engineering blueprint, ADRs, schemas, security | Senior engineers, tech leads        |
+| [`AGENTS.md`](./AGENTS.md)                                           | High-signal facts for AI coding agents         | AI agents (Claude, Cursor, Copilot) |
+| [`CLAUDE.md`](./CLAUDE.md)                                           | Claude Code-specific instructions              | Claude Code                         |
+| [`docs/landing_page_unified.html`](./docs/landing_page_unified.html) | Canonical visual reference for the storefront  | Designers, frontend engineers       |
+| [`skills/skills-catalog.md`](./skills/skills-catalog.md)             | 196 skills organised by category               | All contributors                    |
 
 ---
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `pnpm install` fails with `ERR_PNPM_NO_MATCHING_VERSION` | The `pnpm-workspace.yaml` `overrides` field pins OpenTelemetry to 2.8.0 to bypass registry desyncs. Re-run after a few minutes if the registry is mid-propagation. |
-| `db:migrate` fails with "prepared statement" error | You're using the pooled `DATABASE_URL`. Set `DATABASE_URL_UNPOOLED` to the direct connection string (no `-pooler` suffix). |
-| Stripe webhook returns 400 | Verify `STRIPE_WEBHOOK_SECRET` matches the webhook endpoint in Stripe Dashboard. Use `stripe listen --forward-to localhost:3000/api/webhooks/stripe` for local dev. |
-| Sanity content changes don't appear on storefront | Verify `SANITY_WEBHOOK_SECRET` is set and the webhook is registered in Sanity Cloud → your-domain `/api/webhooks/sanity`. |
-| `better-auth` session errors after deploy | Ensure `BETTER_AUTH_URL` is set to your production domain (not localhost). The auth config throws at module load if unset in production. |
-| `proxy.ts` not running | Next.js 16 renamed `middleware.ts` → `proxy.ts`. Ensure the file is at `apps/web/proxy.ts` (not `src/`). |
-| Tailwind classes not applying | Tailwind v4 uses CSS-first `@theme` in `globals.css`. Do NOT create `tailwind.config.js`. Ensure `@tailwindcss/postcss` is in `postcss.config.mjs`. |
+| Issue                                                    | Solution                                                                                                                                                            |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm install` fails with `ERR_PNPM_NO_MATCHING_VERSION` | The `pnpm-workspace.yaml` `overrides` field pins OpenTelemetry to 2.8.0 to bypass registry desyncs. Re-run after a few minutes if the registry is mid-propagation.  |
+| `db:migrate` fails with "prepared statement" error       | You're using the pooled `DATABASE_URL`. Set `DATABASE_URL_UNPOOLED` to the direct connection string (no `-pooler` suffix).                                          |
+| Stripe webhook returns 400                               | Verify `STRIPE_WEBHOOK_SECRET` matches the webhook endpoint in Stripe Dashboard. Use `stripe listen --forward-to localhost:3000/api/webhooks/stripe` for local dev. |
+| Sanity content changes don't appear on storefront        | Verify `SANITY_WEBHOOK_SECRET` is set and the webhook is registered in Sanity Cloud → your-domain `/api/webhooks/sanity`.                                           |
+| `better-auth` session errors after deploy                | Ensure `BETTER_AUTH_URL` is set to your production domain (not localhost). The auth config throws at module load if unset in production.                            |
+| `proxy.ts` not running                                   | Next.js 16 renamed `middleware.ts` → `proxy.ts`. Ensure the file is at `apps/web/proxy.ts` (not `src/`).                                                            |
+| Tailwind classes not applying                            | Tailwind v4 uses CSS-first `@theme` in `globals.css`. Do NOT create `tailwind.config.js`. Ensure `@tailwindcss/postcss` is in `postcss.config.mjs`.                 |
 
 ---
 

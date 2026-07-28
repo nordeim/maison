@@ -31,44 +31,44 @@
 
 ### 1.1 Document Metadata & Purpose
 
-This PAD is the **single source of truth** for the Maison platform's engineering architecture. It complements the PRD (which defines *what* to build) by defining *how* to build it — every technology choice, every layer boundary, every security rule, every operational procedure.
+This PAD is the **single source of truth** for the Maison platform's engineering architecture. It complements the PRD (which defines _what_ to build) by defining _how_ to build it — every technology choice, every layer boundary, every security rule, every operational procedure.
 
 **How to use this document:**
 
-| If you are… | Read these sections first |
-|-------------|---------------------------|
-| A new engineer onboarding | §1, §3, §10 (Developer Handbook) |
-| Debugging a production issue | §2 (Topology), §6 (Security), §9 (Build/Deploy), §11 (Known Issues) |
-| Reviewing a tech choice | §1.3 (ADRs) — every decision has Context, Rationale, Consequences, Alternatives |
-| Adding a new feature | §3 (Layer Model), §4 (Data), §5 (Design System), §8 (Testing) |
-| An AI coding agent | This PAD + `AGENTS.md` + `CLAUDE.md` before touching any file |
+| If you are…                  | Read these sections first                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| A new engineer onboarding    | §1, §3, §10 (Developer Handbook)                                                |
+| Debugging a production issue | §2 (Topology), §6 (Security), §9 (Build/Deploy), §11 (Known Issues)             |
+| Reviewing a tech choice      | §1.3 (ADRs) — every decision has Context, Rationale, Consequences, Alternatives |
+| Adding a new feature         | §3 (Layer Model), §4 (Data), §5 (Design System), §8 (Testing)                   |
+| An AI coding agent           | This PAD + `AGENTS.md` + `CLAUDE.md` before touching any file                   |
 
 ### 1.2 Technology Stack Summary
 
-| Layer | Technology | Pinned Version | Key Rationale |
-|-------|-----------|----------------|---------------|
-| Monorepo tooling | Turborepo | ≥2.10.4 | Task orchestration, caching, incremental builds; proven in Stillwater (651 tests, 11 ADRs) |
-| Package manager | pnpm | 11.9.0 (`packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge: 1440`) |
-| Runtime | Node.js | ≥22.0.0 | LTS required by Next.js 16; ESM-first |
-| Meta-framework | Next.js | 16.2.x | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack, async params |
-| UI runtime | React | 19.2.x | React Compiler, `use()` hook, ref-as-prop (no `forwardRef`) |
-| Language | TypeScript | 5.9.x | Strict mode, `noUnusedLocals`, `erasableSyntaxOnly` |
-| Styling | Tailwind CSS | v4.3.x | CSS-first `@theme` config (no `tailwind.config.js`), `@tailwindcss/postcss` |
-| API layer | tRPC | v11.18.x | End-to-end type safety, server-side caller for RSC, React Query integration |
-| ORM | Drizzle ORM | 0.45.x | Type-safe SQL, migration system, no runtime overhead, edge-runtime compatible |
-| Database | PostgreSQL | 17 (Neon prod / Docker dev) | Relational integrity, JSONB for flexible content, FTS for Phase 1 search |
-| Authentication | Better Auth | 1.6.23 | Replaces Auth.js v5 — better OAuth, magic links, session control, simpler config |
-| Payments | Stripe | 22.3.x (Dahlia) | Payment Intents, Checkout, Webhooks, Stripe Tax, Apple/Google Pay |
-| Background jobs | Trigger.dev | v4 | Webhook processing, abandoned cart emails, digest emails |
-| CMS | Sanity | v6 Studio + v7 client | Headless, real-time, Live Preview, GROQ queries, Next.js integration |
-| Email | Resend + React Email | 6.17 / 6.6 | Transactional emails, type-safe templates |
-| Image CDN | Cloudflare Images + R2 | — | On-the-fly optimization, AVIF/WebP, cost-effective storage |
-| Error tracking | Sentry | 10.63.x | Next.js integration, source maps, performance monitoring |
-| Analytics | PostHog | 1.396.x | Privacy-friendly, session replay, feature flags |
-| Logging | Axiom | — | Structured logs, OpenTelemetry-compatible |
-| Hosting | Vercel | — | Next.js optimised, Edge functions, ISR |
-| Database hosting | Neon | — | Serverless Postgres, branching, point-in-time recovery |
-| Rate limiting | Upstash Redis | — | Serverless Redis, sliding window, fail-open pattern |
+| Layer            | Technology             | Pinned Version                  | Key Rationale                                                                              |
+| ---------------- | ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| Monorepo tooling | Turborepo              | ≥2.10.4                         | Task orchestration, caching, incremental builds; proven in Stillwater (651 tests, 11 ADRs) |
+| Package manager  | pnpm                   | 11.9.0 (`packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge: 1440`)                    |
+| Runtime          | Node.js                | ≥22.0.0                         | LTS required by Next.js 16; ESM-first                                                      |
+| Meta-framework   | Next.js                | 16.2.x                          | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack, async params            |
+| UI runtime       | React                  | 19.2.x                          | React Compiler, `use()` hook, ref-as-prop (no `forwardRef`)                                |
+| Language         | TypeScript             | 5.9.x                           | Strict mode, `noUnusedLocals`, `erasableSyntaxOnly`                                        |
+| Styling          | Tailwind CSS           | v4.3.x                          | CSS-first `@theme` config (no `tailwind.config.js`), `@tailwindcss/postcss`                |
+| API layer        | tRPC                   | v11.18.x                        | End-to-end type safety, server-side caller for RSC, React Query integration                |
+| ORM              | Drizzle ORM            | 0.45.x                          | Type-safe SQL, migration system, no runtime overhead, edge-runtime compatible              |
+| Database         | PostgreSQL             | 17 (Neon prod / Docker dev)     | Relational integrity, JSONB for flexible content, FTS for Phase 1 search                   |
+| Authentication   | Better Auth            | 1.6.23                          | Replaces Auth.js v5 — better OAuth, magic links, session control, simpler config           |
+| Payments         | Stripe                 | 22.3.x (Dahlia)                 | Payment Intents, Checkout, Webhooks, Stripe Tax, Apple/Google Pay                          |
+| Background jobs  | Trigger.dev            | v4                              | Webhook processing, abandoned cart emails, digest emails                                   |
+| CMS              | Sanity                 | v6 Studio + v7 client           | Headless, real-time, Live Preview, GROQ queries, Next.js integration                       |
+| Email            | Resend + React Email   | 6.17 / 6.6                      | Transactional emails, type-safe templates                                                  |
+| Image CDN        | Cloudflare Images + R2 | —                               | On-the-fly optimization, AVIF/WebP, cost-effective storage                                 |
+| Error tracking   | Sentry                 | 10.63.x                         | Next.js integration, source maps, performance monitoring                                   |
+| Analytics        | PostHog                | 1.396.x                         | Privacy-friendly, session replay, feature flags                                            |
+| Logging          | Axiom                  | —                               | Structured logs, OpenTelemetry-compatible                                                  |
+| Hosting          | Vercel                 | —                               | Next.js optimised, Edge functions, ISR                                                     |
+| Database hosting | Neon                   | —                               | Serverless Postgres, branching, point-in-time recovery                                     |
+| Rate limiting    | Upstash Redis          | —                               | Serverless Redis, sliding window, fail-open pattern                                        |
 
 ### 1.3 Architecture Decision Records (ADRs)
 
@@ -84,9 +84,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ Steeper onboarding (must understand workspace protocol)
   - ❌ Slower initial `pnpm install` (links all packages)
 - **Alternatives Rejected:**
-  - *Single Next.js app* — couples CMS admin with storefront; can't share code with Trigger.dev workers
-  - *Nx* — heavier, more opinionated; Turborepo is lighter and sufficient for this scope
-  - *Separate repos* — breaks type safety, complicates CI, requires manual version publishing
+  - _Single Next.js app_ — couples CMS admin with storefront; can't share code with Trigger.dev workers
+  - _Nx_ — heavier, more opinionated; Turborepo is lighter and sufficient for this scope
+  - _Separate repos_ — breaks type safety, complicates CI, requires manual version publishing
 
 #### ADR-002: Better Auth over Auth.js v5
 
@@ -100,9 +100,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ Smaller community than Auth.js (fewer Stack Overflow answers)
   - ❌ Newer project (less battle-tested at scale)
 - **Alternatives Rejected:**
-  - *Auth.js v5* — JWT-based sessions complicate revocation; magic links require custom provider; Stillwater migration documented 7 pain points
-  - *Clerk* — hosted, adds vendor lock-in, less control over data residency
-  - *Supabase Auth* — couples auth with database choice; we want Neon, not Supabase Postgres
+  - _Auth.js v5_ — JWT-based sessions complicate revocation; magic links require custom provider; Stillwater migration documented 7 pain points
+  - _Clerk_ — hosted, adds vendor lock-in, less control over data residency
+  - _Supabase Auth_ — couples auth with database choice; we want Neon, not Supabase Postgres
 
 #### ADR-003: tRPC v11 over REST/GraphQL
 
@@ -116,9 +116,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ tRPC is TypeScript-only (no Python/Go clients without OpenAPI generation)
   - ❌ Bundle size slightly larger than REST (Zod + tRPC client)
 - **Alternatives Rejected:**
-  - *REST + OpenAPI codegen* — codegen step is fragile; type drift between server and client
-  - *GraphQL* — schema/resolver overhead; Apollo client bundle is heavy; overkill for a single-team app
-  - *Next.js Server Actions only* — no client-side mutations without manual fetch; doesn't integrate with React Query caching
+  - _REST + OpenAPI codegen_ — codegen step is fragile; type drift between server and client
+  - _GraphQL_ — schema/resolver overhead; Apollo client bundle is heavy; overkill for a single-team app
+  - _Next.js Server Actions only_ — no client-side mutations without manual fetch; doesn't integrate with React Query caching
 
 #### ADR-004: Drizzle ORM over Prisma
 
@@ -133,9 +133,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ Smaller ecosystem than Prisma (fewer plugins)
   - ❌ No built-in nested-write API (must use transactions for multi-table writes)
 - **Alternatives Rejected:**
-  - *Prisma* — Rust binary adds CI weight; generated code in `node_modules` is opaque; edge-runtime support is incomplete
-  - *Raw SQL with `pg`* — no type safety; too easy to introduce SQL injection
-  - *Kysely* — query builder, not an ORM; no migration system
+  - _Prisma_ — Rust binary adds CI weight; generated code in `node_modules` is opaque; edge-runtime support is incomplete
+  - _Raw SQL with `pg`_ — no type safety; too easy to introduce SQL injection
+  - _Kysely_ — query builder, not an ORM; no migration system
 
 #### ADR-005: Sanity CMS over Strapi/Contentful
 
@@ -149,9 +149,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ Pricing scales with usage (mitigation: monitor, fallback to Strapi if needed)
   - ❌ GROQ has a learning curve (mitigation: `groqd` for type-safe query building)
 - **Alternatives Rejected:**
-  - *Strapi* — self-hosted (adds ops); UI is less polished; real-time preview is weaker
-  - *Contentful* — enterprise pricing; less flexible content modelling
-  - *Payload CMS* — newer, smaller community; Next.js integration less mature
+  - _Strapi_ — self-hosted (adds ops); UI is less polished; real-time preview is weaker
+  - _Contentful_ — enterprise pricing; less flexible content modelling
+  - _Payload CMS_ — newer, smaller community; Next.js integration less mature
 
 #### ADR-006: `proxy.ts` over `middleware.ts`
 
@@ -163,7 +163,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ✅ Clearer naming (it's a proxy, not middleware)
   - ❌ Confusing for engineers familiar with Next.js 15 (mitigation: documented in `AGENTS.md` + `CLAUDE.md`)
 - **Alternatives Rejected:**
-  - *`middleware.ts`* — deprecated in Next.js 16; will be removed in 17
+  - _`middleware.ts`_ — deprecated in Next.js 16; will be removed in 17
 
 #### ADR-007: Self-hosted fonts (woff2) over Google Fonts CDN
 
@@ -177,8 +177,8 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ❌ Larger initial bundle (woff2 files; mitigated by subsetting to Latin + Latin Extended)
   - ❌ Manual updates (no auto-updates from Google)
 - **Alternatives Rejected:**
-  - *Google Fonts CDN* — privacy concern, DNS lookup, render-blocking
-  - *Fontsource* — convenient but adds a dependency; self-hosting is simpler for a fixed font set
+  - _Google Fonts CDN_ — privacy concern, DNS lookup, render-blocking
+  - _Fontsource_ — convenient but adds a dependency; self-hosting is simpler for a fixed font set
 
 ---
 
@@ -251,6 +251,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 ```
 
 **Runtime characteristics:**
+
 - **Vercel Edge:** Global CDN, < 50ms TTFB at p95, auto-scales to 10K+ concurrent users
 - **Next.js App:** Node.js 22 runtime on Vercel, serverless functions for API routes, ISR for product pages (revalidate every 60s)
 - **PostgreSQL (Neon):** Serverless, scales to zero, branching for preview deployments, point-in-time recovery
@@ -613,47 +614,46 @@ export default async function ProductsPage({
 
 ```typescript
 // apps/web/src/app/api/webhooks/stripe/route.ts
-import { stripe } from "@maison/payments";
-import { db } from "@maison/db";
-import { orders } from "@maison/db/schema";
-import { eq } from "drizzle-orm";
+import { stripe } from '@maison/payments';
+import { db } from '@maison/db';
+import { orders } from '@maison/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature");
-  if (!signature) return new Response("Missing signature", { status: 400 });
+  const signature = req.headers.get('stripe-signature');
+  if (!signature) return new Response('Missing signature', { status: 400 });
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!,
-    );
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch {
-    return new Response("Invalid signature", { status: 400 });
+    return new Response('Invalid signature', { status: 400 });
   }
 
   // Idempotency: Stripe retries webhooks. The orders table has a UNIQUE
   // constraint on stripe_idempotency_key. If we already processed this,
   // the INSERT throws — we catch it and return 200 (don't retry).
-  if (event.type === "payment_intent.succeeded") {
+  if (event.type === 'payment_intent.succeeded') {
     const paymentIntent = event.data.object;
     try {
       await db
         .update(orders)
-        .set({ status: "confirmed", stripe_payment_intent_id: paymentIntent.id })
-        .where(eq(orders.stripe_idempotency_key, event.idempotency_key ?? ""));
+        .set({
+          status: 'confirmed',
+          stripe_payment_intent_id: paymentIntent.id,
+        })
+        .where(eq(orders.stripe_idempotency_key, event.idempotency_key ?? ''));
     } catch (e) {
       // Already processed — return 200 so Stripe stops retrying
-      if (e instanceof Error && e.message.includes("unique")) {
-        return new Response("OK (duplicate)", { status: 200 });
+      if (e instanceof Error && e.message.includes('unique')) {
+        return new Response('OK (duplicate)', { status: 200 });
       }
       throw e;
     }
   }
 
-  return new Response("OK", { status: 200 });
+  return new Response('OK', { status: 200 });
 }
 ```
 
@@ -663,28 +663,28 @@ export async function POST(req: Request) {
 
 ```typescript
 // packages/api/src/middleware/rateLimit.ts
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import { TRPCError } from "@trpc/server";
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+import { TRPCError } from '@trpc/server';
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, "1 m"), // 10 req/min per identifier
+  limiter: Ratelimit.slidingWindow(10, '1 m'), // 10 req/min per identifier
 });
 
 export const rateLimitMiddleware = t.procedure.middleware(async ({ ctx, next }) => {
-  const identifier = ctx.session?.user.id ?? ctx.requestIP ?? "anonymous";
+  const identifier = ctx.session?.user.id ?? ctx.requestIP ?? 'anonymous';
   try {
     const { success } = await ratelimit.limit(identifier);
     if (!success) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      throw new TRPCError({ code: 'TOO_MANY_REQUESTS' });
     }
   } catch (e) {
     // FAIL OPEN: if Redis is down, allow the request.
     // Rationale: blocking legitimate users during a Redis outage is worse
     // than allowing a brief window of unthrottled traffic. Log for review.
     if (e instanceof TRPCError) throw e; // Re-throw rate limit errors
-    console.error("Rate limit check failed (Redis down?), failing open:", e);
+    console.error('Rate limit check failed (Redis down?), failing open:', e);
   }
   return next({ ctx });
 });
@@ -734,20 +734,20 @@ function ProductFilters() {
 
 ```typescript
 // packages/db/src/schema/products.ts
-import { pgTable, uuid, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
 
-export const products = pgTable("products", {
-  id: uuid("id").defaultRandom().primaryKey(),
+export const products = pgTable('products', {
+  id: uuid('id').defaultRandom().primaryKey(),
   // ... other fields
-  priceCents: integer("price_cents").notNull(), // ← Cents, not dollars
-  compareAtPriceCents: integer("compare_at_price_cents"), // ← Nullable
-  currency: text("currency").default("USD").notNull(),
+  priceCents: integer('price_cents').notNull(), // ← Cents, not dollars
+  compareAtPriceCents: integer('compare_at_price_cents'), // ← Nullable
+  currency: text('currency').default('USD').notNull(),
 });
 
 // Display logic (apps/web/src/components/shop/ProductCard.tsx)
 function formatPrice(cents: number, currency: string) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency,
   }).format(cents / 100);
 }
@@ -784,24 +784,24 @@ erDiagram
 
 > Full column-level definitions are in `docs/PRD_unified.md` §9.2. This section documents the architectural decisions, not the column lists.
 
-| Table | Layer | Purpose | Notes |
-|-------|-------|---------|-------|
-| `users` | Better Auth managed | Email, password hash, role | Better Auth creates this; we add `role` enum |
-| `sessions` | Better Auth managed | Session tokens, expiry, IP | DB-backed (not JWT) — enables instant revocation |
-| `accounts` | Better Auth managed | OAuth provider links | Google, Apple (Phase 2) |
-| `customers` | Application | Customer profile (name, phone, newsletter) | 1:1 with `users` |
-| `addresses` | Application | Shipping/billing addresses | Multiple per customer; default flags |
-| `collections` | Application | Product collections (Lighting, Furniture, etc.) | Slug-indexed |
-| `products` | Application | Product catalog | Soft-deleted (`is_active = false`) |
-| `product_variants` | Application | Size/finish/material variants | Each has own SKU + stock |
-| `product_images` | Application | Multiple images per product | Sort-ordered |
-| `carts` | Application | Shopping cart (anonymous + authenticated) | `anonymous_id` cookie for guests |
-| `cart_items` | Application | Cart line items | Quantity 1–99 |
-| `orders` | Application | Placed orders | `stripe_idempotency_key` UNIQUE |
-| `line_items` | Application | Order line items (snapshot of product + price) | Never references live product (preserves order history) |
-| `wishlist_items` | Application | Saved products | UNIQUE (customer_id, product_id) |
-| `discounts` | Application (Phase 2) | Promo codes | Percentage / fixed / free shipping |
-| `audit_log` | Application | Admin action audit trail | Required for PCI DSS compliance |
+| Table              | Layer                 | Purpose                                         | Notes                                                   |
+| ------------------ | --------------------- | ----------------------------------------------- | ------------------------------------------------------- |
+| `users`            | Better Auth managed   | Email, password hash, role                      | Better Auth creates this; we add `role` enum            |
+| `sessions`         | Better Auth managed   | Session tokens, expiry, IP                      | DB-backed (not JWT) — enables instant revocation        |
+| `accounts`         | Better Auth managed   | OAuth provider links                            | Google, Apple (Phase 2)                                 |
+| `customers`        | Application           | Customer profile (name, phone, newsletter)      | 1:1 with `users`                                        |
+| `addresses`        | Application           | Shipping/billing addresses                      | Multiple per customer; default flags                    |
+| `collections`      | Application           | Product collections (Lighting, Furniture, etc.) | Slug-indexed                                            |
+| `products`         | Application           | Product catalog                                 | Soft-deleted (`is_active = false`)                      |
+| `product_variants` | Application           | Size/finish/material variants                   | Each has own SKU + stock                                |
+| `product_images`   | Application           | Multiple images per product                     | Sort-ordered                                            |
+| `carts`            | Application           | Shopping cart (anonymous + authenticated)       | `anonymous_id` cookie for guests                        |
+| `cart_items`       | Application           | Cart line items                                 | Quantity 1–99                                           |
+| `orders`           | Application           | Placed orders                                   | `stripe_idempotency_key` UNIQUE                         |
+| `line_items`       | Application           | Order line items (snapshot of product + price)  | Never references live product (preserves order history) |
+| `wishlist_items`   | Application           | Saved products                                  | UNIQUE (customer_id, product_id)                        |
+| `discounts`        | Application (Phase 2) | Promo codes                                     | Percentage / fixed / free shipping                      |
+| `audit_log`        | Application           | Admin action audit trail                        | Required for PCI DSS compliance                         |
 
 ### 4.3 Persistence Strategy
 
@@ -826,14 +826,15 @@ erDiagram
 
 ### 5.1 Typographic System
 
-| Role | Font | Weights | Fallback | Usage |
-|------|------|---------|----------|-------|
-| Display | Cormorant Garamond | 300, 400, 500, 600, 700, italic 400, italic 500 | Georgia, serif | H1–H6, product names, logo, editorial headlines |
-| Body | Inter | 300, 400, 500, 600 | system-ui, -apple-system, sans-serif | Paragraphs, labels, buttons, nav, form inputs |
+| Role    | Font               | Weights                                         | Fallback                             | Usage                                           |
+| ------- | ------------------ | ----------------------------------------------- | ------------------------------------ | ----------------------------------------------- |
+| Display | Cormorant Garamond | 300, 400, 500, 600, 700, italic 400, italic 500 | Georgia, serif                       | H1–H6, product names, logo, editorial headlines |
+| Body    | Inter              | 300, 400, 500, 600                              | system-ui, -apple-system, sans-serif | Paragraphs, labels, buttons, nav, form inputs   |
 
 **Self-hosting:** woff2 files in `packages/ui/src/fonts/cormorant/` and `packages/ui/src/fonts/inter/`. Subsets: Latin, Latin Extended, Cyrillic (for future Russian market). `font-display: swap` with preload of critical weights (regular 400 + bold 600) in `apps/web/src/app/layout.tsx`.
 
 **Type scale (CSS custom properties):**
+
 - Hero title: `clamp(3rem, 8.5vw, 7.5rem)` (Cormorant 400, line-height 0.98)
 - Section title: `clamp(2rem, 4.5vw, 3.4rem)` (Cormorant 500)
 - Body large (lede): `clamp(1rem, 1.15vw, 1.125rem)` (Inter 400, line-height 1.7)
@@ -845,23 +846,23 @@ erDiagram
 
 All tokens are CSS custom properties, ported to `packages/ui/src/tokens/colors.css` and re-exported via `@theme` in `apps/web/src/app/globals.css`.
 
-| Token | Hex | Usage | WCAG Contrast (on --bg) |
-|-------|-----|-------|--------------------------|
-| `--bg` | `#faf8f5` | Page background (warm cream) | — |
-| `--bg-2` | `#f3efe8` | Linen section backgrounds | — |
-| `--bg-3` | `#ece5d8` | Deeper linen (journal, testimonials) | — |
-| `--bg-card` | `#ffffff` | Product cards, modal surfaces | — |
-| `--bg-dark` | `#1f1b17` | Footer, newsletter, marquee | — |
-| `--ink` | `#1f1b17` | Primary text | 14.8:1 ✅ AAA |
-| `--ink-2` | `#4a433b` | Secondary text | 9.2:1 ✅ AAA |
-| `--muted` | `#8a8178` | Tertiary text, meta labels | 4.6:1 ✅ AA |
-| `--line` | `#e5ddd1` | Borders, dividers | — |
-| `--line-soft` | `#efe9df` | Subtle dividers | — |
-| `--clay` | `#a86b4a` | Primary accent (CTAs, links, badges) | 4.8:1 ✅ AA |
-| `--clay-dark` | `#8a5538` | Hover state for clay | 6.1:1 ✅ AA |
-| `--clay-light` | `#c17d52` | Secondary clay | 3.9:1 (large text only) |
-| `--gold` | `#c4a265` | Editorial accent (hero italic, ornament) | 3.2:1 (large/decorative only) |
-| `--sage` | `#8b9a82` | Tertiary muted green (Phase 2 badges) | 3.5:1 (large text only) |
+| Token          | Hex       | Usage                                    | WCAG Contrast (on --bg)       |
+| -------------- | --------- | ---------------------------------------- | ----------------------------- |
+| `--bg`         | `#faf8f5` | Page background (warm cream)             | —                             |
+| `--bg-2`       | `#f3efe8` | Linen section backgrounds                | —                             |
+| `--bg-3`       | `#ece5d8` | Deeper linen (journal, testimonials)     | —                             |
+| `--bg-card`    | `#ffffff` | Product cards, modal surfaces            | —                             |
+| `--bg-dark`    | `#1f1b17` | Footer, newsletter, marquee              | —                             |
+| `--ink`        | `#1f1b17` | Primary text                             | 14.8:1 ✅ AAA                 |
+| `--ink-2`      | `#4a433b` | Secondary text                           | 9.2:1 ✅ AAA                  |
+| `--muted`      | `#8a8178` | Tertiary text, meta labels               | 4.6:1 ✅ AA                   |
+| `--line`       | `#e5ddd1` | Borders, dividers                        | —                             |
+| `--line-soft`  | `#efe9df` | Subtle dividers                          | —                             |
+| `--clay`       | `#a86b4a` | Primary accent (CTAs, links, badges)     | 4.8:1 ✅ AA                   |
+| `--clay-dark`  | `#8a5538` | Hover state for clay                     | 6.1:1 ✅ AA                   |
+| `--clay-light` | `#c17d52` | Secondary clay                           | 3.9:1 (large text only)       |
+| `--gold`       | `#c4a265` | Editorial accent (hero italic, ornament) | 3.2:1 (large/decorative only) |
+| `--sage`       | `#8b9a82` | Tertiary muted green (Phase 2 badges)    | 3.5:1 (large text only)       |
 
 **Accessibility rule:** Body text must use `--ink` or `--ink-2` (both AAA on `--bg`). `--muted` is AA (use only for meta labels at 11px+, never for primary content). `--gold` and `--sage` are decorative only — never use for text smaller than 18px.
 
@@ -869,35 +870,37 @@ All tokens are CSS custom properties, ported to `packages/ui/src/tokens/colors.c
 
 Built on Radix UI (accessibility) + Tailwind v4 (styling) + `class-variance-authority` (variants).
 
-| Component | Base | Variants | Customisation |
-|-----------|------|----------|---------------|
-| Button | Radix Slot + CVA | `primary` (clay), `outline` (ink border), `ghost` (no border) | Uppercase 13px, 0.14em tracking, 0.95rem 1.75rem padding |
-| Input | Radix Label + custom | `default` (full border), `underline` (border-bottom only, for newsletter) | Focus ring: clay outline |
-| Dialog | Radix Dialog | `drawer` (slide-in right, 380px), `modal` (centered) | Used for cart drawer, quick view |
-| Toast | Sonner | `default` (ink bg, cream text) | Bottom-center, 2.8s auto-dismiss |
-| Select | Radix Select | — | Minimal, ink-on-cream |
-| Tabs | Radix Tabs | `gallery` (PDP image thumbnails) | — |
-| Dropdown | Radix Popover | `mega-nav` (Phase 2) | Category previews |
-| Tooltip | Radix Tooltip | — | — |
-| Form | React Hook Form + Zod | — | `@hookform/resolvers` for Zod |
+| Component | Base                  | Variants                                                                  | Customisation                                            |
+| --------- | --------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Button    | Radix Slot + CVA      | `primary` (clay), `outline` (ink border), `ghost` (no border)             | Uppercase 13px, 0.14em tracking, 0.95rem 1.75rem padding |
+| Input     | Radix Label + custom  | `default` (full border), `underline` (border-bottom only, for newsletter) | Focus ring: clay outline                                 |
+| Dialog    | Radix Dialog          | `drawer` (slide-in right, 380px), `modal` (centered)                      | Used for cart drawer, quick view                         |
+| Toast     | Sonner                | `default` (ink bg, cream text)                                            | Bottom-center, 2.8s auto-dismiss                         |
+| Select    | Radix Select          | —                                                                         | Minimal, ink-on-cream                                    |
+| Tabs      | Radix Tabs            | `gallery` (PDP image thumbnails)                                          | —                                                        |
+| Dropdown  | Radix Popover         | `mega-nav` (Phase 2)                                                      | Category previews                                        |
+| Tooltip   | Radix Tooltip         | —                                                                         | —                                                        |
+| Form      | React Hook Form + Zod | —                                                                         | `@hookform/resolvers` for Zod                            |
 
 ### 5.4 Motion / Animation
 
-| Animation | Duration | Easing | Reduced-Motion Fallback |
-|-----------|----------|--------|--------------------------|
-| Ken Burns (hero) | 24s | ease-in-out, alternate infinite | Disabled (static image) |
-| Marquee | 38s | linear infinite | Disabled (static, wraps) |
-| Scroll reveal | 0.9s | `cubic-bezier(0.16, 1, 0.3, 1)` | Instant (no transform) |
-| Image hover scale | 1.0–1.2s | ease-out | Disabled |
-| Button hover translate | 0.45s | `cubic-bezier(0.22, 1, 0.36, 1)` | Color change only |
-| Toast slide | 0.45s | ease | Instant |
-| Stagger delay | 0.1s/item | — | Removed |
+| Animation              | Duration  | Easing                           | Reduced-Motion Fallback  |
+| ---------------------- | --------- | -------------------------------- | ------------------------ |
+| Ken Burns (hero)       | 24s       | ease-in-out, alternate infinite  | Disabled (static image)  |
+| Marquee                | 38s       | linear infinite                  | Disabled (static, wraps) |
+| Scroll reveal          | 0.9s      | `cubic-bezier(0.16, 1, 0.3, 1)`  | Instant (no transform)   |
+| Image hover scale      | 1.0–1.2s  | ease-out                         | Disabled                 |
+| Button hover translate | 0.45s     | `cubic-bezier(0.22, 1, 0.36, 1)` | Color change only        |
+| Toast slide            | 0.45s     | ease                             | Instant                  |
+| Stagger delay          | 0.1s/item | —                                | Removed                  |
 
 All animations respect `prefers-reduced-motion: reduce` via a global CSS rule:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -911,34 +914,34 @@ All animations respect `prefers-reduced-motion: reduce` via a global CSS rule:
 
 ### 6.1 Security Rules
 
-| Rule | Enforcement | Layer |
-|------|-------------|-------|
-| All mutating tRPC procedures require authentication | tRPC middleware (`@maison/api/src/middleware/auth.ts`) | Layer 1 |
-| All `admin.*` procedures require `staff` or `admin` role | tRPC middleware (RBAC check) | Layer 1 |
-| All user inputs validated with Zod | tRPC input parsers (compile-time + runtime) | Layer 1 |
-| All SQL parameterised (no string interpolation) | Drizzle ORM (enforces parameterisation) | Layer 0 |
-| All Stripe webhooks signature-verified | Route handler (`api/webhooks/stripe/route.ts`) | API routes |
-| All Sanity webhooks signature-verified | Route handler (`api/webhooks/sanity/route.ts`) | API routes |
-| Rate limiting on auth + checkout endpoints | tRPC middleware (Upstash Redis, fail-open) | Layer 1 |
-| CSP headers enforced | `next.config.ts` + CI test (CSP verify) | Vercel Edge |
-| No secrets in client code | `NEXT_PUBLIC_*` prefix audit in CI | CI |
-| Dependencies audited for CVEs | `pnpm audit --audit-level=high` in CI | CI |
-| Supply-chain guardrail (24h release delay) | `pnpm-workspace.yaml` `minimumReleaseAge: 1440` | Install |
-| Admin actions logged | `audit_log` table + `@maison/api/src/lib/audit-log.ts` | Layer 1 |
-| Sessions DB-backed (revocable) | Better Auth config | Layer 1 |
-| HTTPS enforced | Vercel (auto-TLS, HSTS header) | Edge |
+| Rule                                                     | Enforcement                                            | Layer       |
+| -------------------------------------------------------- | ------------------------------------------------------ | ----------- |
+| All mutating tRPC procedures require authentication      | tRPC middleware (`@maison/api/src/middleware/auth.ts`) | Layer 1     |
+| All `admin.*` procedures require `staff` or `admin` role | tRPC middleware (RBAC check)                           | Layer 1     |
+| All user inputs validated with Zod                       | tRPC input parsers (compile-time + runtime)            | Layer 1     |
+| All SQL parameterised (no string interpolation)          | Drizzle ORM (enforces parameterisation)                | Layer 0     |
+| All Stripe webhooks signature-verified                   | Route handler (`api/webhooks/stripe/route.ts`)         | API routes  |
+| All Sanity webhooks signature-verified                   | Route handler (`api/webhooks/sanity/route.ts`)         | API routes  |
+| Rate limiting on auth + checkout endpoints               | tRPC middleware (Upstash Redis, fail-open)             | Layer 1     |
+| CSP headers enforced                                     | `next.config.ts` + CI test (CSP verify)                | Vercel Edge |
+| No secrets in client code                                | `NEXT_PUBLIC_*` prefix audit in CI                     | CI          |
+| Dependencies audited for CVEs                            | `pnpm audit --audit-level=high` in CI                  | CI          |
+| Supply-chain guardrail (24h release delay)               | `pnpm-workspace.yaml` `minimumReleaseAge: 1440`        | Install     |
+| Admin actions logged                                     | `audit_log` table + `@maison/api/src/lib/audit-log.ts` | Layer 1     |
+| Sessions DB-backed (revocable)                           | Better Auth config                                     | Layer 1     |
+| HTTPS enforced                                           | Vercel (auto-TLS, HSTS header)                         | Edge        |
 
 ### 6.2 Security Utilities
 
-| Utility | Location | Purpose |
-|---------|----------|---------|
-| `verifyStripeSignature` | `packages/payments/src/webhooks.ts` | Stripe webhook signature verification |
-| `verifySanitySignature` | `apps/web/src/app/api/webhooks/sanity/route.ts` | Sanity webhook signature verification |
-| `rateLimit` | `packages/api/src/middleware/rateLimit.ts` | Upstash Redis sliding-window rate limit (fail-open) |
-| `requireRole` | `packages/api/src/middleware/auth.ts` | RBAC role check (throws `UNAUTHORIZED` if insufficient) |
-| `auditLog` | `packages/api/src/lib/audit-log.ts` | Write to `audit_log` table (admin actions) |
-| `sanitizeInput` | Zod schemas (per-procedure) | Input validation + sanitisation |
-| `generateIdempotencyKey` | Client-side (UUID v4) | Stripe idempotency key generation |
+| Utility                  | Location                                        | Purpose                                                 |
+| ------------------------ | ----------------------------------------------- | ------------------------------------------------------- |
+| `verifyStripeSignature`  | `packages/payments/src/webhooks.ts`             | Stripe webhook signature verification                   |
+| `verifySanitySignature`  | `apps/web/src/app/api/webhooks/sanity/route.ts` | Sanity webhook signature verification                   |
+| `rateLimit`              | `packages/api/src/middleware/rateLimit.ts`      | Upstash Redis sliding-window rate limit (fail-open)     |
+| `requireRole`            | `packages/api/src/middleware/auth.ts`           | RBAC role check (throws `UNAUTHORIZED` if insufficient) |
+| `auditLog`               | `packages/api/src/lib/audit-log.ts`             | Write to `audit_log` table (admin actions)              |
+| `sanitizeInput`          | Zod schemas (per-procedure)                     | Input validation + sanitisation                         |
+| `generateIdempotencyKey` | Client-side (UUID v4)                           | Stripe idempotency key generation                       |
 
 ### 6.3 Authentication & Authorization
 
@@ -956,28 +959,28 @@ Login flow:
 
 **RBAC roles:**
 
-| Role | Permissions | Can access |
-|------|-------------|------------|
-| `customer` (default) | Own account, orders, wishlist, addresses | `(shop)`, `(account)`, `account.*` procedures |
-| `staff` | All customer permissions + admin read | `(admin)` (read-only), `admin.*.list` procedures |
-| `admin` | Full access | All routes, all `admin.*` procedures including mutations |
+| Role                 | Permissions                              | Can access                                               |
+| -------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| `customer` (default) | Own account, orders, wishlist, addresses | `(shop)`, `(account)`, `account.*` procedures            |
+| `staff`              | All customer permissions + admin read    | `(admin)` (read-only), `admin.*.list` procedures         |
+| `admin`              | Full access                              | All routes, all `admin.*` procedures including mutations |
 
 **Token strategy:** Sessions are 30-day sliding expiry (refreshed on activity). OAuth tokens (Google, Apple) are stored in `accounts` table (Better Auth managed). No JWTs — database lookup per request is fast (indexed by session_id).
 
 ### 6.4 Threat Model
 
-| Threat | Vector | Mitigation |
-|--------|--------|------------|
-| SQL injection | Unsanitised input in queries | Drizzle ORM (parameterised), Zod input validation |
-| XSS | User-generated content (product descriptions, journal) | Sanity renders to structured JSON; React escapes by default; CSP blocks inline scripts |
-| CSRF | Cross-site form submission | Better Auth uses SameSite=Lax cookies; tRPC mutations require origin header check |
-| Session hijacking | Stolen session cookie | httpOnly + Secure + SameSite=Lax cookies; IP + User-Agent fingerprinting (Phase 2) |
-| Brute-force login | Automated password guessing | Rate limiting (10 attempts / 10 min per IP); account lockout after 5 failed attempts |
-| Webhook spoofing | Fake Stripe/Sanity webhook | Signature verification with `STRIPE_WEBHOOK_SECRET` / `SANITY_WEBHOOK_SECRET` |
-| Supply-chain attack | Malicious npm package | `minimumReleaseAge: 1440` (24h delay); `pnpm audit` in CI; dependabot alerts |
-| Card data exposure | Card numbers in our system | Stripe Elements (card data never touches our servers); PCI SAQ-A scope |
-| Admin privilege escalation | Customer accessing admin routes | `proxy.ts` redirects unauthenticated users; tRPC `requireRole` middleware double-checks |
-| GDPR violation | Customer data retained after erasure request | `account.deleteAccount` procedure cascades to customer data; orders retained 7 years (tax law) with PII stripped |
+| Threat                     | Vector                                                 | Mitigation                                                                                                       |
+| -------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| SQL injection              | Unsanitised input in queries                           | Drizzle ORM (parameterised), Zod input validation                                                                |
+| XSS                        | User-generated content (product descriptions, journal) | Sanity renders to structured JSON; React escapes by default; CSP blocks inline scripts                           |
+| CSRF                       | Cross-site form submission                             | Better Auth uses SameSite=Lax cookies; tRPC mutations require origin header check                                |
+| Session hijacking          | Stolen session cookie                                  | httpOnly + Secure + SameSite=Lax cookies; IP + User-Agent fingerprinting (Phase 2)                               |
+| Brute-force login          | Automated password guessing                            | Rate limiting (10 attempts / 10 min per IP); account lockout after 5 failed attempts                             |
+| Webhook spoofing           | Fake Stripe/Sanity webhook                             | Signature verification with `STRIPE_WEBHOOK_SECRET` / `SANITY_WEBHOOK_SECRET`                                    |
+| Supply-chain attack        | Malicious npm package                                  | `minimumReleaseAge: 1440` (24h delay); `pnpm audit` in CI; dependabot alerts                                     |
+| Card data exposure         | Card numbers in our system                             | Stripe Elements (card data never touches our servers); PCI SAQ-A scope                                           |
+| Admin privilege escalation | Customer accessing admin routes                        | `proxy.ts` redirects unauthenticated users; tRPC `requireRole` middleware double-checks                          |
+| GDPR violation             | Customer data retained after erasure request           | `account.deleteAccount` procedure cascades to customer data; orders retained 7 years (tax law) with PII stripped |
 
 ### 6.5 GDPR / CCPA Compliance
 
@@ -1009,13 +1012,13 @@ services/workers/
 
 ### 7.2 Job Queue Configuration
 
-| Job | Trigger | Concurrency | Retry Policy |
-|-----|---------|-------------|--------------|
-| `abandoned-cart` | Cron (every 30 min, checks for carts abandoned 1h/24h/72h ago) | 5 concurrent | 3 retries, exponential backoff |
-| `order-confirmation` | Event (order.created) | 10 concurrent | 5 retries (email is critical) |
-| `shipping-update` | Event (order.status_changed to "shipped") | 10 concurrent | 3 retries |
-| `weekly-digest` | Cron (Sunday 9am CET) | 1 (sequential, batches by recipient) | 2 retries |
-| `inventory-alert` | Event (variant.stock_quantity < threshold) | 3 concurrent | No retry (alert is best-effort) |
+| Job                  | Trigger                                                        | Concurrency                          | Retry Policy                    |
+| -------------------- | -------------------------------------------------------------- | ------------------------------------ | ------------------------------- |
+| `abandoned-cart`     | Cron (every 30 min, checks for carts abandoned 1h/24h/72h ago) | 5 concurrent                         | 3 retries, exponential backoff  |
+| `order-confirmation` | Event (order.created)                                          | 10 concurrent                        | 5 retries (email is critical)   |
+| `shipping-update`    | Event (order.status_changed to "shipped")                      | 10 concurrent                        | 3 retries                       |
+| `weekly-digest`      | Cron (Sunday 9am CET)                                          | 1 (sequential, batches by recipient) | 2 retries                       |
+| `inventory-alert`    | Event (variant.stock_quantity < threshold)                     | 3 concurrent                         | No retry (alert is best-effort) |
 
 ### 7.3 Flow Patterns
 
@@ -1046,14 +1049,14 @@ checkout.confirmOrder (tRPC mutation)
 
 ### 8.1 Test Distribution
 
-| Category | Framework | Location | Test Count Target | Coverage Target |
-|----------|-----------|----------|-------------------|-----------------|
-| Unit tests (business logic) | Vitest | `packages/*/src/**/*.test.ts` | ~300 | 80% |
-| Component tests | Vitest + Testing Library | `apps/web/src/components/**/*.test.tsx` | ~150 | 70% |
-| Integration tests (tRPC + test DB) | Vitest + testcontainers | `packages/api/src/**/*.integration.test.ts` | ~80 | Critical paths |
-| E2E tests (user journeys) | Playwright | `e2e/*.spec.ts` | ~40 | All P0 stories |
-| Accessibility tests | `@axe-core/playwright` | `e2e/accessibility.spec.ts` | 1 per route | All pages |
-| Visual regression | Playwright screenshots | `e2e/visual/*.spec.ts` | ~20 | Key pages |
+| Category                           | Framework                | Location                                    | Test Count Target | Coverage Target |
+| ---------------------------------- | ------------------------ | ------------------------------------------- | ----------------- | --------------- |
+| Unit tests (business logic)        | Vitest                   | `packages/*/src/**/*.test.ts`               | ~300              | 80%             |
+| Component tests                    | Vitest + Testing Library | `apps/web/src/components/**/*.test.tsx`     | ~150              | 70%             |
+| Integration tests (tRPC + test DB) | Vitest + testcontainers  | `packages/api/src/**/*.integration.test.ts` | ~80               | Critical paths  |
+| E2E tests (user journeys)          | Playwright               | `e2e/*.spec.ts`                             | ~40               | All P0 stories  |
+| Accessibility tests                | `@axe-core/playwright`   | `e2e/accessibility.spec.ts`                 | 1 per route       | All pages       |
+| Visual regression                  | Playwright screenshots   | `e2e/visual/*.spec.ts`                      | ~20               | Key pages       |
 
 ### 8.2 Test Patterns
 
@@ -1061,14 +1064,14 @@ checkout.confirmOrder (tRPC mutation)
 
 ```typescript
 // packages/api/src/routers/products.test.ts
-import { describe, it, expect, beforeEach } from "vitest";
-import { mockDB } from "../../test/mock-db";
-import { productsRouter } from "./products";
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mockDB } from '../../test/mock-db';
+import { productsRouter } from './products';
 
-describe("products.list", () => {
+describe('products.list', () => {
   beforeEach(() => mockDB.reset());
 
-  it("returns paginated products", async () => {
+  it('returns paginated products', async () => {
     const caller = productsRouter.createCaller({
       db: mockDB,
       session: null,
@@ -1078,10 +1081,10 @@ describe("products.list", () => {
     expect(result.nextCursor).toBeDefined();
   });
 
-  it("filters by collection", async () => {
+  it('filters by collection', async () => {
     const caller = productsRouter.createCaller({ db: mockDB, session: null });
-    const result = await caller.list({ collection: "lighting", limit: 100 });
-    expect(result.items.every((p) => p.collectionSlug === "lighting")).toBe(true);
+    const result = await caller.list({ collection: 'lighting', limit: 100 });
+    expect(result.items.every((p) => p.collectionSlug === 'lighting')).toBe(true);
   });
 });
 ```
@@ -1090,35 +1093,35 @@ describe("products.list", () => {
 
 ```typescript
 // e2e/checkout.spec.ts
-import { test, expect } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
-test.describe("Checkout flow", () => {
-  test("guest user can complete purchase", async ({ page }) => {
-    await page.goto("/products");
+test.describe('Checkout flow', () => {
+  test('guest user can complete purchase', async ({ page }) => {
+    await page.goto('/products');
     await page.click('[data-testid="product-card"]:first-child');
     await page.click('[data-testid="add-to-cart"]');
     await page.click('[data-testid="checkout"]');
     // ... fill shipping + payment
     await page.click('[data-testid="place-order"]');
     await expect(page).toHaveURL(/\/order\/MAI-\d{4}-\d{4}/);
-    await expect(page.locator("h1")).toContainText("Order Confirmed");
+    await expect(page.locator('h1')).toContainText('Order Confirmed');
   });
 });
 ```
 
 ### 8.3 Coverage Thresholds
 
-| Package | Minimum Coverage | Rationale |
-|---------|------------------|-----------|
-| `packages/db` | 80% | Schema integrity critical |
-| `packages/api` | 85% | Business logic critical |
-| `packages/auth` | 90% | Security critical |
-| `packages/payments` | 90% | Money critical |
-| `packages/email` | 70% | Templates, lower risk |
-| `packages/ui` | 50% | Visual, hard to unit test |
-| `packages/config` | 80% | Env validation critical |
-| `apps/web/src/lib` | 75% | Server-side callers |
-| `apps/web/src/components` | 60% | Visual, relies on E2E |
+| Package                   | Minimum Coverage | Rationale                 |
+| ------------------------- | ---------------- | ------------------------- |
+| `packages/db`             | 80%              | Schema integrity critical |
+| `packages/api`            | 85%              | Business logic critical   |
+| `packages/auth`           | 90%              | Security critical         |
+| `packages/payments`       | 90%              | Money critical            |
+| `packages/email`          | 70%              | Templates, lower risk     |
+| `packages/ui`             | 50%              | Visual, hard to unit test |
+| `packages/config`         | 80%              | Env validation critical   |
+| `apps/web/src/lib`        | 75%              | Server-side callers       |
+| `apps/web/src/components` | 60%              | Visual, relies on E2E     |
 
 ### 8.4 Pre-PR / Pre-Deploy Checklist
 
@@ -1169,46 +1172,47 @@ pnpm build                    # Builds all packages + apps via Turborepo
 
 > Full reference in `.env.example`. Critical variables documented here.
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `NODE_ENV` | ✅ | `development` | `production` for prod builds |
-| `NEXT_PUBLIC_APP_URL` | ✅ | — | Canonical app URL (e.g. `https://maison-living.com`) |
-| `DATABASE_URL` | ✅ | — | Pooled Postgres (Neon pooler or Docker). Used for app queries. |
-| `DATABASE_URL_UNPOOLED` | ✅ | — | Direct Postgres. Used ONLY for migrations (PgBouncer breaks prepared statements). |
-| `BETTER_AUTH_SECRET` | ✅ | — | Session signing key (min 32 chars). Generate: `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | ✅ | — | App URL for auth callbacks. MUST be set in production (config throws otherwise). |
-| `GOOGLE_CLIENT_ID` | Phase 2 | — | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Phase 2 | — | Google OAuth client secret |
-| `STRIPE_SECRET_KEY` | ✅ | — | Server-side Stripe API key (`sk_test_...` or `sk_live_...`) |
-| `STRIPE_WEBHOOK_SECRET` | ✅ | — | Stripe webhook signature verification (`whsec_...`) |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅ | — | Client-side Stripe Elements (`pk_test_...` or `pk_live_...`) |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | ✅ | — | Sanity project ID |
-| `NEXT_PUBLIC_SANITY_DATASET` | ✅ | `production` | Sanity dataset name |
-| `SANITY_API_TOKEN` | ✅ | — | Server-side Sanity read token |
-| `SANITY_WEBHOOK_SECRET` | ✅ | — | Sanity webhook signature verification |
-| `RESEND_API_KEY` | ✅ | — | Resend API key (`re_...`) |
-| `EMAIL_FROM` | ✅ | — | From address (e.g. `hello@maison-living.com`) |
-| `TRIGGER_SECRET_KEY` | ✅ | — | Trigger.dev v4 secret key (`tr_dev_...` or `tr_prod_...`) |
-| `UPSTASH_REDIS_REST_URL` | ✅ | — | Upstash Redis REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` | ✅ | — | Upstash Redis auth token |
-| `SENTRY_DSN` | ⚪ Optional | — | Sentry DSN (app runs without if unset) |
-| `NEXT_PUBLIC_SENTRY_DSN` | ⚪ Optional | — | Client-side Sentry DSN |
-| `SENTRY_AUTH_TOKEN` | ⚪ CI only | — | Sentry source map upload auth |
-| `NEXT_PUBLIC_POSTHOG_KEY` | ✅ | — | PostHog project API key |
-| `NEXT_PUBLIC_POSTHOG_HOST` | ✅ | `https://app.posthog.com` | PostHog host |
-| `AXIOM_TOKEN` | ⚪ Optional | — | Axiom structured logging token |
-| `AXIOM_DATASET` | ⚪ Optional | — | Axiom dataset name |
-| `CLOUDFLARE_ACCOUNT_ID` | ✅ | — | Cloudflare account ID |
-| `CLOUDFLARE_IMAGES_TOKEN` | ✅ | — | Cloudflare Images API token |
-| `CLOUDFLARE_R2_ACCESS_KEY_ID` | ✅ | — | R2 access key |
-| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | ✅ | — | R2 secret key |
-| `CLOUDFLARE_R2_BUCKET` | ✅ | — | R2 bucket name |
-| `CLOUDFLARE_R2_ENDPOINT` | ✅ | — | R2 endpoint URL |
-| `NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL` | ✅ | — | Cloudflare Images delivery URL |
+| Variable                             | Required    | Default                   | Description                                                                       |
+| ------------------------------------ | ----------- | ------------------------- | --------------------------------------------------------------------------------- |
+| `NODE_ENV`                           | ✅          | `development`             | `production` for prod builds                                                      |
+| `NEXT_PUBLIC_APP_URL`                | ✅          | —                         | Canonical app URL (e.g. `https://maison-living.com`)                              |
+| `DATABASE_URL`                       | ✅          | —                         | Pooled Postgres (Neon pooler or Docker). Used for app queries.                    |
+| `DATABASE_URL_UNPOOLED`              | ✅          | —                         | Direct Postgres. Used ONLY for migrations (PgBouncer breaks prepared statements). |
+| `BETTER_AUTH_SECRET`                 | ✅          | —                         | Session signing key (min 32 chars). Generate: `openssl rand -base64 32`           |
+| `BETTER_AUTH_URL`                    | ✅          | —                         | App URL for auth callbacks. MUST be set in production (config throws otherwise).  |
+| `GOOGLE_CLIENT_ID`                   | Phase 2     | —                         | Google OAuth client ID                                                            |
+| `GOOGLE_CLIENT_SECRET`               | Phase 2     | —                         | Google OAuth client secret                                                        |
+| `STRIPE_SECRET_KEY`                  | ✅          | —                         | Server-side Stripe API key (`sk_test_...` or `sk_live_...`)                       |
+| `STRIPE_WEBHOOK_SECRET`              | ✅          | —                         | Stripe webhook signature verification (`whsec_...`)                               |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅          | —                         | Client-side Stripe Elements (`pk_test_...` or `pk_live_...`)                      |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`      | ✅          | —                         | Sanity project ID                                                                 |
+| `NEXT_PUBLIC_SANITY_DATASET`         | ✅          | `production`              | Sanity dataset name                                                               |
+| `SANITY_API_TOKEN`                   | ✅          | —                         | Server-side Sanity read token                                                     |
+| `SANITY_WEBHOOK_SECRET`              | ✅          | —                         | Sanity webhook signature verification                                             |
+| `RESEND_API_KEY`                     | ✅          | —                         | Resend API key (`re_...`)                                                         |
+| `EMAIL_FROM`                         | ✅          | —                         | From address (e.g. `hello@maison-living.com`)                                     |
+| `TRIGGER_SECRET_KEY`                 | ✅          | —                         | Trigger.dev v4 secret key (`tr_dev_...` or `tr_prod_...`)                         |
+| `UPSTASH_REDIS_REST_URL`             | ✅          | —                         | Upstash Redis REST URL                                                            |
+| `UPSTASH_REDIS_REST_TOKEN`           | ✅          | —                         | Upstash Redis auth token                                                          |
+| `SENTRY_DSN`                         | ⚪ Optional | —                         | Sentry DSN (app runs without if unset)                                            |
+| `NEXT_PUBLIC_SENTRY_DSN`             | ⚪ Optional | —                         | Client-side Sentry DSN                                                            |
+| `SENTRY_AUTH_TOKEN`                  | ⚪ CI only  | —                         | Sentry source map upload auth                                                     |
+| `NEXT_PUBLIC_POSTHOG_KEY`            | ✅          | —                         | PostHog project API key                                                           |
+| `NEXT_PUBLIC_POSTHOG_HOST`           | ✅          | `https://app.posthog.com` | PostHog host                                                                      |
+| `AXIOM_TOKEN`                        | ⚪ Optional | —                         | Axiom structured logging token                                                    |
+| `AXIOM_DATASET`                      | ⚪ Optional | —                         | Axiom dataset name                                                                |
+| `CLOUDFLARE_ACCOUNT_ID`              | ✅          | —                         | Cloudflare account ID                                                             |
+| `CLOUDFLARE_IMAGES_TOKEN`            | ✅          | —                         | Cloudflare Images API token                                                       |
+| `CLOUDFLARE_R2_ACCESS_KEY_ID`        | ✅          | —                         | R2 access key                                                                     |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY`    | ✅          | —                         | R2 secret key                                                                     |
+| `CLOUDFLARE_R2_BUCKET`               | ✅          | —                         | R2 bucket name                                                                    |
+| `CLOUDFLARE_R2_ENDPOINT`             | ✅          | —                         | R2 endpoint URL                                                                   |
+| `NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL`  | ✅          | —                         | Cloudflare Images delivery URL                                                    |
 
 ### 9.3 Docker Configuration
 
 **Local dev (`docker-compose.yml`):**
+
 - `postgres:17-alpine` — port 5432, healthcheck, persistent volume
 - `redis:7-alpine` — port 6379, password-protected, persistent volume
 - `stripe/stripe-cli:latest` (profile: `stripe`) — webhook forwarding
@@ -1304,45 +1308,45 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 ### 10.2 Common Commands
 
-| Command | Location | Purpose |
-|---------|----------|---------|
-| `pnpm dev` | repo root | Start all apps in dev mode (Turbopack) |
-| `pnpm --filter=@maison/web dev` | repo root | Start only the web app |
-| `pnpm --filter=@maison/web build` | repo root | Production build of web app only |
-| `pnpm check-types` | repo root | Type-check all packages |
-| `pnpm lint` | repo root | Lint all packages |
-| `pnpm lint:fix` | repo root | Lint + auto-fix |
-| `pnpm format` | repo root | Prettier format all files |
-| `pnpm format:check` | repo root | Check formatting (CI gate) |
-| `pnpm test` | repo root | Run all unit/integration tests |
-| `pnpm --filter=@maison/api test` | repo root | Test a single package |
-| `pnpm test:e2e` | repo root | Run Playwright E2E (requires `pnpm build` first) |
-| `pnpm db:generate` | repo root | Generate Drizzle migrations from schema changes |
-| `pnpm db:migrate` | repo root | Apply pending migrations |
-| `pnpm db:push` | repo root | Push schema directly to DB (dev only!) |
-| `pnpm db:seed` | repo root | Seed initial catalog (8 collections, 13 products) |
-| `pnpm db:studio` | repo root | Open Drizzle Studio GUI |
-| `pnpm db:reset` | repo root | ⚠️ Drop all tables + re-seed (dev only) |
-| `pnpm jobs:dev` | repo root | Start Trigger.dev workers in dev mode |
-| `pnpm audit --audit-level=high` | repo root | Check for high/critical CVEs |
-| `pnpm bundle-size` | repo root | Analyze bundle size (`ANALYZE=true` build) |
-| `pnpm lighthouse` | repo root | Run Lighthouse CI |
-| `docker compose up -d postgres redis` | repo root | Start local DB + cache |
-| `docker compose --profile stripe up -d stripe` | repo root | Start Stripe CLI for webhook forwarding |
-| `docker compose --profile tools up -d adminer` | repo root | Start Adminer DB GUI on :8080 |
+| Command                                        | Location  | Purpose                                           |
+| ---------------------------------------------- | --------- | ------------------------------------------------- |
+| `pnpm dev`                                     | repo root | Start all apps in dev mode (Turbopack)            |
+| `pnpm --filter=@maison/web dev`                | repo root | Start only the web app                            |
+| `pnpm --filter=@maison/web build`              | repo root | Production build of web app only                  |
+| `pnpm check-types`                             | repo root | Type-check all packages                           |
+| `pnpm lint`                                    | repo root | Lint all packages                                 |
+| `pnpm lint:fix`                                | repo root | Lint + auto-fix                                   |
+| `pnpm format`                                  | repo root | Prettier format all files                         |
+| `pnpm format:check`                            | repo root | Check formatting (CI gate)                        |
+| `pnpm test`                                    | repo root | Run all unit/integration tests                    |
+| `pnpm --filter=@maison/api test`               | repo root | Test a single package                             |
+| `pnpm test:e2e`                                | repo root | Run Playwright E2E (requires `pnpm build` first)  |
+| `pnpm db:generate`                             | repo root | Generate Drizzle migrations from schema changes   |
+| `pnpm db:migrate`                              | repo root | Apply pending migrations                          |
+| `pnpm db:push`                                 | repo root | Push schema directly to DB (dev only!)            |
+| `pnpm db:seed`                                 | repo root | Seed initial catalog (8 collections, 13 products) |
+| `pnpm db:studio`                               | repo root | Open Drizzle Studio GUI                           |
+| `pnpm db:reset`                                | repo root | ⚠️ Drop all tables + re-seed (dev only)           |
+| `pnpm jobs:dev`                                | repo root | Start Trigger.dev workers in dev mode             |
+| `pnpm audit --audit-level=high`                | repo root | Check for high/critical CVEs                      |
+| `pnpm bundle-size`                             | repo root | Analyze bundle size (`ANALYZE=true` build)        |
+| `pnpm lighthouse`                              | repo root | Run Lighthouse CI                                 |
+| `docker compose up -d postgres redis`          | repo root | Start local DB + cache                            |
+| `docker compose --profile stripe up -d stripe` | repo root | Start Stripe CLI for webhook forwarding           |
+| `docker compose --profile tools up -d adminer` | repo root | Start Adminer DB GUI on :8080                     |
 
 ### 10.3 Code Style Rules
 
-| Rule | Enforcement | Tool |
-|------|-------------|------|
-| No `any` types | ESLint rule `@typescript-eslint/no-explicit-any` | ESLint |
-| No `console.log` in production | ESLint rule `no-console` (warn) | ESLint |
-| No unused imports/vars | ESLint rule `@typescript-eslint/no-unused-vars` | ESLint |
-| Strict TypeScript | `strict: true` in tsconfig | tsc |
-| Prettier formatting | `prettier --check` in CI | Prettier |
-| Tailwind class sorting | `prettier-plugin-tailwindcss` | Prettier (auto) |
-| Import order | `eslint-plugin-import` | ESLint |
-| Conventional commits | `commitlint` (Phase 2) | commitlint |
+| Rule                           | Enforcement                                      | Tool            |
+| ------------------------------ | ------------------------------------------------ | --------------- |
+| No `any` types                 | ESLint rule `@typescript-eslint/no-explicit-any` | ESLint          |
+| No `console.log` in production | ESLint rule `no-console` (warn)                  | ESLint          |
+| No unused imports/vars         | ESLint rule `@typescript-eslint/no-unused-vars`  | ESLint          |
+| Strict TypeScript              | `strict: true` in tsconfig                       | tsc             |
+| Prettier formatting            | `prettier --check` in CI                         | Prettier        |
+| Tailwind class sorting         | `prettier-plugin-tailwindcss`                    | Prettier (auto) |
+| Import order                   | `eslint-plugin-import`                           | ESLint          |
+| Conventional commits           | `commitlint` (Phase 2)                           | commitlint      |
 
 ### 10.4 Git Workflow
 
@@ -1359,116 +1363,116 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 ## 11. Known Issues & Outstanding Tasks
 
-| Priority | Issue | Impact | Status |
-|----------|-------|--------|--------|
-| ~~CRITICAL~~ | ~~Application code not yet scaffolded (Phase 0)~~ | ~~Cannot run the storefront~~ | ✅ Resolved — Phase 0 scaffold complete |
-| ~~HIGH~~ | ~~GitHub Actions CI workflow not yet created~~ | ~~No automated quality gates~~ | ✅ Resolved — `.github/workflows/ci.yml` created |
-| ~~HIGH~~ | ~~Drizzle schema not yet written~~ | ~~No DB layer~~ | ✅ Resolved — 16 tables in `packages/db/src/schema/`, migration `0000_initial.sql` |
-| ~~HIGH~~ | ~~tRPC routers not yet implemented~~ | ~~No API layer~~ | ✅ Resolved — 8 routers in `packages/api/src/routers/` |
-| ~~MEDIUM~~ | ~~Sanity Studio schemas not yet defined~~ | ~~No CMS content management~~ | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings) |
-| ~~MEDIUM~~ | ~~Playwright E2E test suite not yet written~~ | ~~No automated user journey tests~~ | ✅ Resolved — 16 smoke tests + accessibility tests |
-| ~~HIGH~~ | ~~Homepage renders only Phase 0 hero + 4 products~~ | ~~Brand experience incomplete~~ | ✅ Resolved — Full 15-section homepage with real data |
-| ~~HIGH~~ | ~~Stripe webhook handler returns 200 but doesn't update order status~~ | ~~Cannot process payments end-to-end~~ | ✅ Resolved — Webhook updates order to "confirmed" + sends OrderConfirmation email |
-| ~~HIGH~~ | ~~Cart router creates carts but no cart drawer UI~~ | ~~No add-to-cart from PDP~~ | ✅ Resolved — CartProvider + CartDrawer + AddToBagButton on PDP |
-| ~~HIGH~~ | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~ | ~~Cannot complete purchases~~ | ✅ Resolved — Multi-step checkout with real order creation + Stripe Payment Intents |
-| ~~HIGH~~ | ~~Account dashboard is a stub (no order history, no wishlist UI)~~ | ~~Account section non-functional~~ | ✅ Resolved — Dashboard with order count + wishlist count, order history, wishlist grid |
-| ~~HIGH~~ | ~~Admin dashboard is a stub (no KPI queries, no product table)~~ | ~~Admin section non-functional~~ | ✅ Resolved — Dashboard with KPIs + recent orders + low-stock alerts, product table, order fulfillment, customer directory, inventory management |
-| ~~MEDIUM~~ | ~~Wishlist toggle on ProductCard is client-side only (not persisted to DB)~~ | ~~Wishlist lost on page refresh~~ | ✅ Resolved — WishlistButton persists to DB for auth users, localStorage for anon |
-| ~~MEDIUM~~ | ~~No product image upload in admin~~ | ~~Admin can't add images to new products~~ | ✅ Resolved — Admin product create form (Phase 3: image upload via Cloudflare) |
-| ~~MEDIUM~~ | ~~Stripe Elements not rendering card input (checkout uses demo mode)~~ | ~~No real card payments in dev~~ | ✅ Resolved — Phase 3 audit: documented as intentional (requires Stripe account config for production) |
-| ~~MEDIUM~~ | ~~No product image upload (only URL-based)~~ | ~~Admin can't upload images to Cloudflare~~ | ✅ Resolved — Phase 3 audit: admin product create form accepts image URLs; Cloudflare upload is Phase 3.1 |
-| ~~MEDIUM~~ | ~~Materials.tsx uses dangerouslySetInnerHTML for SVG icons~~ | ~~XSS risk~~ | ✅ Resolved — Code audit: replaced with React JSX SVG components |
-| ~~MEDIUM~~ | ~~3 unoptimized <img> tags should use next/image~~ | ~~Performance + CLS~~ | ✅ Resolved — Code audit: replaced with next/image in SearchModal, InstagramGrid, JournalSection |
-| ~~MEDIUM~~ | ~~Admin components use window.location.reload()~~ | ~~Poor UX~~ | ✅ Resolved — Code audit: replaced with tRPC cache invalidation (utils.invalidate()) |
-| ~~MEDIUM~~ | ~~alert() calls in AddToBagButton, OrderActions, settings~~ | ~~Poor UX~~ | ✅ Resolved — Code audit: replaced with console.error + inline error state |
-| ~~CRITICAL~~ | ~~tRPC routers throw Error instead of TRPCError~~ | ~~Loses proper error codes for client~~ | ✅ Resolved — Code audit: all routers now throw TRPCError with correct codes |
-| ~~CRITICAL~~ | ~~cart.ts null variantId comparison uses unsafe cast~~ | ~~Type safety~~ | ✅ Resolved — Code audit: uses Drizzle isNull() operator |
-| ~~HIGH~~ | ~~customers schema missing loyalty_tier + trade_discount_percent~~ | ~~Drizzle can't query these columns~~ | ✅ Resolved — Code audit: added to schema |
-| ~~HIGH~~ | ~~account.ts upsertAddress spreads input (includes addressId)~~ | ~~Inserts addressId field~~ | ✅ Resolved — Code audit: explicit field mapping |
-| ~~HIGH~~ | ~~loyalty.ts listAll returns customers.id as customerEmail~~ | ~~Wrong data displayed~~ | ✅ Resolved — Code audit: proper join through users table |
-| LOW | OAuth providers (Google, Apple) not configured | Email/password only in v1 | Phase 3.1 |
-| LOW | Multi-region (EU/UK) not implemented | US-only in v1 | Phase 3.1 |
-| LOW | Product reviews not implemented | No social proof on PDP | ✅ Resolved — Phase 3 |
-| LOW | Trade program (designer tier) not implemented | No B2B workflow | ✅ Resolved — Phase 3 |
+| Priority     | Issue                                                                        | Impact                                      | Status                                                                                                                                           |
+| ------------ | ---------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ~~CRITICAL~~ | ~~Application code not yet scaffolded (Phase 0)~~                            | ~~Cannot run the storefront~~               | ✅ Resolved — Phase 0 scaffold complete                                                                                                          |
+| ~~HIGH~~     | ~~GitHub Actions CI workflow not yet created~~                               | ~~No automated quality gates~~              | ✅ Resolved — `.github/workflows/ci.yml` created                                                                                                 |
+| ~~HIGH~~     | ~~Drizzle schema not yet written~~                                           | ~~No DB layer~~                             | ✅ Resolved — 16 tables in `packages/db/src/schema/`, migration `0000_initial.sql`                                                               |
+| ~~HIGH~~     | ~~tRPC routers not yet implemented~~                                         | ~~No API layer~~                            | ✅ Resolved — 8 routers in `packages/api/src/routers/`                                                                                           |
+| ~~MEDIUM~~   | ~~Sanity Studio schemas not yet defined~~                                    | ~~No CMS content management~~               | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings)                                                                      |
+| ~~MEDIUM~~   | ~~Playwright E2E test suite not yet written~~                                | ~~No automated user journey tests~~         | ✅ Resolved — 16 smoke tests + accessibility tests                                                                                               |
+| ~~HIGH~~     | ~~Homepage renders only Phase 0 hero + 4 products~~                          | ~~Brand experience incomplete~~             | ✅ Resolved — Full 15-section homepage with real data                                                                                            |
+| ~~HIGH~~     | ~~Stripe webhook handler returns 200 but doesn't update order status~~       | ~~Cannot process payments end-to-end~~      | ✅ Resolved — Webhook updates order to "confirmed" + sends OrderConfirmation email                                                               |
+| ~~HIGH~~     | ~~Cart router creates carts but no cart drawer UI~~                          | ~~No add-to-cart from PDP~~                 | ✅ Resolved — CartProvider + CartDrawer + AddToBagButton on PDP                                                                                  |
+| ~~HIGH~~     | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~          | ~~Cannot complete purchases~~               | ✅ Resolved — Multi-step checkout with real order creation + Stripe Payment Intents                                                              |
+| ~~HIGH~~     | ~~Account dashboard is a stub (no order history, no wishlist UI)~~           | ~~Account section non-functional~~          | ✅ Resolved — Dashboard with order count + wishlist count, order history, wishlist grid                                                          |
+| ~~HIGH~~     | ~~Admin dashboard is a stub (no KPI queries, no product table)~~             | ~~Admin section non-functional~~            | ✅ Resolved — Dashboard with KPIs + recent orders + low-stock alerts, product table, order fulfillment, customer directory, inventory management |
+| ~~MEDIUM~~   | ~~Wishlist toggle on ProductCard is client-side only (not persisted to DB)~~ | ~~Wishlist lost on page refresh~~           | ✅ Resolved — WishlistButton persists to DB for auth users, localStorage for anon                                                                |
+| ~~MEDIUM~~   | ~~No product image upload in admin~~                                         | ~~Admin can't add images to new products~~  | ✅ Resolved — Admin product create form (Phase 3: image upload via Cloudflare)                                                                   |
+| ~~MEDIUM~~   | ~~Stripe Elements not rendering card input (checkout uses demo mode)~~       | ~~No real card payments in dev~~            | ✅ Resolved — Phase 3 audit: documented as intentional (requires Stripe account config for production)                                           |
+| ~~MEDIUM~~   | ~~No product image upload (only URL-based)~~                                 | ~~Admin can't upload images to Cloudflare~~ | ✅ Resolved — Phase 3 audit: admin product create form accepts image URLs; Cloudflare upload is Phase 3.1                                        |
+| ~~MEDIUM~~   | ~~Materials.tsx uses dangerouslySetInnerHTML for SVG icons~~                 | ~~XSS risk~~                                | ✅ Resolved — Code audit: replaced with React JSX SVG components                                                                                 |
+| ~~MEDIUM~~   | ~~3 unoptimized <img> tags should use next/image~~                           | ~~Performance + CLS~~                       | ✅ Resolved — Code audit: replaced with next/image in SearchModal, InstagramGrid, JournalSection                                                 |
+| ~~MEDIUM~~   | ~~Admin components use window.location.reload()~~                            | ~~Poor UX~~                                 | ✅ Resolved — Code audit: replaced with tRPC cache invalidation (utils.invalidate())                                                             |
+| ~~MEDIUM~~   | ~~alert() calls in AddToBagButton, OrderActions, settings~~                  | ~~Poor UX~~                                 | ✅ Resolved — Code audit: replaced with console.error + inline error state                                                                       |
+| ~~CRITICAL~~ | ~~tRPC routers throw Error instead of TRPCError~~                            | ~~Loses proper error codes for client~~     | ✅ Resolved — Code audit: all routers now throw TRPCError with correct codes                                                                     |
+| ~~CRITICAL~~ | ~~cart.ts null variantId comparison uses unsafe cast~~                       | ~~Type safety~~                             | ✅ Resolved — Code audit: uses Drizzle isNull() operator                                                                                         |
+| ~~HIGH~~     | ~~customers schema missing loyalty_tier + trade_discount_percent~~           | ~~Drizzle can't query these columns~~       | ✅ Resolved — Code audit: added to schema                                                                                                        |
+| ~~HIGH~~     | ~~account.ts upsertAddress spreads input (includes addressId)~~              | ~~Inserts addressId field~~                 | ✅ Resolved — Code audit: explicit field mapping                                                                                                 |
+| ~~HIGH~~     | ~~loyalty.ts listAll returns customers.id as customerEmail~~                 | ~~Wrong data displayed~~                    | ✅ Resolved — Code audit: proper join through users table                                                                                        |
+| LOW          | OAuth providers (Google, Apple) not configured                               | Email/password only in v1                   | Phase 3.1                                                                                                                                        |
+| LOW          | Multi-region (EU/UK) not implemented                                         | US-only in v1                               | Phase 3.1                                                                                                                                        |
+| LOW          | Product reviews not implemented                                              | No social proof on PDP                      | ✅ Resolved — Phase 3                                                                                                                            |
+| LOW          | Trade program (designer tier) not implemented                                | No B2B workflow                             | ✅ Resolved — Phase 3                                                                                                                            |
 
 ---
 
 ## 12. Key Files Reference
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `docs/PRD_unified.md` | ~1,374 | Product requirements — what to build (features, pages, data models, API) |
-| `docs/landing_page_unified.html` | ~2,250 | Canonical visual reference — CSS tokens, sections, copy |
-| `PROJECT-ARCHITECTURE.md` | ~1,450 | This document — engineering blueprint |
-| `AGENTS.md` | ~212 | High-signal facts for AI agents |
-| `CLAUDE.md` | ~248 | Claude Code instructions |
-| `README.md` | ~490 | Project overview + quick start |
-| `package.json` | ~50 | Root scripts + devDependencies |
-| `pnpm-workspace.yaml` | ~55 | Workspace config + supply-chain guardrails |
-| `turbo.json` | ~100 | Task pipeline definition |
-| `.env.example` | ~104 | Environment variable template |
-| `docker-compose.yml` | ~90 | Local Postgres + Redis + Stripe CLI |
-| `scripts/db-setup.sh` | ~45 | One-shot DB setup |
-| `scripts/pre-commit-check.sh` | ~20 | Pre-commit quality gates |
-| `.github/workflows/ci.yml` | ~100 | GitHub Actions CI (8-gate pipeline) |
-| `playwright.config.ts` | ~45 | Playwright E2E config (desktop + mobile) |
-| `packages/config/src/env.ts` | ~190 | Zod-validated env (t3-env, build-context fallback) |
-| `packages/config/src/site.ts` | ~110 | Brand metadata, nav, footer, shipping config |
-| `packages/db/src/index.ts` | ~90 | Drizzle client (Neon + node-postgres auto-detect) |
-| `packages/db/src/schema/index.ts` | ~60 | Schema barrel (re-exports all 16 tables + enums + relations) |
-| `packages/db/drizzle/migrations/0000_initial.sql` | ~190 | Initial migration (all tables + enums + indexes) |
-| `packages/db/src/seed/index.ts` | ~100 | Seed script (8 collections + 13 products, idempotent) |
-| `packages/db/drizzle.config.ts` | ~45 | Drizzle Kit config (uses DATABASE_URL_UNPOOLED) |
-| `packages/auth/src/config.ts` | ~130 | Better Auth config (email/password, custom session w/ role, rate limiting) |
-| `packages/auth/src/rbac.ts` | ~45 | RBAC roles (customer/staff/admin) + helpers |
-| `packages/api/src/trpc.ts` | ~55 | tRPC init + 4 procedure tiers (public/protected/admin/adminWrite) |
-| `packages/api/src/context.ts` | ~35 | Context builder (db + session w/ 5s timeout) |
-| `packages/api/src/root.ts` | ~30 | Root router (8 routers merged) |
-| `packages/api/src/routers/products.ts` | ~130 | Products router (list, getBySlug, getRelated, search) |
-| `packages/api/src/middleware/rateLimit.ts` | ~60 | Upstash Redis rate limit (fail-open) |
-| `packages/payments/src/client.ts` | ~35 | Stripe client (lazy-init, stub fallback) |
-| `packages/payments/src/webhooks.ts` | ~55 | Webhook event handlers (idempotent) |
-| `packages/email/src/templates/OrderConfirmation.tsx` | ~170 | Order confirmation email (React Email) |
-| `packages/ui/src/tokens/colors.css` | ~45 | Color tokens (WCAG contrast documented) |
-| `packages/ui/src/globals.css` | ~80 | Combined tokens + fonts + CSS reset |
-| `apps/web/src/app/globals.css` | ~140 | Tailwind v4 @theme mapping (CSS-first) |
-| `apps/web/src/app/layout.tsx` | ~90 | Root layout (next/font, TRPCProvider, metadata) |
-| `apps/web/proxy.ts` | ~60 | Next.js 16 proxy (auth cookie check, route protection) |
-| `apps/web/next.config.ts` | ~110 | Next.js config (CSP, transpilePackages, image domains) |
-| `apps/web/src/lib/trpc/server.ts` | ~20 | Server-side tRPC caller (for RSC, zero HTTP) |
-| `apps/web/src/lib/trpc/client.tsx` | ~60 | Client tRPC provider + hooks |
-| `apps/web/src/app/api/webhooks/stripe/route.ts` | ~65 | Stripe webhook handler (signature verify + idempotent) |
-| `apps/web/src/app/api/webhooks/sanity/route.ts` | ~40 | Sanity webhook → ISR revalidation |
-| `apps/web/src/app/(shop)/page.tsx` | ~140 | Homepage (Phase 0 hero + seeded products) |
-| `apps/web/src/app/(shop)/products/[slug]/page.tsx` | ~150 | PDP (gallery, JSON-LD, async params) |
-| `apps/web/src/app/(admin)/layout.tsx` | ~85 | Admin layout (RBAC guard — Layer 2) |
-| `apps/web/src/app/(account)/layout.tsx` | ~55 | Account layout (auth guard — Layer 2) |
-| `apps/studio/sanity.config.ts` | ~25 | Sanity Studio config |
-| `apps/studio/schemas/index.ts` | ~15 | Schema barrel (4 content types) |
-| `e2e/smoke.spec.ts` | ~50 | E2E smoke tests (homepage, products, auth redirect) |
-| `e2e/accessibility.spec.ts` | ~35 | Axe-core accessibility tests (8 public pages) |
+| File                                                 | Lines  | Purpose                                                                    |
+| ---------------------------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `docs/PRD_unified.md`                                | ~1,374 | Product requirements — what to build (features, pages, data models, API)   |
+| `docs/landing_page_unified.html`                     | ~2,250 | Canonical visual reference — CSS tokens, sections, copy                    |
+| `PROJECT-ARCHITECTURE.md`                            | ~1,450 | This document — engineering blueprint                                      |
+| `AGENTS.md`                                          | ~212   | High-signal facts for AI agents                                            |
+| `CLAUDE.md`                                          | ~248   | Claude Code instructions                                                   |
+| `README.md`                                          | ~490   | Project overview + quick start                                             |
+| `package.json`                                       | ~50    | Root scripts + devDependencies                                             |
+| `pnpm-workspace.yaml`                                | ~55    | Workspace config + supply-chain guardrails                                 |
+| `turbo.json`                                         | ~100   | Task pipeline definition                                                   |
+| `.env.example`                                       | ~104   | Environment variable template                                              |
+| `docker-compose.yml`                                 | ~90    | Local Postgres + Redis + Stripe CLI                                        |
+| `scripts/db-setup.sh`                                | ~45    | One-shot DB setup                                                          |
+| `scripts/pre-commit-check.sh`                        | ~20    | Pre-commit quality gates                                                   |
+| `.github/workflows/ci.yml`                           | ~100   | GitHub Actions CI (8-gate pipeline)                                        |
+| `playwright.config.ts`                               | ~45    | Playwright E2E config (desktop + mobile)                                   |
+| `packages/config/src/env.ts`                         | ~190   | Zod-validated env (t3-env, build-context fallback)                         |
+| `packages/config/src/site.ts`                        | ~110   | Brand metadata, nav, footer, shipping config                               |
+| `packages/db/src/index.ts`                           | ~90    | Drizzle client (Neon + node-postgres auto-detect)                          |
+| `packages/db/src/schema/index.ts`                    | ~60    | Schema barrel (re-exports all 16 tables + enums + relations)               |
+| `packages/db/drizzle/migrations/0000_initial.sql`    | ~190   | Initial migration (all tables + enums + indexes)                           |
+| `packages/db/src/seed/index.ts`                      | ~100   | Seed script (8 collections + 13 products, idempotent)                      |
+| `packages/db/drizzle.config.ts`                      | ~45    | Drizzle Kit config (uses DATABASE_URL_UNPOOLED)                            |
+| `packages/auth/src/config.ts`                        | ~130   | Better Auth config (email/password, custom session w/ role, rate limiting) |
+| `packages/auth/src/rbac.ts`                          | ~45    | RBAC roles (customer/staff/admin) + helpers                                |
+| `packages/api/src/trpc.ts`                           | ~55    | tRPC init + 4 procedure tiers (public/protected/admin/adminWrite)          |
+| `packages/api/src/context.ts`                        | ~35    | Context builder (db + session w/ 5s timeout)                               |
+| `packages/api/src/root.ts`                           | ~30    | Root router (8 routers merged)                                             |
+| `packages/api/src/routers/products.ts`               | ~130   | Products router (list, getBySlug, getRelated, search)                      |
+| `packages/api/src/middleware/rateLimit.ts`           | ~60    | Upstash Redis rate limit (fail-open)                                       |
+| `packages/payments/src/client.ts`                    | ~35    | Stripe client (lazy-init, stub fallback)                                   |
+| `packages/payments/src/webhooks.ts`                  | ~55    | Webhook event handlers (idempotent)                                        |
+| `packages/email/src/templates/OrderConfirmation.tsx` | ~170   | Order confirmation email (React Email)                                     |
+| `packages/ui/src/tokens/colors.css`                  | ~45    | Color tokens (WCAG contrast documented)                                    |
+| `packages/ui/src/globals.css`                        | ~80    | Combined tokens + fonts + CSS reset                                        |
+| `apps/web/src/app/globals.css`                       | ~140   | Tailwind v4 @theme mapping (CSS-first)                                     |
+| `apps/web/src/app/layout.tsx`                        | ~90    | Root layout (next/font, TRPCProvider, metadata)                            |
+| `apps/web/proxy.ts`                                  | ~60    | Next.js 16 proxy (auth cookie check, route protection)                     |
+| `apps/web/next.config.ts`                            | ~110   | Next.js config (CSP, transpilePackages, image domains)                     |
+| `apps/web/src/lib/trpc/server.ts`                    | ~20    | Server-side tRPC caller (for RSC, zero HTTP)                               |
+| `apps/web/src/lib/trpc/client.tsx`                   | ~60    | Client tRPC provider + hooks                                               |
+| `apps/web/src/app/api/webhooks/stripe/route.ts`      | ~65    | Stripe webhook handler (signature verify + idempotent)                     |
+| `apps/web/src/app/api/webhooks/sanity/route.ts`      | ~40    | Sanity webhook → ISR revalidation                                          |
+| `apps/web/src/app/(shop)/page.tsx`                   | ~140   | Homepage (Phase 0 hero + seeded products)                                  |
+| `apps/web/src/app/(shop)/products/[slug]/page.tsx`   | ~150   | PDP (gallery, JSON-LD, async params)                                       |
+| `apps/web/src/app/(admin)/layout.tsx`                | ~85    | Admin layout (RBAC guard — Layer 2)                                        |
+| `apps/web/src/app/(account)/layout.tsx`              | ~55    | Account layout (auth guard — Layer 2)                                      |
+| `apps/studio/sanity.config.ts`                       | ~25    | Sanity Studio config                                                       |
+| `apps/studio/schemas/index.ts`                       | ~15    | Schema barrel (4 content types)                                            |
+| `e2e/smoke.spec.ts`                                  | ~50    | E2E smoke tests (homepage, products, auth redirect)                        |
+| `e2e/accessibility.spec.ts`                          | ~35    | Axe-core accessibility tests (8 public pages)                              |
 
 ---
 
 ## 13. Glossary
 
-| Term | Definition |
-|------|------------|
-| **AOV** | Average Order Value — total revenue / order count |
-| **Considered living** | Brand philosophy: intentional, slow, quality-over-quantity consumption |
-| **GMV** | Gross Merchandise Value — total order value before fees/refunds |
-| **Hygge** | Danish concept of coziness, contentment, and warm simplicity |
-| **ISR** | Incremental Static Regeneration — Next.js feature for periodic page re-rendering |
-| **PAD** | Project Architecture Document — this file |
-| **PDP** | Product Detail Page (`/product/{slug}`) |
-| **PLP** | Product Listing Page (`/products`) |
-| **PRD** | Project Requirements Document — `docs/PRD_unified.md` |
-| **proxy.ts** | Next.js 16 replacement for `middleware.ts` — supports async, runs on Edge |
-| **RSC** | React Server Component — renders on server, ships zero JS |
-| **RBAC** | Role-Based Access Control — `customer` / `staff` / `admin` roles |
-| **Trade program** | Phase 3 feature: designer tier with 10–20% discount |
-| **White Glove delivery** | Premium shipping: in-home setup, packaging removal (2-week lead time) |
+| Term                     | Definition                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **AOV**                  | Average Order Value — total revenue / order count                                |
+| **Considered living**    | Brand philosophy: intentional, slow, quality-over-quantity consumption           |
+| **GMV**                  | Gross Merchandise Value — total order value before fees/refunds                  |
+| **Hygge**                | Danish concept of coziness, contentment, and warm simplicity                     |
+| **ISR**                  | Incremental Static Regeneration — Next.js feature for periodic page re-rendering |
+| **PAD**                  | Project Architecture Document — this file                                        |
+| **PDP**                  | Product Detail Page (`/product/{slug}`)                                          |
+| **PLP**                  | Product Listing Page (`/products`)                                               |
+| **PRD**                  | Project Requirements Document — `docs/PRD_unified.md`                            |
+| **proxy.ts**             | Next.js 16 replacement for `middleware.ts` — supports async, runs on Edge        |
+| **RSC**                  | React Server Component — renders on server, ships zero JS                        |
+| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `admin` roles                 |
+| **Trade program**        | Phase 3 feature: designer tier with 10–20% discount                              |
+| **White Glove delivery** | Premium shipping: in-home setup, packaging removal (2-week lead time)            |
 
 ---
 
-*End of Project Architecture Document v1.0. For product requirements, see `docs/PRD_unified.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`.*
+_End of Project Architecture Document v1.0. For product requirements, see `docs/PRD_unified.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

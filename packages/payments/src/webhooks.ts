@@ -8,11 +8,11 @@
  * Per nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth skill §5.5.
  */
 
-import type Stripe from "stripe";
-import { stripe } from "./client";
-import { db } from "@maison/db";
-import { orders, lineItems } from "@maison/db";
-import { eq, sql } from "drizzle-orm";
+import type Stripe from 'stripe';
+import { stripe } from './client';
+import { db } from '@maison/db';
+import { orders, lineItems } from '@maison/db';
+import { eq, sql } from 'drizzle-orm';
 
 type StripeEvent = Stripe.Event;
 
@@ -34,13 +34,13 @@ export function constructWebhookEvent(
  */
 export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
   switch (event.type) {
-    case "payment_intent.succeeded":
+    case 'payment_intent.succeeded':
       await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
       break;
-    case "charge.refunded":
+    case 'charge.refunded':
       await handleChargeRefunded(event.data.object as Stripe.Charge);
       break;
-    case "checkout.session.completed":
+    case 'checkout.session.completed':
       await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     default:
@@ -53,7 +53,7 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
  * Idempotent: if the order is already confirmed, do nothing.
  */
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log("[stripe] payment_intent.succeeded:", paymentIntent.id);
+  console.log('[stripe] payment_intent.succeeded:', paymentIntent.id);
 
   // Find the order by stripe_payment_intent_id
   const [order] = await db
@@ -68,7 +68,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   }
 
   // Idempotency: if already confirmed, skip
-  if (order.status === "confirmed" || order.status === "shipped" || order.status === "delivered") {
+  if (order.status === 'confirmed' || order.status === 'shipped' || order.status === 'delivered') {
     console.log(`[stripe] Order ${order.orderNumber} already ${order.status}, skipping`);
     return;
   }
@@ -77,7 +77,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   await db
     .update(orders)
     .set({
-      status: "confirmed",
+      status: 'confirmed',
       updatedAt: new Date(),
     })
     .where(eq(orders.id, order.id));
@@ -86,19 +86,16 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   // In production, this is enqueued as a Trigger.dev job for retry resilience.
   // For Phase 1, we send directly.
   try {
-    const { sendEmail, OrderConfirmationEmail } = await import("@maison/email");
+    const { sendEmail, OrderConfirmationEmail } = await import('@maison/email');
 
-    const orderLineItems = await db
-      .select()
-      .from(lineItems)
-      .where(eq(lineItems.orderId, order.id));
+    const orderLineItems = await db.select().from(lineItems).where(eq(lineItems.orderId, order.id));
 
     await sendEmail({
       to: order.email,
       subject: `Order ${order.orderNumber} confirmed — Maison`,
       react: OrderConfirmationEmail({
         orderNumber: order.orderNumber,
-        customerName: "",
+        customerName: '',
         items: orderLineItems.map((li) => ({
           name: li.productName,
           quantity: li.quantity,
@@ -108,13 +105,16 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         shippingCents: order.shippingCostCents,
         taxCents: order.taxCents,
         totalCents: order.totalCents,
-        orderUrl: `${process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000"}/account/orders`,
+        orderUrl: `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'}/account/orders`,
       }),
     });
 
     console.log(`[stripe] Order ${order.orderNumber} confirmed + email sent to ${order.email}`);
   } catch (err) {
-    console.error(`[stripe] Failed to send confirmation email for order ${order.orderNumber}:`, err);
+    console.error(
+      `[stripe] Failed to send confirmation email for order ${order.orderNumber}:`,
+      err,
+    );
     // Don't throw — the order is confirmed, the email can be retried later
   }
 }
@@ -123,7 +123,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
  * charge.refunded — update order to "refunded".
  */
 async function handleChargeRefunded(charge: Stripe.Charge) {
-  console.log("[stripe] charge.refunded:", charge.id);
+  console.log('[stripe] charge.refunded:', charge.id);
 
   const paymentIntentId = charge.payment_intent as string;
   if (!paymentIntentId) return;
@@ -139,7 +139,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
   await db
     .update(orders)
     .set({
-      status: "refunded",
+      status: 'refunded',
       updatedAt: new Date(),
     })
     .where(eq(orders.id, order.id));
@@ -152,6 +152,6 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
  * when using Stripe Checkout Sessions.
  */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log("[stripe] checkout.session.completed:", session.id);
+  console.log('[stripe] checkout.session.completed:', session.id);
   // Phase 2: implement if using Checkout Sessions
 }

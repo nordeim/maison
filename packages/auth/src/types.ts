@@ -2,7 +2,7 @@
  * Maison — Shared auth types
  */
 
-import type { UserRole } from "@maison/db";
+import type { UserRole } from '@maison/db';
 
 /** Session user (enriched with role from users table). */
 export interface SessionUser {
@@ -13,7 +13,7 @@ export interface SessionUser {
   role: UserRole;
 }
 
-export type { UserRole } from "@maison/db";
+export type { UserRole } from '@maison/db';
 
 /** Full session shape returned by auth.api.getSession(). */
 export interface Session {
@@ -26,10 +26,10 @@ export interface Session {
 
 /** Helper to check if a session belongs to an admin. */
 export function isAdmin(session: Session | null): boolean {
-  return session?.user.role === "admin";
+  return session?.user.role === 'admin';
 }
 
 /** Helper to check if a session belongs to staff or admin. */
 export function isStaffOrAdmin(session: Session | null): boolean {
-  return session?.user.role === "staff" || session?.user.role === "admin";
+  return session?.user.role === 'staff' || session?.user.role === 'admin';
 }

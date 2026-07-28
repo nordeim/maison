@@ -10,19 +10,13 @@
  * Usage: Wrap the app in <CartProvider>. Read cart via useCart() hook.
  */
 
-"use client";
+'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from "react";
-import { trpc } from "@/lib/trpc/client";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 
-const CART_COOKIE_NAME = "maison_cart_id";
+import { trpc } from '@/lib/trpc/client';
+
+const CART_COOKIE_NAME = 'maison_cart_id';
 const CART_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 
 interface CartItem {
@@ -53,12 +47,12 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 function setCookie(name: string, value: string, maxAge: number) {
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${name}=${value}; path=/; max-age=${String(maxAge)}; SameSite=Lax`;
 }
 
 function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
+  const match = new RegExp(`(?:^|; )${name}=([^;]*)`).exec(document.cookie);
+  return match ? decodeURIComponent(match[1] ?? '') : null;
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -93,7 +87,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const invalidateCart = useCallback(() => {
     if (cartId) {
-      utils.cart.get.invalidate({ cartId });
+      void utils.cart.get.invalidate({ cartId });
     }
   }, [cartId, utils]);
 
@@ -131,10 +125,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const items = (cartData?.items ?? []) as CartItem[];
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotalCents = items.reduce(
-    (sum, item) => sum + item.priceCents * item.quantity,
-    0,
-  );
+  const subtotalCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
 
   const value: CartContextValue = {
     cartId,
@@ -143,8 +134,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     subtotalCents,
     isLoading: isLoading || !isHydrated,
     isDrawerOpen,
-    openDrawer: () => setIsDrawerOpen(true),
-    closeDrawer: () => setIsDrawerOpen(false),
+    openDrawer: () => {
+      setIsDrawerOpen(true);
+    },
+    closeDrawer: () => {
+      setIsDrawerOpen(false);
+    },
     addItem,
     updateItemQuantity,
     removeItem,
@@ -156,7 +151,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart(): CartContextValue {
   const ctx = useContext(CartContext);
   if (!ctx) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error('useCart must be used within a CartProvider');
   }
   return ctx;
 }

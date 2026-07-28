@@ -6,18 +6,29 @@
  * Admin: approve/reject reviews, list pending.
  */
 
-import { z } from "zod";
-import { eq, and, desc, sql, avg } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { productReviews, products, orders, lineItems } from "@maison/db";
-import { router, publicProcedure, protectedProcedure, adminProcedure, adminWriteProcedure } from "../trpc";
+import { z } from 'zod';
+import { eq, and, desc, sql, avg } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { productReviews, products, orders, lineItems } from '@maison/db';
+import {
+  router,
+  publicProcedure,
+  protectedProcedure,
+  adminProcedure,
+  adminWriteProcedure,
+} from '../trpc';
 
 export const reviewsRouter = router({
   /**
    * List approved reviews for a product.
    */
   list: publicProcedure
-    .input(z.object({ productSlug: z.string(), limit: z.number().min(1).max(50).default(20) }))
+    .input(
+      z.object({
+        productSlug: z.string(),
+        limit: z.number().min(1).max(50).default(20),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const [product] = await ctx.db
         .select({ id: products.id })
@@ -44,7 +55,10 @@ export const reviewsRouter = router({
         .limit(input.limit);
 
       const avgResult = await ctx.db
-        .select({ avg: avg(productReviews.rating), count: sql<number>`count(*)` })
+        .select({
+          avg: avg(productReviews.rating),
+          count: sql<number>`count(*)`,
+        })
         .from(productReviews)
         .where(and(eq(productReviews.productId, product.id), eq(productReviews.isApproved, true)));
 
@@ -76,7 +90,11 @@ export const reviewsRouter = router({
         .where(eq(products.slug, input.productSlug))
         .limit(1);
 
-      if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+      if (!product)
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Product not found',
+        });
 
       // Check if user is a customer
       const customerResult = await ctx.db.execute(sql`
@@ -86,16 +104,17 @@ export const reviewsRouter = router({
         WHERE c.user_id = ${ctx.session.user.id}
         LIMIT 1
       `);
-      const customer = (customerResult as Array<Record<string, unknown>>)[0];
+      const customer = (customerResult as unknown as Array<Record<string, unknown>>)[0];
 
       let customerId: string | null = null;
-      let customerName = ctx.session.user.name ?? "Anonymous";
+      let customerName = ctx.session.user.name ?? 'Anonymous';
       let customerEmail = ctx.session.user.email;
       let isVerifiedPurchase = false;
 
       if (customer) {
         customerId = customer.id as string;
-        customerName = [customer.first_name, customer.last_name].filter(Boolean).join(" ") || customerName;
+        customerName =
+          [customer.first_name, customer.last_name].filter(Boolean).join(' ') || customerName;
         customerEmail = customer.email as string;
 
         // Check if customer purchased this product
@@ -107,7 +126,8 @@ export const reviewsRouter = router({
             AND li.product_id = ${product.id}
             AND o.status NOT IN ('cancelled', 'refunded')
         `);
-        isVerifiedPurchase = Number((purchaseCheck as Array<Record<string, unknown>>)[0]?.count) > 0;
+        isVerifiedPurchase =
+          Number((purchaseCheck as unknown as Array<Record<string, unknown>>)[0]?.count) > 0;
       }
 
       const [review] = await ctx.db
@@ -170,9 +190,7 @@ export const reviewsRouter = router({
   reject: adminWriteProcedure
     .input(z.object({ reviewId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
-      await ctx.db
-        .delete(productReviews)
-        .where(eq(productReviews.id, input.reviewId));
+      await ctx.db.delete(productReviews).where(eq(productReviews.id, input.reviewId));
       return { success: true };
     }),
 });
