@@ -18,7 +18,7 @@ export const tradeRouter = router({
   /**
    * Submit a trade application.
    */
-  apply: protectedProcedure
+  submitApplication: protectedProcedure
     .input(
       z.object({
         firstName: z.string().min(1).max(50),

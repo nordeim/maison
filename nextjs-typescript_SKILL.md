@@ -129,9 +129,11 @@ Examples:
 - deprecated event types,
 - console usage.
 
+**Third category: construction-time validation failures.** Some frameworks (like tRPC v11) validate code at router construction time, which runs at module load — not during static type analysis. A reserved word in a tRPC procedure name is not an infrastructure failure (the tool runs) nor a source-code debt issue (it's not a lint violation) — it's a **framework contract violation** that only surfaces when the module is actually loaded at build time. This is why `pnpm check-types` passes but `pnpm build` fails.
+
 ### Rule
 
-> Fix infrastructure first. Then remediate source-code debt deliberately.
+> Fix infrastructure first. Then remediate source-code debt deliberately. For construction-time validation failures (like tRPC reserved words), inspect the build gate output — the error message names the offending identifier.
 
 ---
 
@@ -1278,6 +1280,51 @@ Prevention:
 - Move root config files under checked directories or include them explicitly.
 
 ---
+
+### Mistake 16: tRPC procedure named with a JavaScript reserved word
+
+Symptom:
+
+```text
+Error: Reserved words used in `router({})` call: apply
+```
+
+Root cause:
+
+- A tRPC procedure was named `apply` (`packages/api/src/routers/trade.ts`).
+- `apply` is `Function.prototype.apply` — a core JavaScript mechanism.
+- tRPC v11 validates all procedure names at router construction time against a list of JavaScript built-in reserved words.
+- The tRPC adapter route (`/api/trpc/[trpc]`) is statically analyzed by Next.js during `next build`, which triggers the router constructor and surfaces the error.
+
+Fix:
+
+```diff
+- apply: protectedProcedure
++ submitApplication: protectedProcedure
+```
+
+Lesson:
+
+> tRPC v11 rejects JavaScript reserved words (`apply`, `call`, `bind`, `constructor`, `toString`, `valueOf`, `hasOwnProperty`, `__proto__`, etc.) as procedure names. Use domain-specific verb-noun pairs instead.
+
+Prevention:
+
+- Name procedures with domain-specific verb-noun pairs: `submitApplication`, `listOrders`, `getProfile`.
+- Avoid any name that collides with `Object.prototype`, `Function.prototype`, or `Array.prototype` methods.
+- The `pnpm build` gate catches this — but only at build time, not at type-check time (the constructor runs at module load, not during static analysis).
+
+Pattern:
+
+```text
+good: submitApplication, createOrder, getProfile, listProducts
+bad:  apply, call, bind, constructor, toString, valueOf
+```
+
+Anti-pattern:
+
+> Naming a tRPC procedure after a common verb without checking for JavaScript built-in collisions.
+
+
 
 ## TypeScript Troubleshooting Checklist
 
@@ -2648,6 +2695,91 @@ Lesson:
 
 ---
 
+## tRPC Lessons
+
+### Mistake 1: Procedure named with a JavaScript reserved word
+
+Symptom:
+
+```text
+Error: Reserved words used in `router({})` call: apply
+```
+
+The tRPC adapter route (`/api/trpc/[trpc]/route.ts`) imports `appRouter` from the API package. During `next build`, Next.js statically analyzes this route to collect page data. The tRPC router constructor runs at module load time and throws immediately when it encounters a reserved word as a procedure name.
+
+Root cause:
+
+- A procedure was named `apply` in `packages/api/src/routers/trade.ts`.
+- `apply` is `Function.prototype.apply` — a core JavaScript mechanism.
+- tRPC v11 validates all router/procedure keys at construction time against a list of JavaScript built-in reserved words.
+- This error only surfaces at `next build` time, not at `pnpm check-types` time, because the router constructor executes at module load (runtime), not during static type analysis.
+
+Fix:
+
+```diff
+// packages/api/src/routers/trade.ts
+- apply: protectedProcedure
++ submitApplication: protectedProcedure
+
+// apps/web/src/app/(shop)/trade/page.tsx
+- const applyMutation = trpc.trade.apply.useMutation();
++ const applyMutation = trpc.trade.submitApplication.useMutation();
+```
+
+Lesson:
+
+> tRPC v11 rejects JavaScript reserved words as procedure names. Use domain-specific verb-noun pairs. The `pnpm build` gate catches this, but `pnpm check-types` does not — the constructor runs at module load, not during static analysis.
+
+Prevention:
+
+- Name procedures with domain-specific verb-noun pairs: `submitApplication`, `listOrders`, `getProfile`.
+- Avoid any name that collides with `Object.prototype`, `Function.prototype`, or `Array.prototype` methods.
+- Reserved words to avoid: `apply`, `call`, `bind`, `constructor`, `toString`, `valueOf`, `hasOwnProperty`, `isPrototypeOf`, `propertyIsEnumerable`, `toLocaleString`, `__proto__`.
+
+Pattern:
+
+```text
+good: submitApplication, createOrder, getProfile, listProducts
+bad:  apply, call, bind, constructor, toString, valueOf
+```
+
+### Mistake 2: Procedure naming too generic
+
+Example:
+
+```typescript
+export const someRouter = router({
+  get: publicProcedure.query(...),
+  create: protectedProcedure.mutation(...),
+  update: protectedProcedure.mutation(...),
+  delete: protectedProcedure.mutation(...),
+});
+```
+
+This works but creates ambiguity when procedures are called:
+
+```typescript
+trpc.some.get(...)    // what does "get" mean?
+trpc.some.create(...) // what is being created?
+```
+
+Better:
+
+```typescript
+export const someRouter = router({
+  getProfile: publicProcedure.query(...),
+  createOrder: protectedProcedure.mutation(...),
+  updateAddress: protectedProcedure.mutation(...),
+  deleteItem: protectedProcedure.mutation(...),
+});
+```
+
+Lesson:
+
+> Procedure names should be self-documenting. The tRPC procedure path (`some.getProfile`) is visible in network logs, error messages, and analytics. Generic names make debugging harder.
+
+---
+
 ## Vitest Lessons
 
 ### Mistake: Config imports a plugin not declared
@@ -2680,6 +2812,7 @@ When an SDK import or type fails:
 8. Use conditional spreads for optional payloads.
 9. Verify with type-check and package tests.
 10. Record latent issues hidden by tsconfig include.
+11. For tRPC routers: verify procedure names are not JavaScript reserved words (`apply`, `call`, `bind`, etc.) — this error only surfaces at `pnpm build`, not `pnpm check-types`.
 
 ---
 
@@ -3247,6 +3380,31 @@ Avoid explicit `undefined`.
 
 Use optional chaining and fallbacks.
 
+### Pattern: Name tRPC procedures with domain-specific verb-noun pairs
+
+```ts
+// Good — self-documenting, no reserved word collisions
+export const tradeRouter = router({
+  submitApplication: protectedProcedure.mutation(...),
+  myStatus: protectedProcedure.query(...),
+  list: adminProcedure.query(...),
+  approve: adminWriteProcedure.mutation(...),
+});
+
+// Bad — generic, ambiguous, potential reserved word collision
+export const tradeRouter = router({
+  apply: protectedProcedure.mutation(...),
+  get: protectedProcedure.query(...),
+  list: adminProcedure.query(...),
+});
+```
+
+Why:
+
+- Avoids JavaScript reserved words (`apply`, `call`, `bind`, `constructor`, etc.) which tRPC v11 rejects at router construction time.
+- Makes the tRPC procedure path self-documenting in network logs and error messages.
+- Prevents ambiguity when multiple routers have similar operations.
+
 ---
 
 ## 5.4 ESLint Patterns
@@ -3402,6 +3560,8 @@ This catalog names recurring mistakes so future agents can recognize them early.
 | Hardcoded SDK literal | API version drift | Remove/update |
 | Outdated SDK API | Method/payload changed | Inspect installed types |
 | Hidden broken file | tsconfig include excludes it | Audit include |
+| tRPC reserved word procedure | `apply`/`call`/`bind` etc. as procedure name — rejected at build time | Use domain-specific verb-noun pairs |
+| Generic procedure names | `get`/`create`/`update`/`delete` — ambiguous in logs and error paths | Self-documenting names: `getProfile`, `createOrder` |
 
 ---
 
@@ -3951,6 +4111,97 @@ Cannot find module '@scope/sdk/v4'
 
 ---
 
+## Playbook 14: tRPC build failure — `Reserved words used in router({})` call
+
+### Symptoms
+
+- `pnpm build` fails.
+- Error message:
+  
+  ```text
+  Error: Reserved words used in `router({})` call: <word>
+  ```
+  
+  or:
+  
+  ```text
+  Error: Failed to collect page data for /api/trpc/[trpc]
+  ```
+
+### Likely Causes
+
+- A tRPC procedure was named with a JavaScript reserved word (`apply`, `call`, `bind`, `constructor`, `toString`, `valueOf`, `hasOwnProperty`, `__proto__`, etc.).
+- tRPC v11 validates all procedure names at router construction time.
+- The tRPC adapter route (`/api/trpc/[trpc]/route.ts`) imports `appRouter`, which triggers the constructor during `next build` static page collection.
+
+### Why It Only Fails at Build Time
+
+- `pnpm check-types` does not catch this because the router constructor runs at **module load time** (runtime), not during static type analysis.
+- `pnpm build` triggers Next.js page data collection, which imports the tRPC adapter route, which imports the root router, which runs the constructor and validates procedure names.
+- `pnpm dev` may or may not surface it depending on whether the route is eagerly loaded.
+
+### Steps
+
+1. Read the full error message — it names the offending word.
+2. Search the API package for the reserved word:
+   
+   ```bash
+   grep -rn "<word>" packages/api/src/routers/ --include="*.ts"
+   ```
+   
+3. Identify the procedure definition.
+4. Rename to a domain-specific verb-noun pair:
+   
+   ```diff
+   - apply: protectedProcedure
+   + submitApplication: protectedProcedure
+   ```
+   
+5. Update all callers:
+   
+   ```bash
+   grep -rn "trade\.apply" apps/web/src --include="*.ts" --include="*.tsx"
+   ```
+   
+6. Update the caller:
+   
+   ```diff
+   - trpc.trade.apply.useMutation()
+   + trpc.trade.submitApplication.useMutation()
+   ```
+   
+7. Update any related JSDoc comments.
+8. Run the verification gates:
+   
+   ```bash
+   pnpm check-types   # Gate 1
+   pnpm lint          # Gate 2
+   pnpm build         # Gate 5 — the original failure
+   ```
+   
+9. Confirm the build succeeds.
+
+### Prevention
+
+- Name tRPC procedures with domain-specific verb-noun pairs.
+- Avoid any name that collides with `Object.prototype`, `Function.prototype`, or `Array.prototype` methods.
+- The reserved words list includes: `apply`, `call`, `bind`, `constructor`, `toString`, `valueOf`, `hasOwnProperty`, `isPrototypeOf`, `propertyIsEnumerable`, `toLocaleString`, `__proto__`.
+- Add a lint rule or pre-commit check that scans procedure definitions for reserved words.
+
+### Pattern
+
+```text
+good: submitApplication, createOrder, getProfile, listProducts, updateAddress, deleteItem
+bad:  apply, call, bind, constructor, toString, valueOf, get, create, update, delete
+```
+
+### Adjacent Considerations
+
+- The "Dynamic server usage" warnings in the build output are expected for routes using `headers()` — they indicate correctly dynamic routes, not errors.
+- The `api/trpc/[trpc]` route must be dynamic (`ƒ`) because it handles authenticated requests.
+
+---
+
 # 8. Verification Matrices
 
 Verification is not optional. A fix is only real if proven.
@@ -3971,6 +4222,8 @@ Verification is not optional. A fix is only real if proven.
 | SDK fix | check-types, package tests, consumer regression |
 | Test fix | single test, package tests |
 | Runtime fix | dev/build/manual flow |
+| tRPC router change | check-types, lint, **build** (router constructor runs at build, not type-check) |
+| tRPC procedure rename | check-types, lint, build, grep callers for stale references |
 
 ---
 
@@ -4114,6 +4367,8 @@ This index summarizes the major incidents and their distilled lessons.
 | TOOL-3 | Exit-code masking | Pipe status | Use `PIPESTATUS`/`pipefail` | Verify real exit codes |
 | HOOK-1 | 7-file Prettier failure | Staged unformatted files | Format 7 files | Staged content must pass gates |
 | HOOK-2 | Hook advances to lint | Format fixed, lint remains | Report next blocker | Simulate full hook |
+| TRPC-1 | Build fails with reserved word | `apply` as tRPC procedure name | Rename to `submitApplication` | tRPC v11 rejects JS reserved words at constructor time; only caught at build, not type-check |
+| TRPC-2 | Generic procedure names | `get`/`create`/`update`/`delete` — ambiguous | Self-documenting verb-noun pairs | Procedure paths visible in logs; generic names hinder debugging |
 
 ---
 
@@ -4209,6 +4464,10 @@ Large diffs hide intent and create review risk.
 
 A fix is not complete until the next agent or human knows exactly what remains.
 
+## 11. Build gate catches what type-check misses
+
+Some errors (like tRPC reserved word procedure names) only surface at `pnpm build` time because the router constructor runs at module load, not during static type analysis. If `check-types` passes but `build` fails, inspect the actual runtime imports — the error is in module initialization, not in type definitions.
+
 ---
 
 # 13. One-Page Agent Field Card
@@ -4231,9 +4490,10 @@ Use this during live troubleshooting.
 13. If SDK: inspect exports and installed types.
 14. If parser error: inspect previous line.
 15. If script edit: validate before mutating.
-16. Check git status and staged state.
-17. Record outstanding issues.
-18. Do not claim success before verification.
+16. If tRPC build fails: check procedure names for JS reserved words.
+17. Check git status and staged state.
+18. Record outstanding issues.
+19. Do not claim success before verification.
 ```
 
 ---

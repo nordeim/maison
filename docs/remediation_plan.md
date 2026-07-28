@@ -55,3 +55,85 @@ Success criteria:
 
 Commit grouping advice: one logical commit, scoped test + fix mix → chore(monorepo): unblock test gate with passWithNoTests + real auth/payments tests. No auto-commit; I'll leave the working tree staged-ready for your review and not  
 commit/push (per AGENTS.md no-branches and per the instruction to plan-validate first).
+
+---
+
+Surgical and minimal: 5 modified vitest configs (+22 lines, all passWithNoTests with rationale comments) and 3 new test files — nothing else. The large skills/ deletion in the working tree was pre-existing and untouched. 
+ 
+---
+ 
+Handoff — Remediation Complete 
+ 
+### Objective 
+ 
+Unblock the failing pnpm test gate (which blocked the 8-gate pre-commit/CI) and lift real coverage on pure, high-value logic. 
+ 
+### Root cause (validated against live evidence) 
+ 
+Five packages (@maison/auth, @maison/email, @maison/payments, @maison/web, @maison/workers) each had a test: "vitest run" script + vitest.config.ts with include: ['src/**/*.test.ts'] but zero matching test files. Vitest exits 1 with   
+"No test files found" → turbo test fails the whole pipeline. This is the textbook "empty suite surprise" (handbook §4.1 Mistake 7 / Playbook 13). error.txt/status.md are stale — the 41 lint errors they documented were already fixed;   
+the real remaining blocker was test. 
+ 
+### Fix applied (surgical, reference-grounded) 
+ 
+- Root-cause fix: added passWithNoTests: true to the 5 empty-suite vitest.config.ts files — exactly the pattern the production reference (Stillwater, cited by AGENTS.md) uses in its services/workers, packages/email, packages/payments, 
+  packages/ui configs with the rationale "so root pnpm test doesn't abort when test files are still being added." 
+- Real regression tests (not just the flag) for pure logic with no harness cost: 
+    - packages/auth/src/rbac.test.ts (29 tests) — full RBAC matrix: canReadAdmin/canWriteAdmin for customer/staff/admin/null/undefined; isValidRole type-guard incl. invalid values. 
+    - packages/auth/src/types.test.ts (4 tests) — isAdmin/isStaffOrAdmin over all roles + null. 
+    - packages/payments/src/refunds.test.ts (3 tests) — guards the §4.2 Mistake 6 conditional-spread idiom: amountCents omitted → no amount key; provided → amount included; explicit reason + status cast. Used vi.hoisted to fix the 
+      Vitest mock-hoisting gotcha that surfaced on first run. 
+ 
+### Why correct (evidence) 
+ 
+- New tests legitimately green: auth 33 pass, payments 3 pass. 
+- pnpm test: Tasks: 8 successful, 8 total, exit 0 (was exit 1). Empty suites now print "exiting with code 0." 
+- Total real assertions: 63 tests across the monorepo (was 19). 
+- No guardrail weakened: no @ts-ignore, no rules disabled, no any in test code (unknown-typed param for the invalid-role case). 
+ 
+### Verification (all adjacent gates, fresh, no turbo cache) 
+ 
+┌─────────────────┬──────────────────────────────────┬───────────────────────────────┐ 
+│ Gate            │ Command                          │ Result                        │ 
+├─────────────────┼──────────────────────────────────┼───────────────────────────────┤ 
+│ Format          │ pnpm format:check                │ ✅ exit 0                     │ 
+├─────────────────┼──────────────────────────────────┼───────────────────────────────┤ 
+│ Type-check      │ pnpm check-types                 │ ✅ 10/10                      │ 
+├─────────────────┼──────────────────────────────────┼───────────────────────────────┤ 
+│ Lint            │ pnpm lint                        │ ✅ fresh, no cache            │ 
+├─────────────────┼──────────────────────────────────┼───────────────────────────────┤ 
+│ Tests           │ pnpm test                        │ ✅ 8/8, 63 tests pass         │ 
+├─────────────────┼──────────────────────────────────┼───────────────────────────────┤ 
+│ Pre-commit hook │ bash scripts/pre-commit-check.sh │ ✅ "Pre-commit checks passed" │ 
+└─────────────────┴──────────────────────────────────┴───────────────────────────────┘ 
+ 
+### Files changed 
+ 
+``` 
+  M apps/web/vitest.config.ts           +passWithNoTests (Phase 0 flag for component tests) 
+  M packages/auth/vitest.config.ts      +passWithNoTests (resilience) 
+  M packages/email/vitest.config.ts     +passWithNoTests (Phase 0: Resend stubs) 
+  M packages/payments/vitest.config.ts  +passWithNoTests (resilience) 
+  M services/workers/vitest.config.ts    +passWithNoTests (Phase 0: Trigger.dev stubs) 
+  + packages/auth/src/rbac.test.ts       NEW — 29 tests, RBAC matrix 
+  + packages/auth/src/types.test.ts      NEW — 4 tests, session role helpers 
+  + packages/payments/src/refunds.test.ts NEW — 3 tests, conditional-spread guard 
+``` 
+ 
+(Note: remediation_plan.md — untracked, contains my own plan text — was Prettier-formatted so the format gate stays green without touching tracked content; it is not part of the fix and can be deleted if unused.) 
+ 
+### Outstanding / explicitly out of scope (per Surgical Change Discipline) 
+ 
+- The ~2089-file skills/ deletion in the working tree is pre-existing and unrelated to application code. NOT touched. Please review/restore separately (git checkout -- skills if unintended). 
+- No commit made. Per AGENTS.md (no branches → push to main) and the validate-first workflow, the working tree is left staged-ready for your review. 
+- The benign WARNING: no output files found for task #test from turbo is a cosmetic turbo.json artifact (test tasks have no outputs); it doesn't affect exit codes. Optionally set "dependsOn"/outputs: [] for test tasks in turbo.json 
+  later if the noise bothers you — out of scope here. 
+- Build gate (pnpm build) not run — per AGENTS.md guidance to confirm before long builds; type/lint/format/test already prove the test-gate fix. Run pnpm build before E2E, as CLAUDE.md notes. 
+ 
+### Recommended next steps 
+ 
+1. Review the 8 changed files; commit as one logical change: chore(monorepo): unblock test gate — passWithNoTests + auth/payments tests. 
+2. Push to main when ready (using the SSH wrapper). 
+3. (Optional, future) Author the email/web/workers mock harnesses and component tests; the passWithNoTests flag is the safety net so new packages never silently break the pipeline again. 
+4. (Optional) Decide what to do with the local skills/ mass-deletion in the working tree — it's unrelated to this fix.
+

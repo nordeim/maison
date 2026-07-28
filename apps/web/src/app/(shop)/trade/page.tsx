@@ -2,7 +2,7 @@
  * Maison — Trade program application page (Client Component)
  *
  * Form for interior designers/trade professionals to apply for the trade program.
- * Calls tRPC trade.apply mutation. Shows status if already applied.
+ * Calls tRPC trade.submitApplication mutation. Shows status if already applied.
  */
 
 'use client';
@@ -13,7 +13,7 @@ import { trpc } from '@/lib/trpc/client';
 
 export default function TradePage() {
   const { data: existingApp, isLoading } = trpc.trade.myStatus.useQuery();
-  const applyMutation = trpc.trade.apply.useMutation();
+  const applyMutation = trpc.trade.submitApplication.useMutation();
 
   const [form, setForm] = useState({
     firstName: '',
