@@ -19,6 +19,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useCart } from './CartProvider';
+import { ClientOnly } from './ClientOnly';
 import { WishlistButton } from './WishlistButton';
 
 import { formatPrice } from '@/lib/utils';
@@ -135,8 +136,12 @@ export function ProductCard({ product, alternateImage }: ProductCardProps) {
             </span>
           )}
 
-          {/* Wishlist */}
-          <WishlistButton productSlug={product.slug} productName={product.name} variant="card" />
+          {/* Wishlist — mounted client-only so Better Auth's `useSession()`
+              (which calls `useRef` via `useStore`) never runs during SSR.
+              See `ClientOnly` for the full rationale. */}
+          <ClientOnly fallback={null}>
+            <WishlistButton productSlug={product.slug} productName={product.name} variant="card" />
+          </ClientOnly>
 
           {/* Quick Add */}
           <button

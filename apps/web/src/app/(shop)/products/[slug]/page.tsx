@@ -6,10 +6,10 @@
  * Uses AddToBagButton (Client Component) for add-to-cart.
  */
 
-/** The caller type returned by `api()` (resolved Promise). Used to type
+/** The caller type returned by `apiPublic()` (resolved Promise). Used to type
  * page-local `let` bindings that must hold procedure return values or null.
  */
-type Caller = Awaited<ReturnType<typeof api>>;
+type Caller = Awaited<ReturnType<typeof apiPublic>>;
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -17,10 +17,11 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { AddToBagButton } from '@/components/shop/AddToBagButton';
+import { ClientOnly } from '@/components/shop/ClientOnly';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { ReviewsSection } from '@/components/shop/ReviewsSection';
 import { WishlistButton } from '@/components/shop/WishlistButton';
-import { api } from '@/lib/trpc/server';
+import { apiPublic } from '@/lib/trpc/server';
 import { formatPrice } from '@/lib/utils';
 
 interface ProductPageProps {
@@ -30,7 +31,7 @@ interface ProductPageProps {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const caller = await api();
+    const caller = await apiPublic();
     const product = await caller.products.getBySlug({ slug });
     if (!product) return { title: 'Product not found' };
     return {
@@ -54,7 +55,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   let related: Awaited<ReturnType<Caller['products']['getRelated']>> = [];
 
   try {
-    const caller = await api();
+    const caller = await apiPublic();
     [product, related] = await Promise.all([
       caller.products.getBySlug({ slug }),
       caller.products
@@ -74,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (related.length === 0) {
     try {
-      const caller = await api();
+      const caller = await apiPublic();
       related = await caller.products.getRelated({
         productId: product.id,
         limit: 4,
@@ -270,7 +271,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div style={{ flex: 1 }}>
                 <AddToBagButton productSlug={product.slug} productName={product.name} />
               </div>
-              <WishlistButton productSlug={product.slug} productName={product.name} variant="pdp" />
+              <ClientOnly fallback={null}>
+                <WishlistButton
+                  productSlug={product.slug}
+                  productName={product.name}
+                  variant="pdp"
+                />
+              </ClientOnly>
             </div>
 
             {/* Trust badges */}
@@ -384,7 +391,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         )}
 
         {/* Reviews */}
-        <ReviewsSection productSlug={product.slug} />
+        <ClientOnly fallback={null}>
+          <ReviewsSection productSlug={product.slug} />
+        </ClientOnly>
       </div>
 
       <style>{`

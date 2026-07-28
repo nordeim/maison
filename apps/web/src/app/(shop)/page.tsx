@@ -15,7 +15,11 @@
  * 11. Instagram (6-col grid)
  * 12. Newsletter ("Letters from Maison")
  *
- * Data is fetched via the tRPC server caller (zero HTTP round-trip).
+ * Data is fetched via the session-free public tRPC caller (`apiPublic()`)
+ * so the homepage can be prerendered static — `api()` calls `next/headers`
+ * which would force `/` dynamic and yield an empty product grid during the
+ * static probe. Only `publicProcedure`s are invoked here, so a null session
+ * is correct. See `src/lib/trpc/server.ts` (Stillwater ADR V16-1 pattern).
  */
 
 import { NewsletterForm } from '@/components/shop/NewsletterForm';
@@ -30,7 +34,7 @@ import { Materials } from '@/components/shop/sections/Materials';
 import { Philosophy } from '@/components/shop/sections/Philosophy';
 import { ProductGrid } from '@/components/shop/sections/ProductGrid';
 import { Testimonials } from '@/components/shop/sections/Testimonials';
-import { api } from '@/lib/trpc/server';
+import { apiPublic } from '@/lib/trpc/server';
 
 export default async function HomePage() {
   // Fetch products + collections via server caller (zero HTTP round-trip)
@@ -55,7 +59,7 @@ export default async function HomePage() {
   }[] = [];
 
   try {
-    const caller = await api();
+    const caller = await apiPublic();
     const [productsResult, collectionsResult] = await Promise.all([
       caller.products.list({ limit: 8, sort: 'featured' }),
       caller.collections.list(),

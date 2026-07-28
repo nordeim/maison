@@ -12,7 +12,7 @@ import type { Metadata } from 'next';
 
 import { ProductCard } from '@/components/shop/ProductCard';
 import { SortSelect } from '@/components/shop/SortSelect';
-import { api } from '@/lib/trpc/server';
+import { apiPublic } from '@/lib/trpc/server';
 
 export const metadata: Metadata = {
   title: 'Shop All',
@@ -55,7 +55,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }[] = [];
 
   try {
-    const caller = await api();
+    const caller = await apiPublic();
     const result = await caller.products.list({
       collection: params.collection,
       sort,

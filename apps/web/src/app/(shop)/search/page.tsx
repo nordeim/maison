@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 import { ProductCard } from '@/components/shop/ProductCard';
-import { api } from '@/lib/trpc/server';
+import { apiPublic } from '@/lib/trpc/server';
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (query.length >= 2) {
     try {
-      const caller = await api();
+      const caller = await apiPublic();
       results = await caller.products.search({ q: query, limit: 24 });
     } catch (err) {
       console.error('[search] Failed to fetch:', err);

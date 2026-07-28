@@ -1372,6 +1372,11 @@ When `check-types` fails:
    - rerun workspace check,
    - rerun Prettier on changed files.
 
+8. If `check-types` passes but `build` fails:
+   - inspect the build output for module initialization errors,
+   - tRPC v11 validates procedure names at router construction time (runtime, not type analysis),
+   - check for reserved words (`apply`, `call`, `bind`, `constructor`, etc.) in procedure definitions.
+
 ---
 
 ## TypeScript Patterns
@@ -2645,6 +2650,72 @@ Lesson:
 
 ---
 
+### Mistake 3: Better Auth React hooks crash during SSR (react-server export condition)
+
+Symptom:
+
+```text
+TypeError: Cannot read properties of null (reading 'useRef')
+```
+
+Observed at runtime (`next start`) on any page that renders a Client Component calling Better Auth's `useSession()` (or any `authClient.useX()` hook) during the server render pass — e.g. the homepage ProductCard rendering a WishlistButton, or a PDP rendering a ReviewsSection.
+
+Root cause:
+
+- `better-auth/react`'s `useSession()` calls `useStore()` (from nanostores), which calls `useRef()`.
+- `react@19.2.x` ships a `"react-server"` export condition (./react.react-server.js), where hooks (useRef, useState, useSyncExternalStore) are null stubs by design (React Server Components forbid hooks).
+- When Turbopack bundles `better-auth/react` into an SSR server chunk (`[root-of-the-server]`), it selects the `react-server` export condition for the React import in that chunk.
+- `null.useRef()` throws `TypeError: Cannot read properties of null (reading 'useRef')`.
+- Client Components DO run on the server (SSR renders their initial HTML); the hooks execute, and the react-server build of React has no dispatcher (null).
+
+Why Stillwater does not hit this:
+
+- Stillwater never invokes `useSession` (or any Better Auth React hook) during SSR. It only uses `authClient.signIn.social()` / `.magicLink()` inside event handlers (dynamic imports). No Better Auth React hook runs during the server render pass — the null-hook path is never reached.
+
+Fix — use a ClientOnly boundary:
+
+```tsx
+// CORRECT: defer the component to the client pass via useSyncExternalStore
+import { useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => noopUnsubscribe;
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+export function ClientOnly({ children, fallback = null }) {
+  const isHydrated = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+  return isHydrated ? children : fallback;
+}
+
+// Usage: wraps any component that calls useSession() or other Better Auth hooks:
+<ClientOnly fallback={null}>
+  <WishlistButton productSlug={product.slug} productName={product.name} />
+</ClientOnly>
+```
+
+Why this works:
+
+- `useSyncExternalStore` with `getServerSnapshot: () => false` is SSR-safe — it returns false on the server, so children never render during SSR.
+- On the client after hydration, `getClientSnapshot` returns true → children mount, `useSession()` fires with the real React dispatcher.
+- Hooks are called unconditionally on every render → Rules of Hooks satisfied.
+- `useSyncExternalStore` does NOT call useRef/useState from a different package's bundled react — it is a React 18+ built-in primitive.
+
+Why `next/dynamic({ ssr: false })` is NOT the fix for Server Components:
+
+- Next.js 16 forbids `ssr: false` inside Server Components: the build fails with "ssr: false is not allowed with next/dynamic in Server Components."
+- The PDP (`/products/[slug]/page.tsx`) is a Server Component (it fetches via `api()` server caller). You cannot use `next/dynamic({ ssr: false })` directly in it.
+- `next/dynamic({ ssr: false })` IS valid inside Client Components (e.g. ProductCard). For consistency, use the ClientOnly pattern everywhere.
+
+Lesson:
+
+> Better Auth React hooks (`useSession`, `authClient.useX()`) must not execute during SSR. Wrap the calling component in a `ClientOnly` boundary. `next/dynamic({ ssr: false })` is only valid inside Client Components, not Server Components. See Stillwater SKILL Lesson 89.
+
+---
+
 ## Sanity Lessons
 
 ### Mistake: Putting `hotspot` on an array instead of the image member
@@ -3043,6 +3114,42 @@ Lesson:
 
 ---
 
+## Server/Client Boundary: Better Auth React Hooks
+
+### Mistake: Calling `useSession()` during SSR in a Client Component
+
+Bad:
+
+```tsx
+'use client';
+import { useSession } from '@maison/auth/client';
+
+export function WishlistButton() {
+  const { data: session } = useSession(); // CRASH during SSR
+}
+```
+
+Better:
+
+```tsx
+// WishlistButton remains unchanged, but the PARENT wraps it:
+<ClientOnly fallback={null}>
+  <WishlistButton productSlug={product.slug} />
+</ClientOnly>
+```
+
+Why:
+
+- Client Components render on the server (SSR produces initial HTML).
+- `useSession()` → `useStore()` → `useRef()` — but Turbopack selects React's `react-server` export for the SSR chunk, where `useRef` is a null stub.
+- `null.useRef()` throws `TypeError: Cannot read properties of null (reading 'useRef')`.
+
+Lesson:
+
+> Any Client Component calling Better Auth React hooks (`useSession`, `authClient.useX()`) must be wrapped in a `ClientOnly` boundary at the call site. Do NOT use `next/dynamic({ ssr: false })` in Server Components — it is forbidden by Next.js 16.
+
+---
+
 ## React/Next.js Checklist
 
 When React or Next.js lint/type issues appear:
@@ -3055,6 +3162,7 @@ When React or Next.js lint/type issues appear:
 6. Check console usage.
 7. Check server/client component boundaries.
 8. Verify route handler conventions.
+9. Wrap Better Auth React hooks (`useSession`) in a `ClientOnly` boundary — never let them execute during SSR.
 
 ---
 
@@ -3509,6 +3617,18 @@ Use `&apos;`, `&quot;`, etc.
 
 `q ?? ''` instead of `String(q)`.
 
+### Pattern: ClientOnly boundary for hooks unsafe in SSR
+
+Wrap Client Components that call hooks illegal during SSR (e.g. Better Auth's `useSession`) in a `ClientOnly` boundary that defers rendering to the client pass via `useSyncExternalStore`.
+
+```tsx
+<ClientOnly fallback={null}>
+  <WishlistButton productSlug={product.slug} />
+</ClientOnly>
+```
+
+Do NOT use `next/dynamic({ ssr: false })` in Server Components (forbidden by Next.js 16). Use `ClientOnly` everywhere for consistency.
+
 ---
 
 # 6. Anti-Pattern Catalog
@@ -3632,6 +3752,8 @@ This catalog names recurring mistakes so future agents can recognize them early.
 | `String(undefined)` | Bad metadata fallback | `?? ''` |
 | Unescaped JSX text | Lint error | Use entities |
 | Console.log | Logging hygiene | Use warn/error/logger |
+| Better Auth React hooks during SSR | `useSession`/`authClient.useX()` calls `useRef` in SSR chunk → `null.useRef()` | Wrap in `ClientOnly` boundary |
+| `next/dynamic({ ssr: false })` in Server Component | Next.js 16 forbids — build fails | Use `ClientOnly` wrapper instead |
 
 ---
 
@@ -4202,6 +4324,103 @@ bad:  apply, call, bind, constructor, toString, valueOf, get, create, update, de
 
 ---
 
+## Playbook 15: Runtime `TypeError: Cannot read properties of null (reading 'useRef')` in SSR
+
+### Symptoms
+
+- `pnpm build` succeeds (37/37 pages).
+- `pnpm start` + HTTP request produces:
+
+```text
+TypeError: Cannot read properties of null (reading 'useRef')
+    at <unknown> (.next/server/chunks/ssr/[root-of-the-server]__<hash>._.js:1:<col>)
+```
+- The page returns HTTP 500 instead of 200.
+- `check-types` and `lint` pass.
+- No compile-time error — only a runtime crash during SSR of a Client Component.
+
+### Likely Causes
+
+- A Client Component calls a hook from `better-auth/react` (`useSession`, `authClient.useX()`) during the SSR pass.
+- `better-auth/react`'s `useSession()` internally calls `useStore()` (from nanostores), which calls `useRef()`.
+- Turbopack bundles `better-auth/react` into the SSR server chunk, where it selects React's `"react-server"` export condition (`./react.react-server.js`).
+- The `react-server` build of React has null stubs for all hooks (`useRef`, `useState`, `useSyncExternalStore`) — by design, since React Server Components cannot call hooks.
+- `null.useRef()` → `TypeError`.
+
+### Diagnostic Steps
+
+1. Identify the crashing chunk:
+
+```bash
+rg -l 'better-auth' .next/server/chunks/ssr/ | head
+```
+
+2. Open the chunk referenced in the stack trace and look for `useSession` or `useStore` or `useRef`.
+
+3. Search the web app for which components call `useSession`:
+
+```bash
+rg -rn 'useSession|authClient\.use' apps/web/src --glob '!*.test.*'
+```
+
+4. Check whether those components render during SSR (are they imported by a Server Component page or layout, or by another Client Component that renders during SSR).
+
+5. Confirm the crash by starting the server and curling the affected page:
+
+```bash
+cd apps/web && pnpm start &
+curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/
+# Expect: 500 (crash)
+```
+
+### Fix
+
+Wrap every component that calls a Better Auth React hook in a `ClientOnly` boundary at the call site.
+
+```tsx
+// At the call site (Server Component or Client Component):
+import { ClientOnly } from '@/components/shop/ClientOnly';
+import { WishlistButton } from '@/components/shop/WishlistButton';
+
+<ClientOnly fallback={null}>
+  <WishlistButton productSlug={product.slug} productName={product.name} />
+</ClientOnly>
+```
+
+`ClientOnly` uses `useSyncExternalStore` with `getServerSnapshot: () => false` — an SSR-safe primitive that defers children to the client pass.
+
+Do NOT use `next/dynamic({ ssr: false })` inside a Server Component — Next.js 16 forbids it and the build will fail with:
+
+```text
+`ssr: false` is not allowed with `next/dynamic` in Server Components.
+```
+
+### Verification
+
+```bash
+pnpm check-types   # Gate 1
+pnpm lint          # Gate 2
+pnpm build         # Gate 5
+```
+
+Then start the server and curl:
+
+```bash
+cd apps/web && pnpm start &
+curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/                # Expect: 200
+curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/products/some-slug  # Expect: 200
+```
+
+Confirm no `useRef` error in the server log.
+
+### Prevention
+
+- Any Client Component that calls Better Auth React hooks must be wrapped in `ClientOnly` at the call site.
+- Do NOT use `next/dynamic({ ssr: false })` in Server Components — use `ClientOnly` everywhere for consistency.
+- When adding new auth-gated UI, check whether `useSession` will be called during SSR before importing the component.
+
+---
+
 # 8. Verification Matrices
 
 Verification is not optional. A fix is only real if proven.
@@ -4346,6 +4565,7 @@ This index summarizes the major incidents and their distilled lessons.
 | SDK-2 | Trigger.dev missing dep | pnpm strict isolation | Add dependency | Declare every import |
 | SDK-3 | Trigger.dev wrong API | Outdated client usage | Use `tasks.trigger` | Inspect installed types |
 | SDK-4 | Workers latent `/v4` | File outside tsconfig include | Deferred; audit include | Green check can hide latent errors |
+| RUNTIME-1 | `useRef` crash on all SSR pages | Better Auth `useSession` calls `useRef` during SSR; Turbopack selects `react-server` build | Wrap in `ClientOnly` boundary | Auth hooks must not execute during SSR |
 | TS-1 | Alias resolution broken | Inherited `baseUrl` | Local `baseUrl` | Trace module resolution |
 | TS-2 | Missing lib scaffolding | Files absent | Scaffold from contracts | Adapt reference carefully |
 | TS-3 | Async caller misuse | Property access on promise | Await caller | Await factories |
@@ -4468,6 +4688,10 @@ A fix is not complete until the next agent or human knows exactly what remains.
 
 Some errors (like tRPC reserved word procedure names) only surface at `pnpm build` time because the router constructor runs at module load, not during static type analysis. If `check-types` passes but `build` fails, inspect the actual runtime imports — the error is in module initialization, not in type definitions.
 
+## 12. Runtime crashes can pass all static gates
+
+`check-types` passes. `lint` passes. `build` succeeds. The page still returns HTTP 500 at runtime. The `react-server` export condition in React 19 causes Better Auth React hooks (`useSession`) to call null-stub hooks (`useRef`) during SSR — a runtime-only failure that no static gate catches. Always verify with `pnpm start` + `curl` against the live server, not just the build output.
+
 ---
 
 # 13. One-Page Agent Field Card
@@ -4494,6 +4718,7 @@ Use this during live troubleshooting.
 17. Check git status and staged state.
 18. Record outstanding issues.
 19. Do not claim success before verification.
+20. If `useRef`/`useState` crash in SSR: Better Auth React hooks must not run during SSR — wrap in `ClientOnly` boundary, never use `next/dynamic ssr:false` in Server Components.
 ```
 
 ---

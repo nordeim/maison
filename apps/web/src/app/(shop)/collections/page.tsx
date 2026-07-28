@@ -4,7 +4,7 @@
 
 import type { Metadata } from 'next';
 
-import { api } from '@/lib/trpc/server';
+import { apiPublic } from '@/lib/trpc/server';
 
 export const metadata: Metadata = {
   title: 'Collections',
@@ -20,7 +20,7 @@ export default async function CollectionsPage() {
   }[] = [];
 
   try {
-    const caller = await api();
+    const caller = await apiPublic();
     collections = await caller.collections.list();
   } catch (err) {
     console.error('[collections] Failed to fetch:', err);
