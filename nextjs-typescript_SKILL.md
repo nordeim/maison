@@ -1,17 +1,17 @@
 ---
 name: nextjs-typescript-patterns
-description: Monorepo web projects using pnpm, Turborepo, TypeScript, Next.js, React, ESLint, Prettier, Drizzle ORM, Postgres, and third-party SDKs (tRPC, Trigger.dev, Stripe, Better Auth, Sanity, React Email, Vitest). v1.2 — canonical troubleshooting handbook with 40+ case-indexed anti-patterns across install, type-check, lint, format, test, build, migration, and pre-commit-hook gates. Covers pnpm 10+ native-build approval (allowBuilds, onlyBuiltDependencies), strict workspace isolation, tsconfig path aliases and inherited baseUrl, Drizzle migration journal drift and silent spinner-masked failures, exactOptionalPropertyTypes, noUncheckedIndexedAccess, React 19 SubmitEvent migration, ESLint flat-config FlatCompat, Prettier ignore-path semantics, SDK drift (subpath exports, hardcoded API versions, callback payload shapes), and the Surgical Change Discipline. Use when debugging failing gates, reproducing mysterious install/type/lint/format/hook failures, remediating monorepo tooling debt across Next.js + TypeScript + Drizzle + tRPC + Better Auth, or hardening a fresh monorepo against repeated mistakes — symptoms like ERR_PNPM_NO_MATCHING_VERSION, TS2307/TS2339, __esModule config errors, passWithNoTests, or silent DATABASE_URL/Drizzle migration failures.
-version: 1.3
+description: Monorepo web projects using pnpm, Turborepo, TypeScript, Next.js, React, ESLint, Prettier, Drizzle ORM, Postgres, and third-party SDKs (tRPC, Trigger.dev, Stripe, Better Auth, Sanity, React Email, Vitest). v1.4 — canonical troubleshooting handbook with 45+ case-indexed anti-patterns across install, type-check, lint, format, test, build, migration, and pre-commit-hook gates. Covers pnpm 10+ native-build approval (allowBuilds, onlyBuiltDependencies), strict workspace isolation, tsconfig path aliases and inherited baseUrl, Drizzle migration journal drift and silent spinner-masked failures, exactOptionalPropertyTypes, noUncheckedIndexedAccess, React 19 SubmitEvent migration, ESLint flat-config FlatCompat, Prettier ignore-path semantics, SDK drift (subpath exports, hardcoded API versions, callback payload shapes), runtime assertions that do not narrow TypeScript types, .prettierrignore as gate-silencer, and the Surgical Change Discipline. Use when debugging failing gates, reproducing mysterious install/type/lint/format/hook failures, remediating monorepo tooling debt across Next.js + TypeScript + Drizzle + tRPC + Better Auth, or hardening a fresh monorepo against repeated mistakes — symptoms like ERR_PNPM_NO_MATCHING_VERSION, TS2307/TS2339, TS18047 after runtime null-checks, __esModule config errors, passWithNoTests, or silent DATABASE_URL/Drizzle migration failures.
+version: 1.4
 ---
 
 # Consolidated Agent Briefing Document and Programming Handbook
 
 ## Agent Programming and Troubleshooting Handbook
 
-Version: 1.3  
+Version: 1.4  
 Scope: Monorepo web projects using pnpm, Turborepo, TypeScript, Next.js, React, ESLint, Prettier, Drizzle, Postgres, and third-party SDKs.  
 Purpose: Prevent repeated mistakes and provide a reusable troubleshooting methodology.  
-Reconciliation note: v1.3 adds: (1) Playbook 16 Scenario B — auth-guarded route `DYNAMIC_SERVER_USAGE` warnings are expected + the `force-dynamic`/`cacheComponents` trap; (2) §5.9 Testing Patterns — source contract tests for architectural invariants + meta-guard pattern for caller modules; (3) §4.10 Mistake 7 — `.gitignore` `lib/` bleed in Python+JS monorepos; (4) §12 Lesson 14 — distinguishing public-route from auth-route warnings; (5) §4.8 Server/Client Boundary note — the `api()`/`apiPublic()` split is a Server Component concern. v1.2 absorbed the genuine deltas from `update.md` (parser-error line attribution + `cat -A`; `psql -f` fallback for spinner-masked silent Drizzle failures; the named "Surgical Change Discipline" and the Stillwater reference-copy caveat).
+Reconciliation note: v1.4 adds: (1) §4.2 TS Mistake 17 — runtime assertions (`expect().not.toBeNull()`) do not narrow TypeScript types; (2) §4.4 Prettier Mistake 8 + anti-pattern — `.prettierrignore` as gate-silencer vs. unowned-content marker; (3) §4.9 Testing Mistake 4 — async-deferred-to-null file reads in contract tests (Stillwater's `readFileSync` → `string` pattern); (4) §5.9 corrected both source-contract-test and meta-guard pattern blocks from async to synchronous null-free form; (5) §7 Playbook 17 — `TS18047` after runtime null-check, two-branch fix (preferred: non-null producer); (6) §10 four new case-index rows (TS-9, PRETTIER-6, TEST-1, RUNTIME-6); (7) §12 Lesson 13 sharpened — prior green-checkmarks are also hypotheses, not just prose conclusions. v1.3 added: (1) Playbook 16 Scenario B — auth-guarded route `DYNAMIC_SERVER_USAGE` warnings are expected + the `force-dynamic`/`cacheComponents` trap; (2) §5.9 Testing Patterns — source contract tests for architectural invariants + meta-guard pattern for caller modules; (3) §4.10 Mistake 7 — `.gitignore` `lib/` bleed in Python+JS monorepos; (4) §12 Lesson 14 — distinguishing public-route from auth-route warnings; (5) §4.8 Server/Client Boundary note — the `api()`/`apiPublic()` split is a Server Component concern. v1.2 absorbed the genuine deltas from `update.md` (parser-error line attribution + `cat -A`; `psql -f` fallback for spinner-masked silent Drizzle failures; the named "Surgical Change Discipline" and the Stillwater reference-copy caveat).
 
 ---
 
@@ -1324,7 +1324,68 @@ Anti-pattern:
 
 > Naming a tRPC procedure after a common verb without checking for JavaScript built-in collisions.
 
+---
 
+### Mistake 17: Runtime assertions do not narrow TypeScript types
+
+Symptom:
+
+```text
+src/lib/__tests__/rendering-strategy.contract.test.ts:111:26 - error TS18047: 'src' is possibly 'null'.
+  111         const codeOnly = src
+                                ~~~
+```
+...appearing *immediately after* a line that reads:
+
+```ts
+expect(src, `… not found`).not.toBeNull();
+```
+
+Root cause:
+
+- The producer was typed `string | null` (`readFile(...).catch(() => null)`).
+- `expect(src).not.toBeNull()` is a **Vitest runtime assertion** — it throws at runtime if `src` is null. It is **not** a TypeScript type guard and does **not** narrow `src`'s compile-time type.
+- `tsc` keeps `src: string | null`, so the next line (`src.split('\n')`) derefs a maybe-null value → `TS18047` under `strict: true`.
+
+Bad:
+
+```ts
+const read = (rel: string) => readFile(join(APP_ROOT, rel), 'utf8').catch(() => null);
+// ...
+const src = await read(rel);            // string | null
+expect(src).not.toBeNull();             // runtime-only — does NOT narrow `src`
+const codeOnly = src.split('\n');        // TS18047: 'src' is possibly 'null'
+```
+
+Better (preferred — make the producer non-null so the null branch never exists):
+
+```ts
+const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), 'utf8');
+// ...
+const src = read(rel);                   // string — no null branch, no TS18047
+const codeOnly = src.split('\n');
+```
+
+Acceptable (if you must keep a nullable producer — use a *real* type guard at the deref site):
+
+```ts
+if (src === null) throw new Error(`${rel} not found`);  // narrows `src` to string
+const codeOnly = src.split('\n');
+```
+
+The first fix (non-null producer) is preferred because it also improves the failure mode: a missing file throws a readable ENOENT at `readFileSync` instead of being swallowed to `null` and surfacing later as a confusing regex-assertion failure. See Testing Mistake 4.
+
+Lesson:
+
+> A runtime assertion (`expect(x).not.toBeNull()`, `assert(x)`, `console.assert`) does not narrow `x`'s TypeScript type. To clear `TS18047` you must either make the producer non-null, or use a construct `tsc` recognizes as narrowing (`if (x === null) …`, a user-defined `asserts x` guard, or `x ?? …`).
+
+Prevention:
+
+- Prefer producers that can't return `null` (synchronous `readFileSync`, `.then(x => x!)` with a known-non-null source, etc.) over deferred-to-null `.catch(() => null)`.
+- If you write `expect(x).not.toBeNull()` and then use `x`'s members, you are relying on a runtime check the compiler cannot see — restructure so the type reflects the truth.
+- Remember `strict: true` (and especially `noUncheckedIndexedAccess`) makes *every* nullable deref a hard error, not a warning.
+
+---
 
 ## TypeScript Troubleshooting Checklist
 
@@ -1372,7 +1433,12 @@ When `check-types` fails:
    - rerun workspace check,
    - rerun Prettier on changed files.
 
-8. If `check-types` passes but `build` fails:
+8. For `TS18047: 'x' is possibly 'null'` appearing right after a runtime null-check (`expect(x).not.toBeNull()`, `assert(x)`):
+   - **the check is not a type guard** — Vitest/Jest assertions narrow at runtime, not compile time,
+   - make the producer non-null (e.g. `readFileSync` instead of `readFile().catch(() => null)`),
+   - or use a *real* narrowing construct (`if (x === null) throw …` / `asserts x` guard).
+
+9. If `check-types` passes but `build` fails:
    - inspect the build output for module initialization errors,
    - tRPC v11 validates procedure names at router construction time (runtime, not type analysis),
    - check for reserved words (`apply`, `call`, `bind`, `constructor`, etc.) in procedure definitions.
@@ -1955,6 +2021,50 @@ pnpm format:check
 
 ---
 
+### Mistake 8: Using .prettierrignore to silence a real [warn]
+
+Symptom:
+
+- A file emits `[warn] Code style issues found` on `prettier --check`.
+- Instead of running `prettier --write`, the file path is added to `.prettierrignore`.
+- The `[warn]` disappears from the gate, but the file remains genuinely mis-formatted.
+
+Root cause:
+
+- `.prettierrignore` is being used as a **gate-silencer**, not as a marker for genuinely-unformattable content.
+- This violates §2.5 Preserve Guardrails ("Never make a gate green by weakening it").
+- The symptom is the same as the Prettier mistake at §4.10 Tooling Mistake 7 (`.gitignore` hiding files from CI) — but on the Prettier side: the gate *passes* now, so the breakage is invisible until the next agent formats the file and sees a diff that has nothing to do with their change.
+
+Bad:
+
+```bash
+# Instead of fixing the file:
+echo 'apps/web/src/lib/__tests__/my-test.ts' >> .prettierrignore
+git add .prettierrignore
+```
+
+Better:
+
+```bash
+# Fix the file, then remove any bespoke exclusion:
+prettier --write apps/web/src/lib/__tests__/my-test.ts
+git add apps/web/src/lib/__tests__/my-test.ts
+# If .prettierrignore had a line for this file, remove it:
+# (the line should only exist for genuinely-unformattable content)
+```
+
+Lesson:
+
+> `.prettierrignore` is for content you **cannot or should not format** (vendored docs, generated files, binary-adjacent assets). It is never a substitute for `prettier --write`. If a file is owned by your project and is mis-formatted, the fix is formatting it — not hiding it from the gate.
+
+Prevention:
+
+- After adding any file to `.prettierrignore`, ask: "Is this genuinely unformattable, or am I silencing a `[warn]`?" If the answer is the latter, run `prettier --write` instead.
+- Verify `.prettierrignore` entries periodically: remove the entry and re-run `prettier --check` — if the file passes, the entry was masking real drift.
+- Reserve `.prettierrignore` for: files outside your control (docs/, skills/, generated content), or content that Prettier cannot parse.
+
+---
+
 ## Prettier Troubleshooting Checklist
 
 When Prettier fails:
@@ -2019,6 +2129,7 @@ This restores formatting fixed point.
 | Staged but unformatted | Hook fails | Format before commit |
 | ESLint fix without format | Prettier drift | Run format after lint:fix |
 | Treating parse error as formatting | Repeated failure | Fix syntax first |
+| Silencing `[warn]` via `.prettierrignore` | Real formatting drift hidden | Run `prettier --write`; reserve ignore for unowned content |
 
 ---
 
@@ -3391,6 +3502,62 @@ Diagnostic patterns:
 
 ---
 
+### Mistake 4: Async-deferred-to-null file reads in contract tests
+
+Symptom:
+
+- A source-contract test's `read()` helper returns `string | null` via `readFile(...).catch(() => null)`.
+- Every assertion site now holds a `string | null`, even after runtime `expect(x).not.toBeNull()` (see TS Mistake 17).
+- A missing file is swallowed to `null` and surfaces as a confusing regex-assertion failure instead of a loud "file not found" error.
+
+Root cause:
+
+- `readFile(...).catch(() => null)` erases the ENOENT signal *and* widens the producer type to `string | null`.
+- The Stillwater reference (`index-routes-no-apiCaller.test.ts`) avoids this entirely: it uses **synchronous `readFileSync`** into `string`-typed module-scoped `const`s — no `Promise`, no `.catch(() => null)`, no null branch.
+
+Bad:
+
+```ts
+const read = (rel: string) =>
+  readFile(join(APP_ROOT, rel), 'utf8').catch(() => null);
+// ...
+for (const rel of PUBLIC_TRPC_PAGES) {
+  it(`${rel} imports apiPublic`, async () => {
+    const src = await read(rel);          // string | null
+    expect(src, `${rel} not found`).not.toBeNull(); // runtime-only — not a type guard
+    expect(src).toMatch(/import.*apiPublic/);        // TS18047 on any .method() call
+  });
+}
+```
+
+Better (synchronous, throwing, null-free — mirrors Stillwater):
+
+```ts
+const read = (rel: string): string =>
+  readFileSync(join(APP_ROOT, rel), 'utf8');
+// ...
+for (const rel of PUBLIC_TRPC_PAGES) {
+  it(`${rel} imports apiPublic`, () => {
+    const src = read(rel);                // string — always
+    expect(src).toMatch(/import.*apiPublic/);
+  });
+}
+```
+
+This also improves the failure mode: a missing file throws a readable `ENOENT` at `readFileSync` (the Vitest spec name + file path are in the stack trace) instead of being silently swallowed to `null`.
+
+Lesson:
+
+> Contract test file reads should be **synchronous and throwing**. Synchronous reads keep the producer type `string` (no null branch → no `TS18047`), throw loudly on missing files, and avoid async/await boilerplate in tests that need no I/O mocking.
+
+Prevention:
+
+- Use `readFileSync` (not `readFile().catch(() => null)`) for test sources.
+- Remove redundant `expect(x).not.toBeNull()` guards after switching to a throwing producer — the throw does that job.
+- If you need async reads (e.g. testing a network client), keep the producer's return type `Promise<T>` and narrow with `await` + a real null check before deref.
+
+---
+
 ## Testing Checklist
 
 When tests fail:
@@ -3860,10 +4027,11 @@ This is:
 ```ts
 // apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts
 const PUBLIC_TRPC_PAGES = ['(shop)/page.tsx', '(shop)/products/page.tsx', /* ... */];
+const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), 'utf8');
 
 for (const rel of PUBLIC_TRPC_PAGES) {
-  it(`${rel} imports apiPublic (not api)`, async () => {
-    const src = await read(rel);
+  it(`${rel} imports apiPublic (not api)`, () => {
+    const src = read(rel);                          // string — null-free
     expect(src).toMatch(/import\s+\{\s*apiPublic\s*\}/);
     // Strip comment lines before checking — api() in JSDoc is benign
     const codeOnly = src.split('\n')
@@ -3873,6 +4041,13 @@ for (const rel of PUBLIC_TRPC_PAGES) {
   });
 }
 ```
+
+Why synchronous `readFileSync` instead of async `readFile().catch(() => null)`:
+
+- Synchronous reads keep the producer type `string` — no null branch, no `TS18047` under `strict: true`.
+- A missing file throws `ENOENT` at `readFileSync` (readable failure) instead of being swallowed to `null` (confusing regex-assertion failure).
+- No async/await overhead in tests that need no I/O mocking.
+- Mirrors the Stillwater reference (`index-routes-no-apiCaller.test.ts`) pattern.
 
 Key design decisions:
 - Use `node:fs` `readFile` (not React rendering) — no mock harness needed
@@ -3894,8 +4069,8 @@ Lesson:
 When a module exports split variants (e.g. `api()` and `apiPublic()`), add a test that asserts the module itself maintains its contract:
 
 ```ts
-it('lib/trpc/server.ts maintains the api/apiPublic contract', async () => {
-  const src = await readFile(join(HERE, '..', 'trpc', 'server.ts'), 'utf8');
+it('lib/trpc/server.ts maintains the api/apiPublic contract', () => {
+  const src = readFileSync(join(HERE, '..', 'trpc', 'server.ts'), 'utf8');
   expect(src).toContain('export async function api()');
   expect(src).toContain('export async function apiPublic()');
   // api() must read headers()
@@ -4849,6 +5024,79 @@ Lesson:
 
 ---
 
+## Playbook 17: check-types fails with TS18047 on a value "already null-checked" by a Vitest assertion
+
+### Symptoms
+
+```text
+src/lib/__tests__/some.contract.test.ts:111:26 - error TS18047: 'src' is possibly 'null'.
+  111         const codeOnly = src
+                                ~~~
+```
+
+...appearing immediately after:
+
+```ts
+expect(src, 'file not found').not.toBeNull();
+```
+
+Pre-commit hook fails at the `check-types` gate. The build itself may succeed — the error is in the test file, not the application.
+
+### Likely Causes
+
+1. The test's file reader returns `string | null` via `readFile(...).catch(() => null)`.
+2. `expect(x).not.toBeNull()` is a **runtime assertion**, not a TypeScript type guard — it does not narrow `x`'s compile-time type.
+3. `tsc` keeps `x: string | null`, so `.split()`, `.match()`, or `.indexOf()` derefs a maybe-null value → `TS18047`.
+
+### Diagnostic Steps
+
+```bash
+# 1. Confirm the failing file:
+find apps/web/src -name '*.test.ts' | xargs grep 'catch.*null'
+
+# 2. Confirm the type error:
+find apps/web/src -name '*.test.ts' | xargs grep 'expect.*not.toBeNull.*\.' | head
+# (look for expect(...).not.toBeNull() followed by .method() on the same value)
+```
+
+### Fix
+
+Two options, in order of preference:
+
+**Option A (preferred): make the producer non-null.** Switch from async `readFile(...).catch(() => null)` to synchronous `readFileSync` → `string` (mirrors the Stillwater reference pattern in `index-routes-no-apiCaller.test.ts`):
+
+```ts
+- const read = (rel: string) =>
+-   readFile(join(APP_ROOT, rel), 'utf8').catch(() => null);
++ const read = (rel: string): string =>
++   readFileSync(join(APP_ROOT, rel), 'utf8');
+```
+
+This eliminates the null branch at the type level, improves the missing-file failure mode (loud ENOENT instead of confusing regex failure), and removes async/await from tests that don't need it.
+
+**Option B (if you must keep a nullable producer): use a real type guard at the deref site.**
+
+```ts
+if (src === null) throw new Error(`${rel} not found`);  // narrows to string
+codeOnly = src.split('\n');
+```
+
+### Verification
+
+```bash
+pnpm --filter=@maison/web exec tsc --noEmit  # no TS18047
+pnpm --filter=@maison/web test                # all contract tests pass
+pnpm format:check                             # file is Prettier-conformant
+```
+
+### Prevention
+
+- **Never use `readFile(...).catch(() => null)` in contract tests.** Synchronous `readFileSync` → `string` is the canonical form.
+- **Never rely on `expect(x).not.toBeNull()` to narrow a type.** Use it for the runtime assertion, but also ensure the *type* is non-null via the producer.
+- **Before committing a new test file:** run `pnpm check-types` and `prettier --check` on it. Don't rely on the pre-commit hook catching everything — some gates run only on staged content.
+
+---
+
 # 8. Verification Matrices
 
 Verification is not optional. A fix is only real if proven.
@@ -5022,6 +5270,10 @@ This index summarizes the major incidents and their distilled lessons.
 | RUNTIME-3 | DYNAMIC_SERVER_USAGE misdiagnosed as cosmetic | Prior handoff said "/ renders fine" when build log explicitly named `[home]` | Verify claims against actual error log | Prior diagnosis documents can be wrong — reproduce, don't trust the summary |
 | RUNTIME-4 | New file not formatted before commit | Prior remediation created ClientOnly.tsx but never ran Prettier | Format every new file before staging | New files are checked by pre-commit hook just like edited files |
 | RUNTIME-5 | apiPublic() migration of 5 public pages | Switched api() → apiPublic() on /, /collections, /products, /products/[slug], /search | `/` and `/collections` flipped from `ƒ` to `○`; warnings eliminated | Session-free caller reuses same appRouter — zero duplicated query logic |
+| RUNTIME-6 | Prior "all gates green" claim contradicted by error log | Verification table in handoff asserted `check-types 10/10 ✓` and `test 20/20 ✓` for a file that error.txt proved was type-broken at commit time | Reproduce the failing gate directly against the committed code | Treat prior *green checkmarks* as hypotheses too — stale cache or never-run verification produces false positives |
+| TS-9 | TS18047 after runtime `not.toBeNull` | `readFile().catch(()=>null)` widened producer to `string | null`; `expect().not.toBeNull()` is not a type guard | Null-free producer (`readFileSync` → `string`) or real type guard at deref site | Runtime assertions do not narrow TypeScript types |
+| PRETTIER-6 | `.prettierrignore` masking a real `[warn]` | File genuinely mis-formatted; exclusion added to silence the gate instead of fixing the file | `prettier --write` then remove exclusion from `.prettierrignore` | Ignore files are for unowned content, not gate-silencing |
+| TEST-1 | Contract test async null swallow | `readFile().catch(()=>null)` widens type + hides ENOENT into a confusing regex failure | Synchronous `readFileSync` → `string` (throws on missing, null-free) | Contract tests should throw on missing sources |
 
 ---
 
@@ -5127,7 +5379,7 @@ Some errors (like tRPC reserved word procedure names) only surface at `pnpm buil
 
 ## 13. Verify prior diagnoses against the actual error log
 
-A prior remediation document (`last_remediation.md`, a handoff from a previous session) may contain confidently stated but incorrect conclusions. In the original session, the prior document claimed: "`DYNAMIC_SERVER_USAGE` warnings are non-fatal… build still completes 37/37. Expected and correct; out of scope per Surgical Changes." The build log explicitly showed `[home] Failed to fetch data: Route / couldn't be rendered statically because it used headers` — the homepage was forced dynamic and rendered an empty product grid during the static probe. The prior document was wrong about `/` being fine. This was later fixed (public routes migrated to `apiPublic()`). Lesson: always verify a prior diagnosis against the actual error log, not the summary. Treat every prior conclusion as a hypothesis until reproduced.
+A prior remediation document (`last_remediation.md`, a handoff from a previous session) may contain confidently stated but incorrect conclusions. In the original session, the prior document claimed: "`DYNAMIC_SERVER_USAGE` warnings are non-fatal… build still completes 37/37. Expected and correct; out of scope per Surgical Changes." The build log explicitly showed `[home] Failed to fetch data: Route / couldn't be rendered statically because it used headers` — the homepage was forced dynamic and rendered an empty product grid during the static probe. The prior document was wrong about `/` being fine. This was later fixed (public routes migrated to `apiPublic()`). A later remediation compound this: its verification table claimed `check-types 10/10 ✓` and `test 20/20 ✓` for a test file that the next `check-types` run proved was type-broken (`TS18047`) at commit time — the verification was either run against stale cache or never actually executed. Lesson: always verify a prior diagnosis against the actual error log, not the summary. Treat every prior conclusion — *and every prior green checkmark* — as a hypothesis until reproduced. (See RUNTIME-3, RUNTIME-6.)
 
 ## 14. Distinguish public-route from auth-route DYNAMIC_SERVER_USAGE warnings
 

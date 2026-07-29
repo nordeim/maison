@@ -329,3 +329,57 @@ No page sources, no server.ts, no schema, no deps, no routing-strategy change. T
 3. The last_remediation.md verification-claim discrepancy. That doc claims check-types 10/10 and test 20/20 green for the very file that error.txt proves was type-broken at commit time. Not actionable as a code change, but worth 
    knowing for trust calibration on that session's other claims. 
 
+
+### Seven regions edited (all surgical, one file only) 
+ 
+┌────────────────────────────────────────────┬──────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐ 
+│ Region                                     │ What                                             │ Why                                                                                                              │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §4.2 TS Mistake 17                         │ New mistake + checklist item 9                   │ expect(x).not.toBeNull() is not a TypeScript type guard — this was the exact bug in error.txt                    │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §4.4 Prettier Mistake 8 + anti-pattern row │ New mistake + table row                          │ .prettierrignore as gate-silencer — the user's exact reaction in error.txt                                       │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §4.9 Testing Mistake 4                     │ New mistake                                      │ Async-deferred-to-null contract reads vs. Stillwater's synchronous readFileSync → string                         │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §5.9 Pattern blocks (2)                    │ Corrected existing code blocks                   │ The SKILL.md was teaching the buggy form (readFile().catch(()=>null), async loops) — now matches the shipped fix │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §7 Playbook 17                             │ New playbook                                     │ Complete symptom→diagnosis→fix→prevention for TS18047 after runtime null-check                                   │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §10 Case Index                             │ 4 new rows (TS-9, PRETTIER-6, TEST-1, RUNTIME-6) │ Quick-lookup entries for all four lessons                                                                        │ 
+├────────────────────────────────────────────┼──────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ §12 Lesson 13                              │ Sharpened paragraph                              │ Extended from "prior prose conclusions" to "prior green checkmarks are also hypotheses"                          │ 
+└────────────────────────────────────────────┴──────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ 
+ 
+### What was NOT changed (Surgical Change Discipline) 
+ 
+- No existing mistakes/playbooks/lessons renumbered 
+- No prose rewrites outside the two pattern blocks (code-only changes there) 
+- No changes to §8 Verification Matrices, §11 Handoff, §13 Field Card 
+- No app code changes (already shipped in previous turn) 
+- The "Bad:" code blocks in new sections correctly show the anti-pattern (the await read(rel) lines are intentionally wrong examples) 
+ 
+### Suggested commit 
+ 
+``` 
+  docs(web): v1.4 — add TS18047, .prettierrignore, and contract-test lessons to SKILL.md 
+ 
+  Root cause (this round): the rendering-strategy contract test had a 
+  TS18047 type hole (`readFile().catch(()=>null)` → `string | null` → 
+  `.split()` deref → TS18047) that the prior remediation claimed was 
+  green. The SKILL.md itself also taught the buggy async-null form in 
+  its source-contract-test pattern blocks. 
+ 
+  Changes: 
+  1. §4.2 TS Mistake 17: runtime assertions don't narrow TypeScript types 
+  2. §4.4 Prettier Mistake 8: .prettierrignore as gate-silencer 
+  3. §4.9 Testing Mistake 4: async-deferred-to-null contract reads 
+  4. §5.9 corrected both pattern blocks to synchronous readFileSync 
+  5. §7 Playbook 17: TS18047 after runtime null-check (two-branch fix) 
+  6. §10 four new case-index rows (TS-9, PRETTIER-6, TEST-1, RUNTIME-6) 
+  7. §12 Lesson 13 sharpened: prior green-checkmarks are also hypotheses 
+ 
+  Verify: frontmatter v1.4 ✓; 17 playbooks ✓; pattern blocks sync ✓; 
+  case index 4 new rows ✓; anti-pattern table 8 rows ✓; Lesson 13 
+  references RUNTIME-6 ✓; line count 5452 (was 5200). 
+``` 
+
