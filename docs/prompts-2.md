@@ -10,6 +10,21 @@ Do not create any new git branch. All git commits must be to the main branch.
 
 ---
 
+Please `git pull` to refresh your local repo for `https://github.com/nordeim/maison.git`, then meticulously review and check the production deployment log in the included `pnpm_log.txt` for any issues.
+
+Your updated remediation codebase is now live at website `https://maison.jesspete.shop/`, please use `curl` to check and confirm.
+
+Next, meticulously plan to perform 'agent-browser' based E2E testing of the live website `https://maison.jesspete.shop/` which has been deployed with the latest changes. Meticulously plan to validate any issues and gaps identified against the codebase to identify the root causes and the optimal fixes.
+
+Next, please meticulously plan to continue to fix any  outstanding issues and errors by first validating them against the codebase to identify the root causes and optimal fixes. Then meticulously plan to create a comprehensive remediation plan with a detailed ToDo list to apply the validated optimal fixes; include in your analysis any previously identified issues and bugs that are still outstanding. Next, review and validate the remediation plan against the codebase again to ensure alignment before executing it meticulously. Use TDD approach to make code changes.
+
+Finally, please meticulously plan to update all relevant documentation to ensure alignment with the remediated codebase, then commit all code and document changes locally and then push to my GitHub repo
+`git commit` all code and document changes locally and then `git push` them to my GitGub repo using the included ssh key `docs/ssh-key.txt` and wrapper script `skills/how-to-git-push-using-ssh-wrapper/scripts/ssh_git_wrapper_v3.py`.
+
+Do not create any new git branch. All git commits must be to the main branch.
+
+---
+
 please `git pull` (or `git clone https://github.com/nordeim/stillwater.git` if your workspace has been reset) to refresh your local repo content.
 
 Please meticulously review the latest pnpm execution log `pnpm_log.txt`. Then meticulously plan to restart your 'agent-browser' based E2E testing of the live website `https://stillwater.jesspete.shop/` which has been deployed with the latest changes. Next, please meticulously plan to validate any issues and gaps identified against the codebase to identify the root causes and the optimal fixes.
