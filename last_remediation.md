@@ -503,3 +503,125 @@ sake would violate the explicit instruction not to introduce unrequested modific
 2. Minor: apps/web/next.config.ts lacks reactCompiler: false and allowedDevOrigins that Stillwater carries (Stillwater disabled React Compiler due to a nested-Suspense streaming bug — V16-2 / V16-3). Maison does not currently hit that 
    bug (its pages await Promise.all before rendering), so this is informational, not a defect.
 
+---
+
+### AGENTS.md (6 edits) 
+ 
+┌────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────┐ 
+│ Location                           │ Change                                                                                    │ Why                                                                              │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ "What this repo is" paragraph      │ "code is to be scaffolded" → "Phase 3 complete, 13 routers, 23 tables, 37 routes"         │ Was stale (code is fully scaffolded)                                             │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ Architecture skills lines (2 rows) │ skills/ → ~/.pi/agent/skills/                                                             │ Repo-local skills/ deleted from worktree; real source is global                  │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ Anti-generic UI rules source path  │ skills/avant-garde-design-v4/... → ~/.pi/agent/skills/...                                 │ Same as above                                                                    │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ SSH push wrapper path              │ /home/z/my-project/maison/ → /home/project/maison/                                        │ Was the wrong directory; would fail on copy-paste                                │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ overrides guardrail note           │ Expanded: now documents ws (GHSA-96hv DoS CVE), tmp (path traversal CVE), and allowBuilds │ Was incomplete — an agent could "clean up" a CVE pin thinking it was dead config │ 
+├────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤ 
+│ "Files to read" table (2 rows)     │ skills/ → ~/.pi/agent/skills/                                                             │ Same repo-local → global repoint                                                 │ 
+└────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────┘ 
+ 
+### CLAUDE.md (6 edits) 
+ 
+┌─────────────────────────────────────┬─────────────────────────────────────────────────────────────────────┬────────────────────────────────────────────────┐ 
+│ Location                            │ Change                                                              │ Why                                            │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ Project Identity paragraph          │ "code-to-be-scaffolded" → "Phase 3 complete, 13 routers, 23 tables" │ Same stale-state fix as AGENTS.md              │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ Stack version pins                  │ pnpm 11.9.0 → 11.17.0                                               │ Was packageManager 11.9.0; actual is 11.17.0   │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ "Before You Write Code" items 5+6   │ skills/ → ~/.pi/agent/skills/                                       │ Repo-local skills/ deleted; paths must resolve │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ Anti-Generic UI Checklist source    │ skills/avant-garde-design-v4/... → ~/.pi/agent/skills/...           │ Same repoint                                   │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ SSH push command (both occurrences) │ /home/z/my-project/maison/ → /home/project/maison/                  │ Wrong directory; would silently fail           │ 
+├─────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────────┤ 
+│ "When You're Stuck" skills ref      │ skills/ → ~/.pi/agent/skills/                                       │ Same repoint                                   │ 
+└─────────────────────────────────────┴─────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────────┘ 
+ 
+### README.md (11 edits) 
+ 
+┌────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────┐ 
+│ Location                       │ Change                                                                                    │ Why                                                                          │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ pnpm badge (line 4)            │ 11.9.0 → 11.17.0                                                                          │ Was stale                                                                    │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Status badge (line 14)         │ PRD approved, Phase 0 scaffold-success → Phase 3 complete · production-ready              │ Contradicted the Project Status table claiming all 4 phases complete         │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Overview paragraph             │ "approved for build" → "fully scaffolded and Phase 3 complete"                            │ Was stale                                                                    │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Tech stack table pnpm          │ 11.9.0 → 11.17.0                                                                          │ Was stale                                                                    │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Prerequisites pnpm (both)      │ 11.9.0 → 11.17.0                                                                          │ Was stale                                                                    │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Color tokens "once scaffolded" │ Removed "(once scaffolded)" qualifier                                                     │ packages/ui/src/tokens/colors.css exists                                     │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Anti-Generic source path       │ skills/ → ~/.pi/agent/skills/                                                             │ Repo-local skills/ deleted                                                   │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ File Hierarchy skills line     │ "(196 skills, design + dev)" → "vendored, deleted from worktree; see ~/.pi/agent/skills/" │ Honest status of the pre-existing drift                                      │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Documentation table skills row │ Relative link → ~/.pi/agent/skills/ text reference (no dead relative link)                │ Link would 404                                                               │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ 8-Gate CI gate 7 (Lighthouse)  │ Added italic note: "config pending — lighthouserc.* not yet committed"                    │ @lhci/cli autorun can't run without config; doc was aspirational, now honest │ 
+├────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────┤ 
+│ Phase-0 row numbers            │ "16 tables" → "23 tables"; "routers (8)" → "routers (13)"                                 │ Was stale (verified: 23 pgTable calls, 13 routers wired in root.ts)          │ 
+└────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────┘ 
+ 
+Verification (all gates green) 
+ 
+┌─────────────────────────────────────┬───────────────────────────────────────────────────┐ 
+│ Gate                                │ Result                                            │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ pnpm 11.9.0 → 11.17.0 check         │ ✅ 0 stale refs remaining                         │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ skills/ stale repo-local refs check │ ✅ 0 remaining (all point to ~/.pi/agent/skills/) │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ "16 tables" / "routers (8)" check   │ ✅ 0 stale numbers                                │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ /home/z/ SSH path check             │ ✅ 0 stale paths                                  │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ pnpm format:check                   │ ✅ All conformant (auto-fixed after edit)         │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ pnpm check-types                    │ ✅ 10/10 packages, exit 0                         │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ pnpm lint (web)                     │ ✅ 0 errors                                       │ 
+├─────────────────────────────────────┼───────────────────────────────────────────────────┤ 
+│ Contract test                       │ ✅ 20/20 passed (1.29s)                           │ 
+└─────────────────────────────────────┴───────────────────────────────────────────────────┘ 
+ 
+Suggested commit 
+ 
+``` 
+  docs: align README, AGENTS, CLAUDE with current codebase state 
+ 
+  Root cause: The three documentation files contained stale facts 
+  from the Phase 0 scaffold era — wrong pnpm version (11.9.0 vs 
+  11.17.0 in package.json), wrong router count (8 vs 13 wired in 
+  root.ts), wrong schema table count (16 vs 23 pgTable calls), an 
+  "approved for build" status when Phase 3 is complete, skills/ 
+  references pointing at a vendored directory deleted from the 
+  working tree, and SSH wrapper paths to a non-existent /home/z/ 
+  directory that would silently fail on copy-paste. 
+ 
+  Changes: 
+  - README: fixed pnpm badge + tech table + prereqs (11.9.0→11.17.0), 
+    updated status badge to Phase 3 complete, fixed schema/router 
+    counts, repointed skills refs to ~/.pi/agent/skills/, flagged 
+    Lighthouse gate as config-pending, removed stale "(once 
+    scaffolded)" qualifier from tokens path, updated skills/ 
+    hierarchy note to honest worktree status 
+  - AGENTS.md: removed "code to be scaffolded" language (Phase 3 
+    complete now), repointed all skills/ refs to ~/.pi/agent/skills/, 
+    fixed SSH wrapper path (/home/z/ → /home/project/), expanded 
+    overrides guardrail to document ws/tmp CVE pins + allowBuilds 
+  - CLAUDE.md: same stale-state + skills/ + SSH fixes, updated pnpm 
+    version pin 
+ 
+  Verify: all six verification steps pass (grep 11.9.0, skills/ stale 
+  refs, old numbers, old SSH path, status badge — all 0 matches); 
+  format:check + check-types (10/10) + lint (0 errors) + contract 
+  test (20/20) green. 
+```
+

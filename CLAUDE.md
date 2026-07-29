@@ -6,12 +6,12 @@
 
 ## Project Identity
 
-**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (target architecture: Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The current state is **documentation-complete, code-to-be-scaffolded** — the unified PRD (`docs/PRD_unified.md`), unified landing page mockup (`docs/landing_page_unified.html`), and this documentation suite are committed; the application packages are to be built per the PRD §8.2 file hierarchy.
+**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The codebase is fully scaffolded and Phase 3 complete — 13 tRPC routers, 23 Drizzle tables, full admin back-office, and 37 production routes. All application packages exist under `apps/` and `packages/` per the PRD §8.2 file hierarchy.
 
 **Stack version pins** (do not deviate without ADR):
 
 - Node.js ≥ 22.0.0
-- pnpm 11.9.0 (via `packageManager` field)
+- pnpm 11.17.0 (via `packageManager` field)
 - Next.js 16.2.x
 - React 19.2.x
 - TypeScript 5.9.x (strict)
@@ -32,8 +32,8 @@ Read these in order:
 2. **`docs/landing_page_unified.html`** — how it should look (canonical design tokens: `--bg #faf8f5`, `--clay #a86b4a`, `--gold #c4a265`; Cormorant Garamond + Inter typography; 15 homepage sections)
 3. **`PROJECT-ARCHITECTURE.md`** — how to build it (ADRs, layer model, DB schemas, security posture)
 4. **`AGENTS.md`** — high-signal facts (read this before any commit)
-5. **`skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` §9 (Anti-Patterns) + §13 (Pitfalls)** — read before writing new code; documents 50+ gotchas
-6. **`skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`** — concrete Stillwater reference (real file paths, working configs, 651 tests, 11 ADRs)
+5. **`~/.pi/agent/skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` §9 (Anti-Patterns) + §13 (Pitfalls)** — read before writing new code; documents 50+ gotchas
+6. **`~/.pi/agent/skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`** — concrete Stillwater reference (real file paths, working configs, 651 tests, 11 ADRs)
 
 If you skip any of these, you will reproduce bugs that have already been solved.
 
@@ -132,7 +132,7 @@ When asked to implement a feature, follow this discipline:
 
 ## Anti-Generic UI Checklist (Non-Negotiable)
 
-Per `skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`. PR review checks these:
+Per `~/.pi/agent/skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`. PR review checks these:
 
 - [ ] **No bento grids** — use asymmetry or vertical narrative instead
 - [ ] **No L/R hero split** — use full-bleed editorial hero (see `docs/landing_page_unified.html`)
@@ -206,7 +206,7 @@ chmod 600 ~/.ssh/id_maison
 chmod +x docs/ssh_git_wrapper_v3.py
 
 # Every push
-GIT_SSH_COMMAND="/home/z/my-project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
+GIT_SSH_COMMAND="/home/project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
 ```
 
 Full instructions: `docs/ssh-warpper_SKILL.md`.
@@ -250,7 +250,7 @@ When something breaks, follow this order:
 
 ## When You're Stuck
 
-- **Stack-specific question:** Read the relevant skill file in `skills/`. The `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill has 50+ anti-patterns documented — your question is probably answered there.
+- **Stack-specific question:** Read the relevant skill file in `~/.pi/agent/skills/`. The `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill has 50+ anti-patterns documented — your question is probably answered there.
 - **"How did Stillwater solve this?":** Browse `https://github.com/nordeim/stillwater` — it's the production reference for this exact stack.
 - **Design question:** Check `docs/landing_page_unified.html` first — it's the canonical visual reference.
 - **Scope question:** Check `docs/PRD_unified.md` §2.2 (Non-Goals). If it's listed there, it's intentionally out of scope.

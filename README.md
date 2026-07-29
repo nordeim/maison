@@ -1,7 +1,7 @@
 # Maison
 
 [![Node.js](https://img.shields.io/badge/node-%E2%89%A522.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-11.9.0-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![pnpm](https://img.shields.io/badge/pnpm-11.17.0-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2.7-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -11,7 +11,7 @@
 [![tRPC](https://img.shields.io/badge/tRPC-v11-2596BE?logo=trpc&logoColor=white)](https://trpc.io/)
 [![Stripe](https://img.shields.io/badge/Stripe-22.3-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)](#license)
-[![Status](https://img.shields.io/badge/status-PRD%20approved%2C%20Phase%200%20scaffold-success)](#project-status)
+[![Status](https://img.shields.io/badge/status-Phase%203%20complete%20·%20production-ready)](#project-status)
 
 > **Objects of Quiet Beauty.** A production-grade, direct-to-consumer e-commerce platform for curated Scandinavian home goods — handcrafted furniture, lighting, textiles, and ceramics. Built with the calm intentionality of editorial commerce.
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-Maison is a premium DTC e-commerce platform selling curated Scandinavian-inspired home objects. The current repository contains the unified landing page mockup (`docs/landing_page_unified.html`), the unified PRD (`docs/PRD_unified.md`), and the complete project documentation suite (`README.md`, `AGENTS.md`, `CLAUDE.md`, `PROJECT-ARCHITECTURE.md`). The platform is approved for build against a Turborepo monorepo architecture using Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe.
+Maison is a premium DTC e-commerce platform selling curated Scandinavian-inspired home objects. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) using a Turborepo monorepo architecture with Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The unified PRD (`docs/PRD_unified.md`), canonical design mockup (`docs/landing_page_unified.html`), and engineering documentation (`PROJECT-ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md`) are the source of truth for the codebase design.
 
 The brand embodies "considered living" — offering handcrafted objects that prioritise material integrity, artisan craftsmanship, and timeless design over mass production. Every product carries a maker's story, and every transaction supports independent Nordic craftspeople. The aesthetic is editorial-luxury: Cormorant Garamond serif display paired with Inter body, warm cream backgrounds, terracotta accents, and zero generic SaaS UI patterns.
 
@@ -54,7 +54,7 @@ The brand embodies "considered living" — offering handcrafted objects that pri
 | Layer            | Technology             | Version                     | Purpose                                     |
 | ---------------- | ---------------------- | --------------------------- | ------------------------------------------- |
 | Monorepo         | Turborepo              | ≥2.10.4                     | Task orchestration, caching                 |
-| Package manager  | pnpm                   | 11.9.0                      | Workspace protocol, supply-chain guardrails |
+| Package manager  | pnpm                   | 11.17.0                     | Workspace protocol, supply-chain guardrails |
 | Runtime          | Node.js                | ≥22.0.0                     | LTS required by Next.js 16                  |
 | Meta-framework   | Next.js                | 16.2.x                      | App Router, RSC, `proxy.ts`, Turbopack      |
 | UI runtime       | React                  | 19.2.x                      | React Compiler, async params                |
@@ -187,7 +187,7 @@ maison/
 │   ├── 📄 PRD_unified.md              # ← Unified Project Requirements Document
 │   ├── 📄 landing_page_unified.html   # ← Canonical visual reference
 │   └── 📄 ssh_git_wrapper_v3.py       # SSH push wrapper (no openssh-client)
-├── 📂 skills/                         # ClawHub skills (196 skills, design + dev)
+├── 📂 skills/                         # ClawHub skills — vendored, deleted from worktree; see ~/.pi/agent/skills/
 ├── 📂 scripts/                        # Repo scripts (db-setup.sh, pre-commit)
 ├── 📄 .env.example                    # Environment variable template
 ├── 📄 docker-compose.yml              # Local Postgres + Redis + Stripe CLI
@@ -207,7 +207,7 @@ maison/
 ### Prerequisites
 
 - **Node.js** ≥ 22.0.0 (`node --version`)
-- **pnpm** 11.9.0 (`corepack enable && corepack prepare pnpm@11.9.0 --activate`)
+- **pnpm** 11.17.0 (`corepack enable && corepack prepare pnpm@11.17.0 --activate`)
 - **Docker** + Docker Compose (for local Postgres + Redis)
 - A Stripe account (test mode for development)
 - A Neon PostgreSQL database (free tier sufficient for dev)
@@ -328,7 +328,7 @@ Every PR must pass all 8 gates before merge:
 4. ✅ `pnpm test:e2e` — all E2E tests pass
 5. ✅ `pnpm build` — production build succeeds
 6. ✅ `pnpm audit --audit-level=high` — no high/critical vulnerabilities
-7. ✅ Lighthouse CI — Performance ≥ 90, Accessibility ≥ 95
+7. ✅ Lighthouse CI — Performance ≥ 90, Accessibility ≥ 95 _(config pending — `lighthouserc.*` not yet committed)_
 8. ✅ Bundle size — initial JS < 200KB gzipped
 
 ---
@@ -356,11 +356,11 @@ Fonts are **self-hosted** as woff2 in `packages/ui/src/fonts/` (no Google Fonts 
 | `--gold`    | `#c4a265` | Editorial accent (hero italic, ornament) |
 | `--sage`    | `#8b9a82` | Tertiary muted green                     |
 
-Full token reference: `packages/ui/src/tokens/colors.css` (once scaffolded) and `docs/landing_page_unified.html` (canonical source).
+Full token reference: `packages/ui/src/tokens/colors.css` and `docs/landing_page_unified.html` (canonical source).
 
 ### Anti-Generic Commitments
 
-Per `skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`:
+Per `~/.pi/agent/skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`:
 
 - ❌ No bento grids (use asymmetry or vertical narrative instead)
 - ❌ No L/R hero split (use full-bleed editorial hero)
@@ -437,7 +437,7 @@ REFACTOR → Clean up the code while keeping the test green
 
 | Phase                  | Status      | Key Deliverables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (16 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (8), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                            |
+| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (23 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (13), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                           |
 | Phase 1 — MVP          | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
 | Phase 2 — Growth       | ✅ Complete | Wishlist persistence (DB-backed for auth, localStorage for anon, WishlistButton on ProductCard + PDP), promo codes (discounts router + checkout promo field + admin discount management), product search (SearchModal with "/" shortcut + search results page), address book CRUD (full create/edit/delete with default flags), account settings (profile edit, newsletter toggle, GDPR deletion stub), full About page (hero, narrative, 4 values, founder profile, sustainability, CTA), admin product create form, admin discount management (create/deactivate codes with audit_log), 20 E2E tests (added search + about editorial content)                                                                                                                           |
 | Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 22 E2E tests                                                                                                                                                                                                                             |
@@ -456,7 +456,7 @@ REFACTOR → Clean up the code while keeping the test green
 | [`AGENTS.md`](./AGENTS.md)                                           | High-signal facts for AI coding agents         | AI agents (Claude, Cursor, Copilot) |
 | [`CLAUDE.md`](./CLAUDE.md)                                           | Claude Code-specific instructions              | Claude Code                         |
 | [`docs/landing_page_unified.html`](./docs/landing_page_unified.html) | Canonical visual reference for the storefront  | Designers, frontend engineers       |
-| [`skills/skills-catalog.md`](./skills/skills-catalog.md)             | 196 skills organised by category               | All contributors                    |
+| `~/.pi/agent/skills/skills-catalog.md`                               | Skills organised by category                   | All contributors                    |
 
 ---
 

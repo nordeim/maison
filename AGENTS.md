@@ -6,14 +6,14 @@
 
 ## What this repo is
 
-Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandinavian home goods). The build target is Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The repo currently contains the design mockup, unified PRD, and documentation suite — the application code is to be scaffolded per `docs/PRD_unified.md` §8.2.
+Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandinavian home goods). The build target is Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) — 13 tRPC routers, 23 Drizzle tables, full admin back-office, and 37 production routes (25 static ○ + 12 dynamic ƒ). See Project Status in `README.md` for deliverables by phase.
 
 **Canonical visual reference:** `docs/landing_page_unified.html` — every CSS custom property and typography choice in that file is the source of truth for the design system.
 
 **Architecture skills to read before touching code:**
 
-- `skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` — generic stack patterns, 50+ anti-patterns
-- `skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md` — concrete Stillwater reference (651 tests, 11 ADRs, battle-tested)
+- `~/.pi/agent/skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` — generic stack patterns, 50+ anti-patterns
+- `~/.pi/agent/skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md` — concrete Stillwater reference (651 tests, 11 ADRs, battle-tested)
 
 ---
 
@@ -142,7 +142,7 @@ Stripe retries webhooks. If your handler isn't idempotent, you'll double-process
 
 ## Anti-generic UI rules (non-negotiable)
 
-Per `skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`. These are checked in PR review:
+Per `~/.pi/agent/skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`. These are checked in PR review:
 
 - ❌ **No bento grids.** Use asymmetry or vertical narrative.
 - ❌ **No L/R hero split.** Use full-bleed editorial hero (see `docs/landing_page_unified.html`).
@@ -181,7 +181,7 @@ If you find yourself reaching for any of these, stop and ask: "What does the bra
 This environment does NOT have `openssh-client`. Use the included wrapper:
 
 ```bash
-GIT_SSH_COMMAND="/home/z/my-project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
+GIT_SSH_COMMAND="/home/project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
 ```
 
 The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). The wrapper uses Paramiko. Full instructions: `docs/ssh-warpper_SKILL.md`.
@@ -192,13 +192,13 @@ The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). 
 
 ## Files to read before writing code
 
-| File                                                                      | Why                                                                  |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `docs/PRD_unified.md`                                                     | What to build (features, pages, data models)                         |
-| `docs/landing_page_unified.html`                                          | How it should look (canonical design tokens, sections, copy)         |
-| `PROJECT-ARCHITECTURE.md`                                                 | How to build it (ADRs, layer model, schemas)                         |
-| `skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` | Stack-specific anti-patterns (read §9 + §13 before writing new code) |
-| `skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`         | Concrete Stillwater reference (real file paths, working configs)     |
+| File                                                                                  | Why                                                                  |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `docs/PRD_unified.md`                                                                 | What to build (features, pages, data models)                         |
+| `docs/landing_page_unified.html`                                                      | How it should look (canonical design tokens, sections, copy)         |
+| `PROJECT-ARCHITECTURE.md`                                                             | How to build it (ADRs, layer model, schemas)                         |
+| `~/.pi/agent/skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` | Stack-specific anti-patterns (read §9 + §13 before writing new code) |
+| `~/.pi/agent/skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`         | Concrete Stillwater reference (real file paths, working configs)     |
 
 ---
 
@@ -210,5 +210,6 @@ The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). 
 - **Fail-open rate limiting** — if Redis is down, allow requests. Don't change to fail-closed.
 - **Self-hosted fonts in `packages/ui/src/fonts/`** — not Google Fonts. Privacy + performance.
 - **`minimumReleaseAge: 1440` in `pnpm-workspace.yaml`** — supply-chain guardrail. Delays new packages 24h. Don't reduce it.
+- **`overrides` in `pnpm-workspace.yaml`** — pins OpenTelemetry, `ws` (GHSA-96hv DoS CVE), and `tmp` (GHSA-pxg6 path traversal CVE) to fixed versions. Also `allowBuilds` grants postinstall to critical native binaries (esbuild, sharp, @sentry/cli, ssh2). Don't remove or reduce any of these.
 - **OpenTelemetry `overrides` in `pnpm-workspace.yaml`** — bypasses NPM registry desyncs. Don't remove.
 - **`DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*`** — These routes are `ƒ (Dynamic)` by design: the `(account)` and `(admin)` layouts call `auth.api.getSession({ headers: await headers() })` (Layer 2 security boundary), which makes `next/headers` hit the static pre-render probe. Next.js catches the probe, marks the route dynamic, and emits a warning. The build still completes (exit 0, 37/37). Do NOT add `export const dynamic = 'force-dynamic'` to silence them — that is **incompatible with `cacheComponents: true`** and will break the build when that feature is enabled in a later phase (Stillwater SKILL §6.10 Gotcha 7). Public shop routes (`/`, `/collections`, `/products`, `/search`) use `apiPublic()` and render as `○ Static` — that is the only split that matters. See `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` for the regression test that locks this invariant.
