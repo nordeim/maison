@@ -1,19 +1,11 @@
+$ rm -rf .next apps/web/.next/
+(venv) pete@pop-os:/home/project/maison
+$ sync
+(venv) pete@pop-os:/home/project/maison
 $ pnpm install
 Scope: all 14 workspace projects
-✓ Lockfile passes supply-chain policies (1952 entries in 40.4s)
-Lockfile is up to date, resolution step is skipped
-Packages: +5
-+++++
-Progress: resolved 5, reused 4, downloaded 1, added 5, done
-[WARN] Request took 10082ms: https://registry.npmjs.org/@next%2Fenv
-[WARN] Request took 11464ms: https://registry.npmjs.org/@next%2Feslint-plugin-next
-[WARN] Request took 14214ms: https://registry.npmjs.org/@next%2Fbundle-analyzer
-[WARN] Request took 10255ms: https://registry.npmjs.org/@sanity%2Fui
-[WARN] Request took 11070ms: https://registry.npmjs.org/@sanity%2Fcodegen
-[WARN] 23 other warnings
-. prepare$ ln -sf ../../scripts/pre-commit-check.sh .git/hooks/pre-commit 2>/dev/null || true
-└─ Done in 34ms
-Done in 42.4s using pnpm v11.17.0
+Already up to date
+Done in 673ms using pnpm v11.17.0
 (venv) pete@pop-os:/home/project/maison
 $ pnpm build
 $ turbo build
@@ -23,38 +15,38 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
+@maison/config:build: cache hit, replaying logs 77cd78f9b1d42778
+@maison/config:build: $ tsc --build
+@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
+@maison/ui:build: $ tsc --build
 @maison/db:build: cache hit, replaying logs e51c357dfcb1e420
-@maison/db:build: $ tsc --build
-@maison/config:build: cache miss, executing 77cd78f9b1d42778
+@maison/email:build: cache hit, replaying logs d505396d1f3676a1
 @maison/studio:build: cache hit, replaying logs f078f9a6046f4da6
+@maison/email:build: $ tsc --build
 @maison/studio:build: $ sanity build
 @maison/studio:build:  ›   Warning: Declared version of styled-components (^6.1.13) is not compatible with the version required by sanity (^6.1.15). This might cause problems!
 ✔ Clean output folder (152ms)
 ✔ Build Sanity Studio (5956ms)
-@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
-@maison/email:build: cache hit, replaying logs d505396d1f3676a1
-@maison/email:build: $ tsc --build
-@maison/auth:build: cache hit, replaying logs 2f9972c1d2dee1d6
-@maison/studio:build:
-@maison/auth:build: $ tsc --build
-@maison/ui:build: $ tsc --build
+@maison/studio:build: 
+@maison/db:build: $ tsc --build
 @maison/payments:build: cache hit, replaying logs 5af41fb336fc849e
 @maison/payments:build: $ tsc --build
+@maison/auth:build: cache hit, replaying logs 2f9972c1d2dee1d6
 @maison/workers:build: cache hit, replaying logs ab9918cc7a3b9d90
 @maison/workers:build: $ tsc --build
-@maison/config:build: $ tsc --build
-@maison/api:build: cache miss, executing 82adcdd053cfd501
+@maison/auth:build: $ tsc --build
+@maison/api:build: cache hit, replaying logs 82adcdd053cfd501
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing 00be15583d24a83e
+@maison/web:build: cache miss, executing 7adf9dc1381954f4
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
-@maison/web:build:
+@maison/web:build: 
 @maison/web:build:   Creating an optimized production build ...
-@maison/web:build: ✓ Compiled successfully in 12.0s
-@maison/web:build: ✓ Finished TypeScript in 12.5s
+@maison/web:build: ✓ Compiled successfully in 14.8s
+@maison/web:build: ✓ Finished TypeScript in 14.3s 
 ⚠ Using edge runtime on a page currently disables static generation for that page
-@maison/web:build: ✓ Collecting page data using 3 workers in 2.3s
+@maison/web:build: ✓ Collecting page data using 3 workers in 2.7s 
 [account orders] Failed to fetch: Error: Dynamic server usage: Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
@@ -100,15 +92,6 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/customers couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: [admin inventory] Failed to fetch: Error: Dynamic server usage: Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
-@maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
-@maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
-@maison/web:build:     at i (.next/server/chunks/ssr/_1smg1o5._.js:501:4676)
-@maison/web:build:     at g (.next/server/chunks/ssr/[root-of-the-server]__1d1r7r9._.js:1:1358)
-@maison/web:build:     at stringify (<anonymous>) {
-@maison/web:build:   description: "Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
-@maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
-@maison/web:build: }
 @maison/web:build: [admin discounts] Failed to fetch: Error: Dynamic server usage: Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
@@ -118,13 +101,13 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: [admin orders] Failed to fetch: Error: Dynamic server usage: Route /admin/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+@maison/web:build: [admin inventory] Failed to fetch: Error: Dynamic server usage: Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1smg1o5._.js:501:4676)
-@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__1rhfsf-._.js:1:2832)
+@maison/web:build:     at g (.next/server/chunks/ssr/[root-of-the-server]__1d1r7r9._.js:1:1358)
 @maison/web:build:     at stringify (<anonymous>) {
-@maison/web:build:   description: "Route /admin/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+@maison/web:build:   description: "Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
 @maison/web:build: [admin dashboard] Failed to fetch: Error: Dynamic server usage: Route /admin couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
@@ -134,6 +117,15 @@ $ turbo build
 @maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0735z74._.js:1:1872)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+@maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
+@maison/web:build: }
+@maison/web:build: [admin orders] Failed to fetch: Error: Dynamic server usage: Route /admin/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+@maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
+@maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
+@maison/web:build:     at i (.next/server/chunks/ssr/_1smg1o5._.js:501:4676)
+@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__1rhfsf-._.js:1:2832)
+@maison/web:build:     at stringify (<anonymous>) {
+@maison/web:build:   description: "Route /admin/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
 @maison/web:build: [admin products] Failed to fetch: Error: Dynamic server usage: Route /admin/products couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
@@ -163,9 +155,9 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/trade couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 671ms
-@maison/web:build: ✓ Finalizing page optimization in 7ms
-@maison/web:build:
+@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 836ms
+@maison/web:build: ✓ Finalizing page optimization in 31ms 
+@maison/web:build: 
 @maison/web:build: Route (app)
 @maison/web:build: ┌ ○ /
 @maison/web:build: ├ ○ /_not-found
@@ -209,14 +201,23 @@ $ turbo build
 @maison/web:build: ├ ƒ /search
 @maison/web:build: ├ ○ /sitemap.xml
 @maison/web:build: └ ○ /trade
-@maison/web:build:
-@maison/web:build:
+@maison/web:build: 
+@maison/web:build: 
 @maison/web:build: ○  (Static)   prerendered as static content
 @maison/web:build: ƒ  (Dynamic)  server-rendered on demand
-@maison/web:build:
-@maison/web:build:
+@maison/web:build: 
+@maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    7 cached, 10 total
-  Time:    31.206s
+Cached:    9 cached, 10 total
+  Time:    35.061s 
+
+(venv) pete@pop-os:/home/project/maison
+$ pnpm start
+$ pnpm --filter=@maison/web start
+$ next start
+▲ Next.js 16.2.12
+- Local:         http://localhost:3000
+- Network:       http://192.168.2.132:3000
+✓ Ready in 195ms
 
