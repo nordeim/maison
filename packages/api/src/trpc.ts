@@ -71,13 +71,9 @@ export const ownerProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   return next();
 });
 
-// ── Deprecated aliases (backward compat — will be removed in v2.0) ─────────
-// adminProcedure → staffProcedure (staff-tier grants admin read)
-// adminWriteProcedure → ownerProcedure (owner-tier grants admin write)
-// Kept to avoid breaking existing router imports during the ADR-008 migration.
-
-/** @deprecated Use staffProcedure instead (ADR-008). */
-export const adminProcedure = staffProcedure;
-
-/** @deprecated Use ownerProcedure instead (ADR-008). */
-export const adminWriteProcedure = ownerProcedure;
+// NOTE: ADR-008 — deprecated aliases `adminProcedure` and `adminWriteProcedure`
+// were removed in REMEDIATION_PLAN_v4 Task 1.1. Routers MUST import canonical
+// tier names (`staffProcedure` for admin reads, `ownerProcedure` for admin writes).
+// `managerProcedure` is defined for future use (manager-or-owner admin mutations
+// such as product/order CRUD) but not yet wired into routers — see
+// REMEDIATION_PLAN_v4 §"Deferred Items" for the design decision.

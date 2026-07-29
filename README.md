@@ -36,7 +36,7 @@ The brand embodies "considered living" — offering handcrafted objects that pri
 | 🛋️  | **Curated catalog**           | 8 collections, 13 initial SKUs across Lighting, Ceramics, Furniture, Textiles, Objects, Seasonal, Gifts |
 | 🛒  | **Full checkout flow**        | Stripe Payment Intents, Apple Pay + Google Pay, idempotent order creation, 3-step UX                    |
 | 👤  | **Customer accounts**         | Better Auth (email/password + OAuth), order history, wishlist, saved addresses                          |
-| 🛠️  | **Admin back-office**         | RBAC-gated (`staff`/`admin`), product CRUD, order fulfillment, inventory, audit log                     |
+| 🛠️  | **Admin back-office**         | RBAC-gated (`staff`/`manager`/`owner`), product CRUD, order fulfillment, inventory, audit log           |
 | 📝  | **Headless CMS**              | Sanity Studio for product content, journal, maker stories, homepage sections                            |
 | 🔍  | **Type-safe API**             | tRPC v11 end-to-end types, no codegen, server-side caller for RSC                                       |
 | 🗄️  | **Type-safe ORM**             | Drizzle ORM 0.45 with PostgreSQL 17, version-controlled migrations                                      |
@@ -185,9 +185,9 @@ maison/
 ├── 📂 e2e/                            # Playwright E2E tests
 ├── 📂 docs/                           # design references and misc project docs
 │   ├── 📄 MAISON_Design_Guide.md      # ← Visual Aesthetics & UI/UX Design Guide
-│   ├── 📄 landing_page_unified.html   # ← Canonical visual reference
-│   └── 📄 ssh_git_wrapper_v3.py       # SSH push wrapper (no openssh-client)
+│   └── 📄 landing_page_unified.html   # ← Canonical visual reference
 ├── 📂 skills/                         # skills — see `skills/skills-catalog.md` for a listing
+│   └── 📄 how-to-git-push-using-ssh-wrapper/scripts/ssh_git_wrapper_v3.py  # SSH push wrapper (no openssh-client)
 ├── 📂 scripts/                        # Repo scripts (db-setup.sh, pre-commit)
 ├── 📄 .env.example                    # Environment variable template
 ├── 📄 docker-compose.yml              # Local Postgres + Redis + Stripe CLI
@@ -293,7 +293,7 @@ All variables are documented in `.env.example` with inline comments. Critical on
 | `NEXT_PUBLIC_POSTHOG_KEY`            | ✅          | Product analytics                                                            |
 | `SENTRY_DSN`                         | ⚪ Optional | Error tracking (app runs without if unset)                                   |
 
-See `PROJECT-ARCHITECTURE.md` §9.2 for the complete environment variable reference.
+See `Project_Architecture_Document.md` §9.2 for the complete environment variable reference.
 
 ---
 
@@ -310,14 +310,14 @@ pnpm test:coverage     # Coverage report (target: 80% packages/api, 90% packages
 
 ### Coverage Targets
 
-| Package                   | Target | Rationale                            |
-| ------------------------- | ------ | ------------------------------------ |
-| `packages/db`             | 80%    | Schema integrity critical            |
-| `packages/api`            | 85%    | Business logic critical              |
-| `packages/auth`           | 90%    | Security critical                    |
-| `packages/payments`       | 90%    | Money critical                       |
-| `apps/web/src/lib`        | 75%    | Server-side callers                  |
-| `apps/web/src/components` | 60%    | Visual components, hard to unit test |
+| Package             | Target | Rationale                           |
+| ------------------- | ------ | ----------------------------------- |
+| `packages/db`       | 80%    | Schema integrity critical           |
+| `packages/api`      | 90%    | Business logic critical             |
+| `packages/auth`     | 90%    | Security critical                   |
+| `packages/payments` | 95%    | Money critical                      |
+| `apps/web`          | 70%    | Server-side callers + UI components |
+| `services/workers`  | 85%    | Background jobs critical            |
 
 ### Pre-Ship Checklist (8-Gate CI)
 
@@ -438,10 +438,10 @@ REFACTOR → Clean up the code while keeping the test green
 
 | Phase                  | Status      | Key Deliverables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (23 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (13), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                           |
+| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (24 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (13), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                           |
 | Phase 1 — MVP          | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
 | Phase 2 — Growth       | ✅ Complete | Wishlist persistence (DB-backed for auth, localStorage for anon, WishlistButton on ProductCard + PDP), promo codes (discounts router + checkout promo field + admin discount management), product search (SearchModal with "/" shortcut + search results page), address book CRUD (full create/edit/delete with default flags), account settings (profile edit, newsletter toggle, GDPR deletion stub), full About page (hero, narrative, 4 values, founder profile, sustainability, CTA), admin product create form, admin discount management (create/deactivate codes with audit_log), 20 E2E tests (added search + about editorial content)                                                                                                                           |
-| Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 22 E2E tests                                                                                                                                                                                                                             |
+| Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 30 E2E tests (22 smoke + 8 accessibility). Trigger.dev workers remain Phase 0 stubs pending implementation.                                                                                                                              |
 
 **Current progress:** Phase 3 Optimisation complete. The platform now includes product reviews, gift cards, trade program, multi-currency display, loyalty program, and a full admin analytics dashboard. All 4 phases (Foundation, MVP, Growth, Optimisation) are complete. The Maison e-commerce platform is production-ready.
 
@@ -449,15 +449,15 @@ REFACTOR → Clean up the code while keeping the test green
 
 ## Documentation
 
-| Document                                                             | Purpose                                        | Audience                            |
-| -------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------- |
-| [`README.md`](./README.md)                                           | Project overview, quick start, deployment      | All visitors                        |
-| [`docs/PRD_unified.md`](./docs/PRD_unified.md)                       | Product requirements, features, metrics        | Product, engineering                |
-| [`PROJECT-ARCHITECTURE.md`](./PROJECT-ARCHITECTURE.md)               | Engineering blueprint, ADRs, schemas, security | Senior engineers, tech leads        |
-| [`AGENTS.md`](./AGENTS.md)                                           | High-signal facts for AI coding agents         | AI agents (Claude, Cursor, Copilot) |
-| [`CLAUDE.md`](./CLAUDE.md)                                           | Claude Code-specific instructions              | Claude Code                         |
-| [`docs/landing_page_unified.html`](./docs/landing_page_unified.html) | Canonical visual reference for the storefront  | Designers, frontend engineers       |
-| `skills/skills-catalog.md`                               | Skills organised by category                   | All contributors                    |
+| Document                                                                 | Purpose                                        | Audience                            |
+| ------------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------------- |
+| [`README.md`](./README.md)                                               | Project overview, quick start, deployment      | All visitors                        |
+| [`docs/PRD_unified.md`](./docs/PRD_unified.md)                           | Product requirements, features, metrics        | Product, engineering                |
+| [`Project_Architecture_Document.md`](./Project_Architecture_Document.md) | Engineering blueprint, ADRs, schemas, security | Senior engineers, tech leads        |
+| [`AGENTS.md`](./AGENTS.md)                                               | High-signal facts for AI coding agents         | AI agents (Claude, Cursor, Copilot) |
+| [`CLAUDE.md`](./CLAUDE.md)                                               | Claude Code-specific instructions              | Claude Code                         |
+| [`docs/landing_page_unified.html`](./docs/landing_page_unified.html)     | Canonical visual reference for the storefront  | Designers, frontend engineers       |
+| `skills/skills-catalog.md`                                               | Skills organised by category                   | All contributors                    |
 
 ---
 

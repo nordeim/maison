@@ -6,7 +6,7 @@
 
 ## Project Identity
 
-**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The codebase is fully scaffolded and Phase 3 complete — 13 tRPC routers, 23 Drizzle tables, full admin back-office, and 37 production routes. All application packages exist under `apps/` and `packages/` per the PRD §8.2 file hierarchy.
+**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The codebase is fully scaffolded and Phase 3 complete — 13 tRPC routers, 24 Drizzle tables, full admin back-office, 30 E2E tests (22 smoke + 8 accessibility), and 37 production routes (25 static ○ + 12 dynamic ƒ). All application packages exist under `apps/` and `packages/` per the PRD §8.2 file hierarchy.
 
 **Stack version pins** (do not deviate without ADR):
 
@@ -109,7 +109,7 @@ When asked to implement a feature, follow this discipline:
   - `staffProcedure` — staff, manager, or owner role (admin read)
   - `managerProcedure` — manager or owner role (admin mutations)
   - `ownerProcedure` — owner role only (role management, store settings)
-  - **Deprecated aliases**: `adminProcedure` → `staffProcedure`, `adminWriteProcedure` → `ownerProcedure` (will be removed in v2.0)
+  - **NOTE**: `managerProcedure` is defined per ADR-008 but not yet wired into routers — admin mutations currently use `ownerProcedure`. See `docs/REMEDIATION_PLAN_v4.md` §Deferred Items.
 - **Every procedure has a Zod v4 input parser** (ADR-018). Use `z.email()` (NOT `z.string().email()` — deprecated). Never accept untyped input.
 - **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. Use `api()` for auth-guarded routes (forces dynamic) or `apiPublic()` for public routes (allows static prerender).
 - **Client-side via React Query** — `apps/web/src/lib/trpc/client.tsx` exports `trpc` and `TRPCProvider`.
@@ -130,13 +130,13 @@ When asked to implement a feature, follow this discipline:
 - **RBAC roles (ADR-008):** `customer`, `staff`, `manager`, `owner`. Checked in tRPC middleware (`staffProcedure` / `managerProcedure` / `ownerProcedure` — not `proxy.ts` which only checks cookie-existence via `getSessionCookie()`).
 - **`customSession` plugin** enriches session with user role from `users` table.
 
-### Stripe (ADR-009 — Checkout Sessions + ADR-014 — idempotency)
+### Stripe (ADR-009 — Payment Intents + ADR-014 — idempotency)
 
-- **Stripe Checkout Sessions** (not Payment Intents — per ADR-009). PCI SAQ-A scope (card data never touches our servers).
+- **Stripe Payment Intents** (not Checkout Sessions — per ADR-009 flipped in `docs/REMEDIATION_PLAN_v4.md`). PCI SAQ-A scope (card data handled by Stripe Elements).
 - **Webhook idempotency via dual-defense pattern** (ADR-014): `payment_events` table + `pg_advisory_xact_lock` (transaction-scoped). See `packages/payments/src/idempotency.ts`.
 - **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `STRIPE_WEBHOOK_SECRET`.
-- **Apple Pay / Google Pay** are native to Stripe Checkout Sessions.
-- **Stripe Tax** via `automatic_tax: { enabled: true }` in Checkout Session params.
+- **Apple Pay / Google Pay** are available via Stripe Payment Intents + Stripe Elements (`paymentMethodTypes` configuration).
+- **Stripe Tax** via `payment_intent_data.automatic_tax` or computed server-side.
 
 ### Trigger.dev v4 (ADR-016)
 
@@ -223,10 +223,10 @@ chmod 600 ~/.ssh/id_maison
 chmod +x docs/ssh_git_wrapper_v3.py
 
 # Every push
-GIT_SSH_COMMAND="/home/project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
+GIT_SSH_COMMAND="/home/z/my-project/maison/skills/how-to-git-push-using-ssh-wrapper/scripts/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
 ```
 
-Full instructions: `docs/ssh-warpper_SKILL.md`.
+Full instructions: `skills/how-to-git-push-using-ssh-wrapper/SKILL.md`.
 
 ---
 

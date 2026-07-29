@@ -11,6 +11,24 @@ export default defineConfig({
     // scaffolded yet. Without this vitest exits 1 with "No test files found"
     // and blocks `turbo test`. Matches the Stillwater reference pattern.
     passWithNoTests: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/**/*.test.tsx',
+        'src/**/*.d.ts',
+        'src/vitest-setup.d.ts',
+        'next-env.d.ts',
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
+      },
+    },
   },
   resolve: {
     alias: {

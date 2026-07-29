@@ -9,7 +9,7 @@
 
 > **v1.1 changelog:** Reconciled all design-system, color, typography, motion, component, and section-listing discrepancies against the v2 landing page mockup. Color tokens corrected (`--muted`, `--sage`, added `--sage-soft`). Motion table expanded from 8 to 24 animations. Homepage section list expanded from 15 to 17 (added Statement Ticker + Hero Spotlight Card). Strategic position anti-generic claims revised (v2 permits bento grids for categories, mesh gradients for editorial atmosphere, glassmorphism for sticky chrome). Responsive breakpoints realigned to landing v2 (1024 / 768 / 480). Initial product catalog annotated with homepage-visibility column.
 >
-> **v1.2 changelog:** Reconciled 15 discrepancies against three coding skills (Stillwater v3.0.0, tRPC+Drizzle v1.4.0, TypeScript patterns v1.4). 5 HIGH-severity fixes: tRPC procedure tiers renamed to public/protected/staff/manager/owner (ADR-008); Stripe switched from Payment Intents to Checkout Sessions (ADR-009); 2-layer auth pattern specified — cookie-only proxy + DB-backed layouts (ADR-010); WCAG target raised from AA to AAA (ADR-011); Phase 1 search switched from FTS to `ilike` (ADR-012). 7 MED-severity fixes: email/password kept as hybrid auth (ADR-013); webhook idempotency via UNIQUE INDEX + `pg_advisory_xact_lock` (ADR-014); `transpilePackages` + `@maison/source` source resolution (ADR-015); Trigger.dev v4 root import (ADR-016); React 19 `SubmitEvent` + `ClientOnly` (ADR-017); Zod v4 patterns (ADR-018); coverage thresholds aligned (ADR-019); `erasableSyntaxOnly` (ADR-020). 3 LOW-severity fixes: `db:push` production warning, `DATABASE_URL_UNPOOLED` (verified), `ClientOnly` component spec. See `PRD_PAD_Validation_Against_Skills.md` for full audit and `PRD_PAD_Skill_Alignment_Update_Plan_v2.md` for remediation details.
+> **v1.2 changelog:** Reconciled 15 discrepancies against three coding skills (Stillwater v3.0.0, tRPC+Drizzle v1.4.0, TypeScript patterns v1.4). 5 HIGH-severity fixes: tRPC procedure tiers renamed to public/protected/staff/manager/owner (ADR-008); Stripe switched to Checkout Sessions (ADR-009, **flipped to Payment Intents in v1.2.1 — see REMEDIATION_HISTORY**); 2-layer auth pattern specified — cookie-only proxy + DB-backed layouts (ADR-010); WCAG target raised from AA to AAA (ADR-011); Phase 1 search switched from FTS to `ilike` (ADR-012). 8 MED-severity fixes (ADR-013 through ADR-020): email/password kept as hybrid auth (ADR-013); webhook idempotency via UNIQUE INDEX + `pg_advisory_xact_lock` (ADR-014); `transpilePackages` + `@maison/source` source resolution (ADR-015); Trigger.dev v4 root import (ADR-016); React 19 `SubmitEvent` + `ClientOnly` (ADR-017); Zod v4 patterns (ADR-018); coverage thresholds aligned (ADR-019); `erasableSyntaxOnly` (ADR-020). 3 LOW-severity fixes: `db:push` production warning, `DATABASE_URL_UNPOOLED` (verified), `ClientOnly` component spec. See `PRD_PAD_Validation_Against_Skills.md` for full audit and `PRD_PAD_Skill_Alignment_Update_Plan_v2.md` for remediation details.
 
 ---
 
@@ -191,7 +191,7 @@ The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), 
 
 ### 4.3 Color Tokens (CSS Custom Properties)
 
-These tokens are implemented in `public/landing.html` and documented in `MAISON_Design_Guide.md` §3. They must be ported to `packages/ui/src/tokens/colors.css` in the build.
+These **16 color tokens** are implemented in `public/landing.html` and documented in `MAISON_Design_Guide.md` §3. They must be ported to `packages/ui/src/tokens/colors.css` in the build.
 
 | Token          | Value     | Usage                                    |
 | -------------- | --------- | ---------------------------------------- |
@@ -267,7 +267,7 @@ All shadows use warm ink (`rgba(31,27,23,...)`) rather than pure black — keeps
 
 Both easing curves are ease-out variants — nothing on the page eases in. The visual impression is that elements arrive and settle, never that they sweep in or fade up.
 
-**Complete animation inventory (24 animations — see `MAISON_Design_Guide.md` §6 and Appendix B for full reference):**
+**Complete animation inventory (27 animations — see `MAISON_Design_Guide.md` §6 and Appendix B for the canonical 27-entry list; the 24 most user-facing animations are documented in the table below, with 3 additional micro-interactions detailed in Appendix B):**
 
 | Animation | Duration | Easing | Usage | Reduced-Motion Fallback |
 | --- | --- | --- | --- | --- |
@@ -399,7 +399,7 @@ Total runtime ~2s. Each element starts before the previous finishes — a "casca
 ### 5.2 Route Group Conventions (per Stillwater reference)
 
 - `(shop)` — public storefront, SSR + ISR, no auth
-- `(admin)` — admin surface, RBAC-gated (roles: `admin`, `staff`), server-session required
+- `(admin)` — admin surface, RBAC-gated (roles: `staff`, `manager`, `owner`), server-session required
 - `(account)` — customer dashboard, auth required, server-session required
 - `api/` — Route handlers (tRPC, Stripe webhooks, Sanity webhooks, auth callbacks)
 
@@ -478,11 +478,11 @@ Total runtime ~2s. Each element starts before the previous finishes — a "casca
 ### 6.5 Checkout (`/checkout`)
 
 - **Step 1 — Contact & Shipping:** Email (or sign in), shipping address (autocomplete via Google Places API), shipping method (Standard 5–7 days / Express 2–3 days / White Gloove 2 weeks)
-- **Step 2 — Payment:** Stripe Checkout Session (hosted payment page — redirect to Stripe, return on success). Checkout natively supports cards, Apple Pay, Google Pay, and Stripe Tax via `automatic_tax: { enabled: true }`. Billing address (checkbox: same as shipping), promo code application. PCI SAQ-A scope (card data never touches our servers per ADR-009).
+- **Step 2 — Payment:** Stripe Payment Intents via Stripe Elements (in-page card form, server-side confirmation via `stripe.confirmPayment({ clientSecret })`). Supports cards, Apple Pay, Google Pay via `paymentMethodTypes`, and Stripe Tax via `automatic_tax: { enabled: true }`. Billing address (checkbox: same as shipping), promo code application. PCI SAQ-A scope (card data never touches our servers per ADR-009).
 - **Step 3 — Review:** Order summary with line items, totals, shipping, tax; "Place Order" button
 - **Step 4 — Confirmation:** Order number, summary, "what happens next" timeline, email confirmation sent indicator
 - Guest checkout supported (no account required); post-purchase prompt to create account
-- Stripe Checkout Session created server-side via `createCheckoutSession({ line_items, success_url, cancel_url, automatic_tax })`; browser redirects to `checkoutUrl`; Stripe redirects back to `/checkout/success` or `/checkout/cancel`
+- Stripe Payment Intent created server-side via `createPaymentIntent({ amount, currency, paymentMethodTypes, automatic_tax })`; client confirms via Stripe Elements (`stripe.confirmPayment({ clientSecret, ... })`); on success, the `checkout.confirmOrder` mutation finalises the order and routes to `/order/{orderNumber}` (no Stripe-hosted redirect — client-side confirmation keeps the user on-site for the 3-step Maison checkout UX)
 - Idempotency: webhook handler guarded by dual-defense pattern — `payment_events.stripe_event_id` UNIQUE INDEX + `pg_advisory_xact_lock` (transaction-scoped) per ADR-014. Fast-path check outside transaction; double-check after lock acquisition.
 
 ### 6.6 About Page (`/about`)
@@ -573,7 +573,7 @@ Total runtime ~2s. Each element starts before the previous finishes — a "casca
 | CK-009 | Address book for returning customers                                           | P2       |
 | CK-010 | Idempotent order creation (Stripe idempotency key)                             | P0       |
 | CK-011 | Inventory reservation on checkout begin, release on timeout (15 min)           | P1       |
-| CK-012 | Stripe webhook handling (payment_intent.succeeded, checkout.session.completed) | P0       |
+| CK-012 | Stripe webhook handling (payment_intent.succeeded, charge.refunded) | P0       |
 
 ### 7.5 User Accounts & Authentication
 
@@ -589,7 +589,7 @@ Total runtime ~2s. Each element starts before the previous finishes — a "casca
 | U-008 | Email verification on registration                                        | P1       |
 | U-009 | Account deletion (GDPR right to erasure)                                  | P1       |
 | U-010 | Session management (httpOnly cookies, 30-day expiry, refresh on activity) | P0       |
-| U-011 | Admin RBAC (roles: `customer`, `staff`, `admin`)                          | P0       |
+| U-011 | Admin RBAC (roles: `customer`, `staff`, `manager`, `owner`)                          | P0       |
 
 ### 7.6 CMS & Content
 
@@ -637,7 +637,7 @@ Per the preferred architecture skills (`nextjs16-react19-tailwindv4-trpcv11-driz
 | Layer                | Technology             | Pinned Version                      | Rationale                                                           |
 | -------------------- | ---------------------- | ----------------------------------- | ------------------------------------------------------------------- |
 | **Monorepo tooling** | Turborepo              | ≥2.10.4                             | Task orchestration, caching, incremental builds                     |
-| **Package manager**  | pnpm                   | 11.9.0 (via `packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge`)   |
+| **Package manager**  | pnpm                   | 11.17.0 (via `packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge`)   |
 | **Runtime**          | Node.js                | ≥22.0.0                             | LTS required by Next.js 16                                          |
 | **Meta-framework**   | Next.js                | 16.2.x                              | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack   |
 | **UI runtime**       | React                  | 19.2.x (≥ 19.2.3 for CVE-2025-55182 floor) | React Compiler, async params, `use()` hook, ref-as-prop (no `forwardRef`), `SubmitEvent` (not `FormEvent`), `ClientOnly` boundary for SSR-safe hooks (ADR-017) |
@@ -648,7 +648,7 @@ Per the preferred architecture skills (`nextjs16-react19-tailwindv4-trpcv11-driz
 | **ORM**              | Drizzle ORM            | 0.45.x                              | Type-safe SQL, migration system, no runtime overhead                |
 | **Database**         | PostgreSQL             | 17 (Neon in prod, Docker locally)   | Relational integrity, JSONB for flexible content, `ilike` for Phase 1 search (ADR-012), `pg_advisory_xact_lock` for webhook idempotency (ADR-014) |
 | **Authentication**   | Better Auth            | 1.6.23                              | Replaces Auth.js v5 — better OAuth, magic links, session control    |
-| **Payments**         | Stripe                 | 22.3.x (Dahlia)                     | Checkout Sessions (ADR-009), Webhooks (idempotent via ADR-014), Stripe Tax via `automatic_tax` |
+| **Payments**         | Stripe                 | 22.3.x (Dahlia)                     | Payment Intents (ADR-009), Webhooks (idempotent via ADR-014), Stripe Tax via `automatic_tax` |
 | **Background jobs**  | Trigger.dev            | v4                                  | Webhook processing, abandoned cart emails, digest emails            |
 | **CMS**              | Sanity                 | v6 (Studio) + v7 client             | Headless, real-time, Live Preview, GROQ queries                     |
 | **Email**            | Resend + React Email   | 6.17 / 6.6                          | Transactional emails, type-safe templates                           |
@@ -773,7 +773,7 @@ maison/
 | ADR-006 | `proxy.ts` over `middleware.ts`             | Next.js 16 breaking change — `proxy.ts` is the new convention; supports async                 |
 | ADR-007 | Self-hosted fonts (woff2) over Google Fonts | Privacy, performance (no third-party connection), layout stability                            |
 | ADR-008 | tRPC procedure tiers: public/protected/staff/manager/owner | Aligns with Stillwater v3.0.0 §15.17; `admin`/`adminWrite` are not valid tRPC v11 tier names |
-| ADR-009 | Stripe Checkout Sessions over Payment Intents | PCI SAQ-A scope; aligns with Stillwater §15.21; Apple Pay/Google Pay native to Checkout |
+| ADR-009 | Stripe Payment Intents (chosen implementation) | Supports Stripe Elements, server-side confirmation, Apple Pay/Google Pay via `paymentMethodTypes`. Checkout Sessions rejected because the codebase needs granular control over the payment flow for the 3-step Maison checkout UX. PCI SAQ-A scope retained (card data never touches our servers). |
 | ADR-010 | 2-layer auth pattern (cookie-only proxy + DB-backed layouts) | Performance (no DB query per request in proxy); aligns with Stillwater ADR-009 |
 | ADR-011 | WCAG 2.2 AAA target (stricter than ADA Title II AA) | Aligns with Stillwater §8; 7:1 contrast, 44×44px targets, 3px focus rings |
 | ADR-012 | Phase 1 search via Drizzle `ilike` (not FTS) | 13 SKUs doesn't justify FTS; aligns with Stillwater Lesson 80 |
@@ -815,6 +815,8 @@ erDiagram
 
 ### 9.2 Key Tables
 
+> **Total: 24 tables.** The Phase 1 schema includes 15 tables (users, sessions, accounts, verifications, customers, addresses, collections, products, product_variants, product_images, carts, cart_items, orders, line_items, audit_log) plus `wishlist_items` and `discounts` (Phase 2) and the Phase 3 additions: `product_reviews`, `gift_cards`, `gift_card_redemptions`, `trade_applications`, `loyalty_accounts`, `loyalty_transactions`. Idempotency is enforced via the `payment_events` table (ADR-014). The `accounts` + `verifications` tables are Better Auth managed (were implicit in v1.1, now documented explicitly per the actual `packages/db/src/schema/` listing). All `enum(...)` syntax in this section reflects Drizzle `pgEnum(...)` usage per ADR-020 (no TypeScript `enum` keyword).
+
 #### `users` (Better Auth managed)
 
 - `id` text PK
@@ -822,7 +824,7 @@ erDiagram
 - `email_verified` boolean default false
 - `name` text
 - `image` text (avatar URL)
-- `role` enum('customer', 'staff', 'admin') default 'customer'
+- `role` pgEnum('user_role', ['customer', 'staff', 'manager', 'owner']) default 'customer' (per ADR-008 + ADR-020 — no TS `enum`; matches the actual `packages/db/src/schema/users.ts`)
 - `created_at` timestamptz default now()
 - `updated_at` timestamptz default now()
 
@@ -833,6 +835,31 @@ erDiagram
 - `expires_at` timestamptz
 - `ip_address` text
 - `user_agent` text
+
+#### `accounts` (Better Auth managed — OAuth/magic-link credential linkage)
+
+- `id` text PK
+- `user_id` text FK → users
+- `account_id` text (provider-scoped account identifier)
+- `provider_id` text (e.g., `google`, `apple`, `magic_link`, `credential`)
+- `access_token` text (encrypted at rest)
+- `refresh_token` text (encrypted at rest)
+- `access_token_expires_at` timestamptz
+- `refresh_token_expires_at` timestamptz
+- `scope` text
+- `id_token` text (encrypted at rest, for OIDC providers)
+- `password` text (Better Auth hash — only populated for `credential` provider accounts per ADR-013)
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### `verifications` (Better Auth managed — email/reset tokens)
+
+- `id` text PK
+- `identifier` text (email address or other identifier)
+- `value` text (the verification token / hash)
+- `expires_at` timestamptz
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
 
 #### `customers`
 
@@ -941,7 +968,7 @@ erDiagram
 - `order_number` text unique not null (human-readable, e.g., "MAI-2026-00142")
 - `customer_id` uuid FK → customers (nullable for guest orders)
 - `email` text not null (snapshot at order time)
-- `status` enum('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded')
+- `status` pgEnum('order_status', ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded'])
 - `subtotal_cents` integer not null
 - `shipping_cost_cents` integer not null
 - `tax_cents` integer not null
@@ -953,8 +980,7 @@ erDiagram
 - `shipping_method` text
 - `tracking_number` text
 - `tracking_url` text
-- `stripe_payment_intent_id` text
-- `stripe_checkout_session_id` text unique (Stripe Checkout Session ID — replaces `stripe_payment_intent_id` per ADR-009)
+- `stripe_payment_intent_id` text (Stripe Payment Intent ID — per ADR-009 Payment Intents implementation)
 - `placed_at` timestamptz
 - `shipped_at` timestamptz
 - `delivered_at` timestamptz
@@ -985,7 +1011,7 @@ erDiagram
 
 - `id` uuid PK
 - `code` text unique not null
-- `type` enum('percentage', 'fixed', 'free_shipping')
+- `type` pgEnum('discount_type', ['percentage', 'fixed', 'free_shipping'])
 - `value` integer (percentage 0–100 or cents)
 - `min_order_cents` integer
 - `max_uses` integer
@@ -1006,11 +1032,106 @@ erDiagram
 - `user_agent` text
 - `created_at` timestamptz default now()
 
+#### `payment_events` (Stripe webhook idempotency — ADR-014)
+
+- `id` uuid PK default gen_random_uuid()
+- `stripe_event_id` text unique not null (Stripe's `evt_...` ID — UNIQUE INDEX enforces idempotency)
+- `event_type` text (e.g., `payment_intent.succeeded`, `charge.refunded`)
+- `resource_id` text (Stripe object ID, e.g., `pi_...`, `ch_...`)
+- `payload` jsonb (raw Stripe event body for replay/debug)
+- `processed_at` timestamptz default now()
+- `status` text (`processed` / `failed` / `ignored`)
+- `error` text (failure reason, nullable)
+- `created_at` timestamptz default now()
+- Note: dual-defense pattern — fast-path `stripe_event_id` lookup outside the transaction, then `pg_advisory_xact_lock` + double-check inside the transaction per ADR-014
+
+#### `product_reviews` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `product_id` uuid FK → products
+- `customer_id` uuid FK → customers
+- `order_id` uuid FK → orders (verified-purchase gating)
+- `rating` integer not null check (rating >= 1 and rating <= 5)
+- `title` text
+- `body` text not null
+- `photo_urls` text[] (optional customer-uploaded photos)
+- `is_published` boolean default false (moderation queue)
+- `published_at` timestamptz
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+- Unique constraint on (customer_id, product_id) — one review per customer per product
+
+#### `gift_cards` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `code` text unique not null (customer-facing gift-card code)
+- `initial_balance_cents` integer not null
+- `remaining_balance_cents` integer not null
+- `currency` char(3) default 'USD'
+- `purchaser_order_id` uuid FK → orders (the order that bought the gift card)
+- `recipient_email` text
+- `recipient_name` text
+- `message` text (gift message)
+- `expires_at` timestamptz (nullable — no expiry if null)
+- `is_active` boolean default true
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### `gift_card_redemptions` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `gift_card_id` uuid FK → gift_cards
+- `order_id` uuid FK → orders (the order that redeemed the gift card)
+- `amount_cents` integer not null
+- `currency` char(3) default 'USD'
+- `redeemed_at` timestamptz default now()
+
+#### `trade_applications` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `customer_id` uuid FK → customers (nullable until approved)
+- `applicant_name` text not null
+- `applicant_email` text not null
+- `business_name` text
+- `business_type` text (e.g., 'interior_designer', 'architect', 'trade_buyer')
+- `website_url` text
+- `linkedin_url` text
+- `tax_id` text (resale certificate / VAT ID)
+- `status` pgEnum('trade_application_status', ['pending', 'approved', 'rejected', 'revoked']) default 'pending'
+- `discount_percent` integer (approved tier discount — 10/15/20)
+- `reviewer_user_id` text FK → users (admin who approved/rejected)
+- `reviewed_at` timestamptz
+- `notes` text (internal admin notes)
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### `loyalty_accounts` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `customer_id` uuid FK → customers unique
+- `points_balance` integer default 0
+- `lifetime_points` integer default 0
+- `tier` pgEnum('loyalty_tier', ['bronze', 'silver', 'gold', 'platinum']) default 'bronze'
+- `tier_reached_at` timestamptz
+- `enrolled_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+
+#### `loyalty_transactions` (Phase 3)
+
+- `id` uuid PK default gen_random_uuid()
+- `loyalty_account_id` uuid FK → loyalty_accounts
+- `order_id` uuid FK → orders (nullable for non-order adjustments)
+- `type` pgEnum('loyalty_tx_type', ['earn', 'redeem', 'adjust', 'expire'])
+- `points` integer not null (positive for earn, negative for redeem/expire)
+- `reason` text (e.g., 'order_purchase', 'redemption', 'tier_bonus', 'manual_adjustment')
+- `actor_user_id` text FK → users (admin who performed manual adjustment, nullable)
+- `created_at` timestamptz default now()
+
 ### 9.3 Persistence Strategy
 
 - **Connection pooling:** Neon serverless pooler for application queries (`DATABASE_URL`); direct connection for migrations (`DATABASE_URL_UNPOOLED`) — PgBouncer breaks prepared statements in migration scripts.
 - **Migrations:** Drizzle Kit `generate` (create SQL from schema diff) → `migrate` (apply). Migrations are version-controlled in `packages/db/drizzle/migrations/` with a `_journal.json` manifest.
-- **Indexing:** GIN index on `products.slug`, `collections.slug`, `orders.order_number`. B-tree on foreign keys. Full-text search index on `products.name` + `products.short_description` + `products.materials` (Phase 1 search).
+- **Indexing:** GIN index on `products.slug`, `collections.slug`, `orders.order_number`. B-tree on foreign keys. Phase 1 search uses Drizzle `ilike` queries (per ADR-012). FTS via `tsvector`/GIN is deferred to Phase 2 if `ilike` proves insufficient.
 - **Soft deletes:** Products use `is_active = false` (never hard-delete — preserve order line item integrity). Orders are never deleted; cancelled orders retain `status = 'cancelled'`.
 
 ---
@@ -1019,7 +1140,9 @@ erDiagram
 
 tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in `packages/api/src/root.ts`.
 
-### 10.1 Public Routers (no auth)
+> **Total: 13 routers.** Public (5): `products`, `collections`, `cart`, `newsletter`, `contact`. Customer (2): `account` (wishlist operations merged in here), `checkout`. Admin (6): `admin` (consolidates products/collections/orders/customers/inventory/auditLog sub-namespaces), `discounts`, `reviews`, `trade`, `gift-cards`, `loyalty`. The deprecated `adminProcedure` / `adminWriteProcedure` aliases have been removed from code; use the 5 procedure tiers (`publicProcedure` / `protectedProcedure` / `staffProcedure` / `managerProcedure` / `ownerProcedure`) per ADR-008.
+
+### 10.1 Public Routers (no auth — 5 routers: `products`, `collections`, `cart`, `newsletter`, `contact`)
 
 | Procedure               | Type     | Input                                          | Output                      | Purpose                                          |
 | ----------------------- | -------- | ---------------------------------------------- | --------------------------- | ------------------------------------------------ |
@@ -1036,7 +1159,9 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 | `newsletter.subscribe`  | mutation | `{ email, source? }`                           | `{ success }`               | Subscribe to newsletter (syncs to Klaviyo)       |
 | `contact.submit`        | mutation | `{ name, email, message }`                     | `{ success }`               | Contact form (sends email via Resend)            |
 
-### 10.2 Customer Routers (auth required)
+### 10.2 Customer Routers (auth required — 2 routers: `account`, `checkout`)
+
+> Note: wishlist operations were merged into the `account` router (no standalone `wishlist` router exists). `wishlist.list` → `account.listWishlist`, `wishlist.toggle` → `account.toggleWishlist`.
 
 | Procedure                      | Type     | Input                                         | Output                      | Purpose                                     |
 | ------------------------------ | -------- | --------------------------------------------- | --------------------------- | ------------------------------------------- |
@@ -1048,13 +1173,15 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 | `account.listAddresses`        | query    | —                                             | `Address[]`                 | Saved addresses                             |
 | `account.upsertAddress`        | mutation | `AddressInput`                                | `Address`                   | Create/update address                       |
 | `account.deleteAddress`        | mutation | `{ addressId }`                               | `{ success }`               | Delete address                              |
-| `wishlist.list`                | query    | —                                             | `Product[]`                 | Wishlist contents                           |
-| `wishlist.toggle`              | mutation | `{ productId }`                               | `{ isWishlisted }`          | Add/remove wishlist item                    |
-| `checkout.createPaymentIntent` | mutation | `{ cartId, shippingAddress, shippingMethod }` | `{ clientSecret, orderId }` | Create Stripe PaymentIntent + pending order |
+| `account.listWishlist`         | query    | —                                             | `Product[]`                 | Wishlist contents (merged from `wishlist` router) |
+| `account.toggleWishlist`       | mutation | `{ productId }`                               | `{ isWishlisted }`          | Add/remove wishlist item (merged from `wishlist` router) |
+| `checkout.createPaymentIntent` | mutation | `{ cartId, shippingAddress, shippingMethod }` | `{ clientSecret, orderId }` | Create Stripe PaymentIntent + pending order (per flipped ADR-009) |
 | `checkout.confirmOrder`        | mutation | `{ orderId, paymentIntentId }`                | `{ orderNumber }`           | Confirm order after Stripe confirmation     |
 | `checkout.applyDiscount`       | mutation | `{ cartId, code }`                            | `Cart`                      | Apply promo code                            |
 
-### 10.3 Admin Routers (RBAC: `staff`, `manager`, or `owner` via `staffProcedure` / `ownerProcedure` per ADR-008)
+### 10.3 Admin Routers (RBAC: `staff`, `manager`, or `owner` via `staffProcedure` / `managerProcedure` / `ownerProcedure` per ADR-008 — 6 routers: `admin`, `discounts`, `reviews`, `trade`, `gift-cards`, `loyalty`)
+
+> The consolidated `admin` router contains all admin operations on products/collections/orders/customers/inventory/auditLog (the previous separation into 7 sub-routers was collapsed into a single `admin` router with sub-namespaces like `admin.products.*`, `admin.orders.*`). The `discounts`, `reviews`, `trade`, `gift-cards`, and `loyalty` routers are separate top-level routers (Phase 2/3 features). The deprecated `adminProcedure` / `adminWriteProcedure` aliases have been removed; use `staffProcedure` / `managerProcedure` / `ownerProcedure`.
 
 | Procedure                   | Type     | Input                               | Output                  | Purpose                              |
 | --------------------------- | -------- | ----------------------------------- | ----------------------- | ------------------------------------ |
@@ -1077,7 +1204,7 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 
 | Endpoint                    | Source      | Purpose                                                                     |
 | --------------------------- | ----------- | --------------------------------------------------------------------------- |
-| `POST /api/webhooks/stripe` | Stripe      | `payment_intent.succeeded`, `checkout.session.completed`, `charge.refunded` |
+| `POST /api/webhooks/stripe` | Stripe      | `payment_intent.succeeded`, `charge.refunded` |
 | `POST /api/webhooks/sanity` | Sanity      | Content publish → ISR revalidation                                          |
 | `POST /api/auth/[...all]`   | Better Auth | Auth callbacks (sign-in, sign-out, OAuth)                                   |
 | `GET /api/og/[...slug]`     | Internal    | Dynamic OpenGraph image generation (`@vercel/og`)                           |
@@ -1115,7 +1242,7 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 
 - Multi-region: US (default), EU, UK
 - Localised pricing: stored in `price_cents` + `currency` per product; displayed via region detection
-- Localised shipping & tax: Stripe Tax via `automatic_tax: { enabled: true }` in Checkout Session params (already available in v1 via ADR-009 — Phase 3 adds multi-region tax rules)
+- Localised shipping & tax: Stripe Tax via `automatic_tax: { enabled: true }` in Payment Intent params (already available in v1 via ADR-009 — Phase 3 adds multi-region tax rules)
 - Language: English only in v1; German, French, Danish in Phase 2
 - URL strategy: `/{region}/products` (e.g., `/eu/products`, `/uk/products`); default region rootless
 
@@ -1150,7 +1277,7 @@ tRPC v11 routers live in `packages/api/src/routers/`. Each router is mounted in 
 ### 12.2 PCI DSS
 
 - Stripe handles all card data — no card numbers ever touch our servers (PCI SAQ-A scope)
-- Stripe Checkout Sessions (not Payment Intents — per ADR-009) for all checkouts
+- Stripe Payment Intents (not Checkout Sessions — per ADR-009) for all checkouts
 - Webhook signature verification on all Stripe events
 - Idempotency keys on order creation to prevent duplicate charges
 
@@ -1184,7 +1311,7 @@ Enforced via `next.config.ts` headers + verified by CI test (per Stillwater patt
 
 | Service                    | Purpose                                                         | Tier      | Phase |
 | -------------------------- | --------------------------------------------------------------- | --------- | ----- |
-| **Stripe**                 | Checkout Sessions (cards, Apple Pay, Google Pay, Tax), Webhooks (idempotent via ADR-014) | Essential | 1     |
+| **Stripe**                 | Payment Intents + Stripe Elements (cards, Apple Pay, Google Pay, Tax), Webhooks (idempotent via ADR-014) | Essential | 1     |
 | **Vercel**                 | Hosting, Edge functions, ISR, Analytics                         | Essential | 1     |
 | **Neon**                   | Serverless PostgreSQL 17                                        | Essential | 1     |
 | **Sanity**                 | Headless CMS (products, collections, journal, homepage content) | Essential | 1     |
@@ -1334,7 +1461,7 @@ Aligned with the v2 landing page CSS media queries (`max-width: 1024px`, `768px`
 - Target Size (WCAG 2.2 §2.5.5): All interactive elements ≥ 44×44 CSS pixels (`min-h-[44px] min-w-[44px]`)
 - Skip-to-content link: first element in `<body>`, `sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50`; `<main id="main-content">`
 - axe-core dev mode: `@axe-core/react` wired in `app/layout.tsx` for development (1000ms check interval); WCAG 2.2 AAA ruleset
-- Lighthouse Accessibility = 100 (CI Gate 6 per §17.3)
+- Lighthouse Accessibility — Target = 100; CI gate threshold = 95 (CI Gate 7 per §17.4)
 - Reduced motion duration: `0.01ms` (NOT `0ms` — some browsers treat `0ms` as default)
 
 ---
@@ -1369,11 +1496,10 @@ Aligned with the v2 landing page CSS media queries (`max-width: 1024px`, `768px`
 
 - `packages/db`: 80% (schema integrity critical)
 - `packages/api`: 90% (business logic critical — was 85% in v1.1, aligned to Stillwater per ADR-019)
-- `packages/payments`: 95% (money-critical — NEW per ADR-019)
-- `packages/auth`: 90% (security critical)
-- `apps/web`: 70% (UI coverage — NEW per ADR-019)
-- `services/workers`: 85% (background job reliability — NEW per ADR-019)
-- `packages/payments`: 90% (money critical)
+- `packages/payments`: 95% (money-critical — ADR-019)
+- `packages/auth`: 90% (security critical — ADR-019)
+- `apps/web`: 70% (UI coverage — ADR-019)
+- `services/workers`: 85% (background job reliability — ADR-019)
 - `apps/web/src/lib`: 75%
 - `apps/web/src/components`: 60% (visual components, hard to unit test)
 - E2E: all P0 user stories must have a passing test
@@ -1412,7 +1538,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 - [ ] Product listing (`/products`) with collection filter + sort
 - [ ] Product detail (`/product/{slug}`) with gallery, related products
 - [ ] Shopping cart (DB-backed, anonymous + authenticated)
-- [ ] Checkout (Stripe Checkout Sessions per ADR-009, 3-step flow)
+- [ ] Checkout (Stripe Payment Intents per ADR-009, 3-step flow)
 - [ ] Order confirmation + email (Resend + React Email)
 - [ ] Customer account (sign-in, sign-up, order history, wishlist)
 - [ ] Admin dashboard (overview, products CRUD, orders list, fulfillment)
@@ -1420,7 +1546,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 - [ ] SEO (meta tags, sitemap, JSON-LD, robots.txt)
 - [ ] Analytics (PostHog events)
 - [ ] Error tracking (Sentry)
-- [ ] E2E test suite (10 critical scenarios)
+- [ ] E2E test suite (30 E2E tests — 22 smoke + 8 accessibility — covering the 10 critical scenarios below)
 - [ ] Lighthouse Performance ≥ 90
 
 ### Phase 2 — Growth (Weeks 7–12)
@@ -1471,6 +1597,32 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 
 ---
 
+## REMEDIATION_HISTORY (v1.2.1 — July 30, 2026)
+
+> **v1.2.1** reconciled this PRD with the actual remediated codebase per `docs/REMEDIATION_PLAN_v4.md`. The codebase is the source of truth; this section documents the divergences corrected and supersedes any contradictory earlier text in this document.
+
+### Key changes reconciled in v1.2.1
+
+1. **ADR-009 flipped to Payment Intents.** The v1.2 decision to use Stripe Checkout Sessions was reversed. The actual codebase uses Stripe Payment Intents + Stripe Elements with server-side confirmation via `stripe.confirmPayment({ clientSecret })`. Rationale: the 3-step Maison checkout UX needs granular control over the payment flow that Checkout Sessions' hosted redirect does not provide. PCI SAQ-A scope is retained. Webhook event list updated to `payment_intent.succeeded` + `charge.refunded` (`checkout.session.completed` removed). The `orders.stripe_checkout_session_id` field was removed from the schema; `orders.stripe_payment_intent_id` is the canonical Stripe reference.
+
+2. **24 tables documented (was 15).** §9.2 now explicitly lists all 24 tables in the actual `packages/db/src/schema/` directory: the 15 Phase 1 tables (including the previously-implicit Better Auth `accounts` and `verifications` tables), `wishlist_items` + `discounts` (Phase 2), the `payment_events` idempotency table (ADR-014), and the 6 Phase 3 tables (`product_reviews`, `gift_cards`, `gift_card_redemptions`, `trade_applications`, `loyalty_accounts`, `loyalty_transactions`).
+
+3. **13 tRPC routers documented (was 15).** §10 now reflects the actual `packages/api/src/routers/` listing: 5 public (`products`, `collections`, `cart`, `newsletter`, `contact`), 2 customer (`account` with wishlist merged in, `checkout`), and 6 admin (`admin` consolidating products/collections/orders/customers/inventory/auditLog, plus `discounts`, `reviews`, `trade`, `gift-cards`, `loyalty`). The `wishlist` router was merged into `account` (`account.listWishlist` / `account.toggleWishlist`).
+
+4. **Deprecated procedure tier aliases removed.** The codebase no longer exports `adminProcedure` or `adminWriteProcedure`. Use the 5 canonical tiers per ADR-008: `publicProcedure`, `protectedProcedure`, `staffProcedure`, `managerProcedure`, `ownerProcedure`. RBAC role enum is `pgEnum('user_role', ['customer', 'staff', 'manager', 'owner'])` per ADR-008 + ADR-020 (no TypeScript `enum` keyword — `erasableSyntaxOnly` enforces this). All `enum(...)` syntax in §9.2 reflects Drizzle `pgEnum(...)` usage.
+
+5. **Coverage thresholds enforced via ADR-019.** §17.3 de-duplicated: `packages/db=80`, `packages/api=90`, `packages/payments=95`, `packages/auth=90`, `apps/web=70`, `services/workers=85`. The duplicate `packages/payments: 90%` entry was removed; 95% (per ADR-019) is canonical for the money-critical package.
+
+6. **Lighthouse a11y gate clarified.** Target = 100 (aspirational); CI gate threshold = 95 (per §17.4 gate 7). Both numbers coexist — they are not contradictory.
+
+7. **Phase 1 search uses `ilike` (not FTS).** §9.3 indexing note corrected to reference ADR-012 (`ilike` for Phase 1; FTS via `tsvector`/GIN deferred to Phase 2).
+
+8. **Misc counts corrected.** Animations: 24 → 27 (per `MAISON_Design_Guide.md` Appendix B). Color tokens: explicit count of 16 (was implicit). pnpm version: 11.9.0 → 11.17.0 (matches actual `package.json`). E2E test count: "10 critical scenarios" → "30 E2E tests (22 smoke + 8 accessibility) covering the 10 critical scenarios". v1.2 changelog: "7 MED-severity fixes" → "8 MED-severity fixes (ADR-013 through ADR-020)".
+
+9. **Sitemap cleanup.** `/checkout/success` and `/checkout/cancel` removed from §6.5 — these were Checkout Sessions routes; Payment Intents uses client-side confirmation (no Stripe-hosted redirect).
+
+---
+
 ## 20. Appendices
 
 ### A. Competitive References
@@ -1507,7 +1659,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Phase 2  | Google OAuth                                     |
 | `STRIPE_SECRET_KEY`                         | Yes      | Server-side Stripe API                           |
 | `STRIPE_WEBHOOK_SECRET`                     | Yes      | Stripe webhook signature verification            |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`        | Yes      | Stripe Checkout redirect (client-side `stripe.redirectToCheckout()`) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`        | Yes      | Stripe Elements + Payment Intents (client-side `stripe.confirmPayment({ clientSecret })`) |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID`             | Yes      | Sanity project ID                                |
 | `NEXT_PUBLIC_SANITY_DATASET`                | Yes      | Sanity dataset (usually `production`)            |
 | `SANITY_API_TOKEN`                          | Yes      | Server-side Sanity read token                    |
@@ -1543,7 +1695,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 | **PDP**                  | Product Detail Page (`/product/{slug}`)                                          |
 | **PLP**                  | Product Listing Page (`/products`)                                               |
 | **RSC**                  | React Server Component — renders on server, ships zero JS                        |
-| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `admin` roles                 |
+| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `manager` / `owner` roles (per ADR-008 + ADR-020)                 |
 | **Sepia reset**          | Image filter `sepia(0.22) saturate(1.05) hue-rotate(-6deg)` that drops to `sepia(0) saturate(1)` on hover. |
 | **Spotlight card**       | Floating product card overlapping the hero. Uses glass bg + blur(6px). |
 | **Statement ticker**     | Horizontal marquee of italic serif phrases alternating solid clay and outlined. 32s linear infinite. |

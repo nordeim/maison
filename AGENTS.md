@@ -6,7 +6,7 @@
 
 ## What this repo is
 
-Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandinavian home goods). The build target is Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) — 13 tRPC routers, 23 Drizzle tables, full admin back-office, and 37 production routes (25 static ○ + 12 dynamic ƒ). See Project Status in `README.md` for deliverables by phase.
+Maison is a **Turborepo monorepo** for a premium DTC e-commerce platform (Scandinavian home goods). The build target is Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) — 13 tRPC routers, 24 Drizzle tables, full admin back-office, 30 E2E tests (22 smoke + 8 accessibility), and 37 production routes (25 static ○ + 12 dynamic ƒ). See Project Status in `README.md` for deliverables by phase.
 
 **Canonical visual reference:** `docs/landing_page_unified.html` — every CSS custom property and typography choice in that file is the source of truth for the design system.
 
@@ -125,7 +125,7 @@ The design tokens from `docs/landing_page_unified.html` (CSS custom properties l
    - `staffProcedure` — staff, manager, or owner role (admin read)
    - `managerProcedure` — manager or owner role (admin mutations)
    - `ownerProcedure` — owner role only (role management, store settings)
-   - **Deprecated aliases**: `adminProcedure` → `staffProcedure`, `adminWriteProcedure` → `ownerProcedure` (will be removed in v2.0)
+   - **Note**: `managerProcedure` is defined per ADR-008 but not yet wired into routers — see REMEDIATION_PLAN_v4 §Deferred Items for the design decision (admin mutations currently use `ownerProcedure`).
 
 2. **Server-side caller for RSC.** Import from `apps/web/src/lib/trpc/server.ts`. Use `api()` for auth-guarded routes (session-aware, forces dynamic) or `apiPublic()` for public routes (session-free, allows static prerender). This calls the router directly (no HTTP round-trip) — perfect for Server Components.
 
@@ -137,13 +137,13 @@ The design tokens from `docs/landing_page_unified.html` (CSS custom properties l
 
 ---
 
-## Stripe (ADR-009 — Checkout Sessions + ADR-014 — idempotency)
+## Stripe (ADR-009 — Payment Intents + ADR-014 — idempotency)
 
-- **Stripe Checkout Sessions** (not Payment Intents — per ADR-009). PCI SAQ-A scope (card data never touches our servers).
+- **Stripe Payment Intents** (not Checkout Sessions — per ADR-009 flipped in REMEDIATION_PLAN_v4). PCI SAQ-A scope (card data handled by Stripe Elements).
 - **Webhook idempotency** via dual-defense pattern (ADR-014): `payment_events` table + `pg_advisory_xact_lock`. See `packages/payments/src/idempotency.ts` for `isUniqueViolation` + `hashStringToBigInt` helpers.
 - **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `STRIPE_WEBHOOK_SECRET`.
-- **Apple Pay / Google Pay** are native to Stripe Checkout Sessions (no separate integration needed).
-- **Stripe Tax** via `automatic_tax: { enabled: true }` in Checkout Session params.
+- **Apple Pay / Google Pay** are available via Stripe Payment Intents + Stripe Elements (paymentMethodTypes configuration).
+- **Stripe Tax** via `payment_intent_data.automatic_tax` or computed server-side.
 - Local dev: use the Stripe CLI (`docker compose --profile stripe up -d stripe`) to forward events to `localhost:3000/api/webhooks/stripe`.
 
 ---
@@ -199,7 +199,7 @@ If you find yourself reaching for any of these, stop and ask: "What does the bra
 This environment does NOT have `openssh-client`. Use the included wrapper:
 
 ```bash
-GIT_SSH_COMMAND="/home/project/maison/docs/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
+GIT_SSH_COMMAND="/home/z/my-project/maison/skills/how-to-git-push-using-ssh-wrapper/scripts/ssh_git_wrapper_v3.py -i ~/.ssh/id_maison -o StrictHostKeyChecking=accept-new" git push origin main
 ```
 
 The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). The wrapper uses Paramiko. Full instructions: `docs/ssh-warpper_SKILL.md`.
@@ -230,4 +230,4 @@ The SSH key is at `docs/ssh-key.txt` (copy to `~/.ssh/id_maison`, `chmod 600`). 
 - **`minimumReleaseAge: 1440` in `pnpm-workspace.yaml`** — supply-chain guardrail. Delays new packages 24h. Don't reduce it.
 - **`overrides` in `pnpm-workspace.yaml`** — pins OpenTelemetry, `ws` (GHSA-96hv DoS CVE), and `tmp` (GHSA-pxg6 path traversal CVE) to fixed versions. Also `allowBuilds` grants postinstall to critical native binaries (esbuild, sharp, @sentry/cli, ssh2). Don't remove or reduce any of these.
 - **OpenTelemetry `overrides` in `pnpm-workspace.yaml`** — bypasses NPM registry desyncs. Don't remove.
-- **`DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*`** — These routes are `ƒ (Dynamic)` by design: the `(account)` and `(admin)` layouts call `auth.api.getSession({ headers: await headers() })` (Layer 2 security boundary), which makes `next/headers` hit the static pre-render probe. Next.js catches the probe, marks the route dynamic, and emits a warning. The build still completes (exit 0, 37/37). Do NOT add `export const dynamic = 'force-dynamic'` to silence them — that is **incompatible with `cacheComponents: true`** and will break the build when that feature is enabled in a later phase (Stillwater SKILL §6.10 Gotcha 7). Public shop routes (`/`, `/collections`, `/products`, `/search`) use `apiPublic()` and render as `○ Static` — that is the only split that matters. See `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` for the regression test that locks this invariant.
+- **`DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*`** — These routes are `ƒ (Dynamic)` by design: the `(account)` and `(admin)` layouts call `auth.api.getSession({ headers: await headers() })` (Layer 2 security boundary), which makes `next/headers` hit the static pre-render probe. Next.js catches the probe, marks the route dynamic, and emits a warning. The build still completes (exit 0, 37/37). Do NOT add `export const dynamic = 'force-dynamic'` to silence them — that is **incompatible with `cacheComponents: true`** and will break the build when that feature is enabled in a later phase (Stillwater SKILL §6.10 Gotcha 7). Public shop routes (`/`, `/collections`, `/products`, `/search`) use `apiPublic()` and render as `○ Static` — that is the only split that matters. See `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` for the regression test that locks this invariant. Additional contract tests: `proxy-contract.test.ts` (ADR-006/010 Layer-1 invariant), `coverage-thresholds.contract.test.ts` (ADR-019), `design-tokens.contract.test.ts` (ADR-007 radius tokens), `webhooks.contract.test.ts` (ADR-009 Payment Intents), `services/workers/trigger.config.test.ts` (ADR-016 Trigger.dev config).

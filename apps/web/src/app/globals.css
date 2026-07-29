@@ -86,11 +86,15 @@
   --spacing-11: var(--space-11);
   --spacing-12: var(--space-12);
 
-  /* Border radius — deliberately minimal (editorial = sharp edges) */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-full: var(--radius-full);
+  /* Border radius — deliberately minimal (editorial = sharp edges).
+   * Concrete values mirror packages/ui/src/tokens/spacing.css (canonical
+   * source per ADR-007). Previously these were broken self-references
+   * (`--radius-sm: var(--radius-sm)`) which silently resolved to the
+   * unset value, breaking `rounded-sm` / `rounded-md` Tailwind utilities. */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
 
   /* Motion easings */
   --ease-gentle: var(--ease-gentle);

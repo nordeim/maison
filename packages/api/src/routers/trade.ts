@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { tradeApplications, customers, users } from '@maison/db';
-import { router, protectedProcedure, adminProcedure, adminWriteProcedure } from '../trpc';
+import { router, protectedProcedure, staffProcedure, ownerProcedure } from '../trpc';
 
 export const tradeRouter = router({
   /**
@@ -90,7 +90,7 @@ export const tradeRouter = router({
    * (`.default(10)` only applies on insert), so coerce to the documented default
    * to give admin pages a non-null contract.
    */
-  list: adminProcedure
+  list: staffProcedure
     .input(
       z.object({
         status: z.enum(['pending', 'approved', 'rejected', 'all']).default('all'),
@@ -118,7 +118,7 @@ export const tradeRouter = router({
    * Admin: approve an application.
    * Sets the customer's trade_discount_percent.
    */
-  approve: adminWriteProcedure
+  approve: ownerProcedure
     .input(
       z.object({
         applicationId: z.string().uuid(),
@@ -152,7 +152,7 @@ export const tradeRouter = router({
   /**
    * Admin: reject an application.
    */
-  reject: adminWriteProcedure
+  reject: ownerProcedure
     .input(
       z.object({
         applicationId: z.string().uuid(),

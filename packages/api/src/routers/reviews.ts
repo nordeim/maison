@@ -14,8 +14,8 @@ import {
   router,
   publicProcedure,
   protectedProcedure,
-  adminProcedure,
-  adminWriteProcedure,
+  staffProcedure,
+  ownerProcedure,
 } from '../trpc';
 
 export const reviewsRouter = router({
@@ -152,7 +152,7 @@ export const reviewsRouter = router({
   /**
    * Admin: list pending reviews.
    */
-  pendingList: adminProcedure.query(async ({ ctx }) => {
+  pendingList: staffProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         id: productReviews.id,
@@ -174,7 +174,7 @@ export const reviewsRouter = router({
   /**
    * Admin: approve a review.
    */
-  approve: adminWriteProcedure
+  approve: ownerProcedure
     .input(z.object({ reviewId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db
@@ -187,7 +187,7 @@ export const reviewsRouter = router({
   /**
    * Admin: reject (delete) a review.
    */
-  reject: adminWriteProcedure
+  reject: ownerProcedure
     .input(z.object({ reviewId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.delete(productReviews).where(eq(productReviews.id, input.reviewId));

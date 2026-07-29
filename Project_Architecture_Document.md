@@ -1,15 +1,17 @@
-# MAISON — Master Project Architecture Document (PAD) v1.2
+# MAISON — Master Project Architecture Document (PAD) v1.2.1
 
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
 **Companion Documents:** [`docs/PRD_unified.md`](./docs/PRD_unified.md), [`docs/MAISON_Design_Guide.md`](./docs/MAISON_Design_Guide.md) (canonical design system reference — 1,336 lines, 15 sections), [`docs/maison_landing_page_mockup_v2.zip`](./docs/maison_landing_page_mockup_v2.zip) (extracts to `public/landing.html`)
-**Last Updated:** 2026-07-29 (v1.2 — aligned with three coding skills: Stillwater v3.0.0, tRPC+Drizzle v1.4.0, TypeScript patterns v1.4)
+**Last Updated:** 2026-07-29 (v1.2.1 — reconciled with post-remediation codebase per REMEDIATION_PLAN_v4. See REMEDIATION_HISTORY at end of document for the full list of corrections.)
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
 
 > **v1.1 changelog:** §5 Design System Reference fully reconciled with `MAISON_Design_Guide.md`. Color tokens corrected (`--muted`, `--sage`, added `--sage-soft`). Motion table expanded from 7 to 24 animations. New §5.5 (Visual Treatments & Textures) and §5.6 (Interaction Patterns — math & choreography) added. Component primitives table extended with custom cursor, magnetic button, scroll progress bar, floating bag panel, statement ticker.
 >
 > **v1.2 changelog:** §5 Design System fully reconciled with three coding skills. 13 new ADRs added (ADR-008 through ADR-020). §1.2 tech stack updated (Zod ^4.4.0 added; React ≥ 19.2.3 CVE floor; `erasableSyntaxOnly` implications documented). §1.3 ADR-006 rewritten (2-layer auth pattern — cookie-only proxy, NO `auth.api.getSession()` in proxy.ts). §5.2 color tokens WCAG AAA contrast ratios. §5.3 component primitives — 6 new components (ClientOnly, payment_events table pattern, apiPublic caller, etc.). §5.4 motion table unchanged (already aligned). §6 security — webhook idempotency dual-defense pattern. §7 workers — Trigger.dev v4 root import. §8 testing — coverage thresholds aligned (api 90 / payments 95). §10 code style — Zod v4 patterns, React 19 SubmitEvent, erasableSyntaxOnly rules. §12 key files — updated. §13 glossary — 12 new terms.
+>
+> **v1.2.1 changelog (post-remediation reconciliation):** ADR-009 flipped from Stripe Checkout Sessions to Stripe Payment Intents (3-step Maison checkout UX requires inline card capture). §4.2 expanded from 16 → 24 tables (added `verifications`, `payment_events`, `product_reviews`, `gift_cards`, `gift_card_redemptions`, `trade_applications`, `loyalty_accounts`, `loyalty_transactions`). §3.2 router listing expanded from 9 → 13 router files (`discounts`, `reviews`, `trade`, `gift-cards`, `loyalty` added; `wishlist` merged into `account`). §6.2/§6.3 `requireRole()` references replaced with canonical `canAccessStaff()` / `canAccessOwner()` from `packages/auth/src/rbac.ts`. Audit-log location clarified as inline in `packages/api/src/routers/admin.ts` (no `packages/api/src/lib/audit-log.ts` file). §3.2 clarified `apps/web/src/middleware/` does NOT exist (correct per ADR-006). pnpm 11.9.0 → 11.17.0 (§1.2 + §9.4 CI). §8.3 duplicate `packages/payments` 90% row removed (95% canonical per ADR-019). New §8.5 Contract Tests subsection documents the 6 contract test files added in remediation. §6.3 procedure tiers chain now includes `managerProcedure`. RBAC roles updated to `customer`/`staff`/`manager`/`owner` throughout. §11 E2E count updated to 30 (22 smoke + 8 accessibility). §12 "8-gate pipeline" clarified as 4 CI jobs with 8 gates inside `quality-gates`. Filename references throughout the PAD updated from `PROJECT-ARCHITECTURE.md` → `Project_Architecture_Document.md`. See REMEDIATION_HISTORY at end of document for the full 17-point reconciliation.
 
 ---
 
@@ -28,6 +30,7 @@
 11. [Known Issues & Outstanding Tasks](#11-known-issues--outstanding-tasks)
 12. [Key Files Reference](#12-key-files-reference)
 13. [Glossary](#13-glossary)
+14. [REMEDIATION_HISTORY (v1.2.1)](#remediation_history-v121--reconciliation-with-post-remediation-codebase)
 
 ---
 
@@ -52,7 +55,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 | Layer            | Technology             | Pinned Version                  | Key Rationale                                                                              |
 | ---------------- | ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | Monorepo tooling | Turborepo              | ≥2.10.4                         | Task orchestration, caching, incremental builds; proven in Stillwater (651 tests, 11 ADRs) |
-| Package manager  | pnpm                   | 11.9.0 (`packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge: 1440`)                    |
+| Package manager  | pnpm                   | 11.17.0 (`packageManager` field) | Workspace protocol, supply-chain guardrails (`minimumReleaseAge: 1440`)                   |
 | Runtime          | Node.js                | ≥22.0.0                         | LTS required by Next.js 16; ESM-first                                                      |
 | Meta-framework   | Next.js                | 16.2.x                          | App Router, RSC, `proxy.ts` (replaces `middleware.ts`), Turbopack, async params            |
 | UI runtime       | React                  | 19.2.x (≥ 19.2.3 CVE floor)    | React Compiler, `use()` hook, ref-as-prop (no `forwardRef`), `SubmitEvent` (not `FormEvent`), `ClientOnly` boundary for SSR-safe hooks (ADR-017) |
@@ -62,7 +65,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 | ORM              | Drizzle ORM            | 0.45.x                          | Type-safe SQL, migration system, no runtime overhead, edge-runtime compatible              |
 | Database         | PostgreSQL             | 17 (Neon prod / Docker dev)     | Relational integrity, JSONB for flexible content, `ilike` for Phase 1 search (ADR-012), `pg_advisory_xact_lock` for webhook idempotency (ADR-014) |
 | Authentication   | Better Auth            | 1.6.23                          | Replaces Auth.js v5 — better OAuth, magic links, session control, simpler config           |
-| Payments         | Stripe                 | 22.3.x (Dahlia)                 | Checkout Sessions (ADR-009), Webhooks (idempotent via ADR-014), Stripe Tax via `automatic_tax` |
+| Payments         | Stripe                 | 22.3.x (Dahlia)                 | Payment Intents + Stripe Elements (ADR-009), Webhooks (idempotent via ADR-014), Stripe Tax via `automatic_tax` |
 | Background jobs  | Trigger.dev            | v4                              | Webhook processing, abandoned cart emails, digest emails. Root SDK import `@trigger.dev/sdk` (ADR-016)                                   |
 | Validation       | Zod                    | ^4.4.0                          | Input validation (env, Server Actions, tRPC). `z.email()` not `z.string().email()` (ADR-018) |
 | CMS              | Sanity                 | v6 Studio + v7 client           | Headless, real-time, Live Preview, GROQ queries, Next.js integration                       |
@@ -160,8 +163,8 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 
 #### ADR-006: `proxy.ts` over `middleware.ts` + 2-layer auth pattern (revised v1.2 — ADR-010)
 
-- **Context:** Next.js 16 renamed `middleware.ts` to `proxy.ts` and made it support async. The rename signals that it's now a full proxy (can rewrite, modify headers, check auth) not just middleware. The Stillwater reference codebase (v3.0.0 §5.6) and the tRPC+Drizzle skill (v1.4 §5.6) both mandate a 2-layer auth pattern: Layer 1 (proxy.ts) does cookie-existence-only checks via `getSessionCookie()` — NO DB, NO RBAC. Layer 2 (Server Component layouts) does full session validation via `auth.api.getSession()` + RBAC via `requireRole()`.
-- **Decision:** Use `proxy.ts` at `apps/web/proxy.ts` with cookie-only auth (Layer 1). Use `getSessionCookie(request)` from `better-auth/cookies` — do NOT call `auth.api.getSession()` in proxy.ts. Full session validation + RBAC happens in Layer 2 (`apps/web/src/app/(account)/layout.tsx` and `(admin)/layout.tsx`) via `auth.api.getSession({ headers: await headers() })` + `requireRole(...roles)`.
+- **Context:** Next.js 16 renamed `middleware.ts` to `proxy.ts` and made it support async. The rename signals that it's now a full proxy (can rewrite, modify headers, check auth) not just middleware. The Stillwater reference codebase (v3.0.0 §5.6) and the tRPC+Drizzle skill (v1.4 §5.6) both mandate a 2-layer auth pattern: Layer 1 (proxy.ts) does cookie-existence-only checks via `getSessionCookie()` — NO DB, NO RBAC. Layer 2 (Server Component layouts) does full session validation via `auth.api.getSession()` + RBAC via `canAccessStaff()` / `canAccessOwner()` (canonical helpers in `packages/auth/src/rbac.ts`).
+- **Decision:** Use `proxy.ts` at `apps/web/proxy.ts` with cookie-only auth (Layer 1). Use `getSessionCookie(request)` from `better-auth/cookies` — do NOT call `auth.api.getSession()` in proxy.ts. Full session validation + RBAC happens in Layer 2 (`apps/web/src/app/(account)/layout.tsx` and `(admin)/layout.tsx`) via `auth.api.getSession({ headers: await headers() })` + `canAccessStaff()` / `canAccessOwner()` (from `packages/auth/src/rbac.ts`).
 - **Rationale:** Calling `auth.api.getSession()` in proxy.ts adds a DB query to EVERY request (performance killer), breaks Next.js 16's caching model, and is explicitly banned in both reference skills. The 2-layer pattern keeps proxy.ts fast (Edge-compatible, sub-millisecond) while pushing full validation to the layout boundary where it runs once per page load.
 - **Consequences:**
   - ✅ Proxy.ts is fast (cookie-only check, no DB, Edge-compatible)
@@ -169,7 +172,9 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ✅ Aligns with Stillwater ADR-009 and tRPC+Drizzle skill §5.6
   - ❌ Security headers in `proxy.ts` response don't reach production on Vercel + Next.js 16.2 — set CSP in `next.config.ts` `headers()` instead
   - ❌ Cannot import `auth` package in proxy.ts (only `better-auth/cookies`)
-- **Verification:** `rg 'auth\.api\.getSession' apps/web/proxy.ts` → MUST return zero matches. Source contract test in `apps/web/src/lib/__tests__/proxy-contract.test.ts` asserts this.
+- **Verification:** `rg 'auth\.api\.getSession' apps/web/proxy.ts` → MUST return zero matches. Two source contract tests assert Layer-1 invariants in `apps/web/src/lib/__tests__/`:
+  - `proxy-contract.test.ts` — asserts proxy.ts does NOT call `auth.api.getSession` (ADR-006/ADR-010 Layer-1 invariant).
+  - `rendering-strategy.contract.test.ts` — asserts the `api()` / `apiPublic()` split for static vs dynamic routes (RSC caller routing).
 - **Alternatives Rejected:**
   - _`middleware.ts`_ — deprecated in Next.js 16; will be removed in 17
   - _`auth.api.getSession()` in proxy.ts (v1.1 approach)_ — banned anti-pattern; DB query on every request; breaks caching
@@ -203,25 +208,26 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - _`admin`/`adminWrite` (v1.1 names)_ — not valid tRPC v11 tier names; build will fail
   - _4 tiers without manager_ — Stillwater v3.0.0 added manager for a reason (intermediate privilege for senior staff)
 
-#### ADR-009: Stripe Checkout Sessions over Payment Intents
+#### ADR-009: Stripe Payment Intents (chosen implementation — Checkout Sessions was rejected for the 3-step Maison checkout UX)
 
-- **Context:** The v1.1 PRD/PAD mandated Payment Intents + Stripe Elements + Apple Pay + Google Pay + Stripe Tax. Validation against Stillwater §15.21 and tRPC+Drizzle §9.4 revealed both skills use Stripe Checkout Sessions exclusively — Payment Intents are not mentioned.
-- **Decision:** Use Stripe Checkout Sessions (hosted payment page). Server creates `createCheckoutSession({ line_items, success_url, cancel_url, automatic_tax: { enabled: true } })`; browser redirects to `checkoutUrl`; Stripe redirects back to `/checkout/success` or `/checkout/cancel`. Apple Pay, Google Pay, and Stripe Tax are native to Checkout Sessions.
-- **Rationale:** (1) Both reference skills use Checkout Sessions — aligning ensures the build matches proven patterns. (2) PCI SAQ-A scope (card data never touches our servers) vs. SAQ-A-EP with Payment Intents + Elements. (3) 13 SKUs with $275–$420 AOV doesn't justify custom Elements UI. (4) Apple Pay/Google Pay work natively in Checkout (no separate Payment Request API). (5) Stripe Tax via single `automatic_tax` parameter (no separate integration).
+- **Context:** The v1.2 PAD originally selected Stripe Checkout Sessions (hosted payment page). Re-evaluation during remediation (REMEDIATION_PLAN_v4) determined that the 3-step Maison checkout UX (shipping → payment → review) requires inline card capture with a custom review step — Checkout Sessions' redirect-to-Stripe-then-back flow breaks the multi-step UX. Stripe Payment Intents + Stripe Elements + Stripe Tax is the chosen implementation.
+- **Decision:** Use Stripe Payment Intents with Stripe Elements (inline card capture). Server creates `stripe.paymentIntents.create({ amount, currency, automatic_payment_methods: { enabled: true }, automatic_tax: { enabled: true } })`; returns `client_secret`; client mounts Stripe Elements with the `client_secret`; on submit, client calls `stripe.confirmPayment({ elements, redirect: 'if_required' })`; on success the server listens for `payment_intent.succeeded` webhook (idempotent per ADR-014) and updates the order to "confirmed". Apple Pay and Google Pay are supported via the Stripe Elements Payment Request Button. Stripe Tax is enabled via the `automatic_tax` parameter on the PaymentIntent.
+- **Rationale:** (1) Inline card capture preserves the 3-step checkout UX (no redirect to Stripe-hosted page). (2) The Payment Request Button gives Apple Pay / Google Pay natively inside the same flow. (3) Stripe Elements iframe keeps the app at PCI SAQ-A scope (card data never touches our servers — it stays inside the Stripe-owned iframe). (4) Server-side confirmation via `payment_intent.succeeded` webhook enables robust idempotency (ADR-014) and decouples confirmation from the client. (5) Stripe Tax works identically via `automatic_tax` on PaymentIntents.
 - **Consequences:**
-  - ✅ PCI SAQ-A scope (lowest PCI burden)
-  - ✅ Apple Pay, Google Pay, Stripe Tax native — no separate integrations
-  - ✅ Less frontend code (no Stripe Elements mounting, card input handling)
-  - ❌ Less control over checkout UI styling (mitigated by Stripe Appearance API in Phase 2)
-  - ❌ Redirect-based flow (customers leave the site briefly — mitigated by Stripe's brand trust)
+  - ✅ Inline checkout UX preserved (no Stripe-hosted redirect)
+  - ✅ PCI SAQ-A scope (card data stays inside Stripe Elements iframe)
+  - ✅ Apple Pay, Google Pay, Stripe Tax native via PaymentIntents + Elements
+  - ✅ Server-side confirmation via idempotent webhook (ADR-014)
+  - ❌ More frontend code than Checkout Sessions (Stripe Elements mounting, `confirmPayment` handling)
+  - ❌ Server must create the PaymentIntent before the customer submits the form
 - **Alternatives Rejected:**
-  - _Payment Intents + Stripe Elements_ — expands PCI scope to SAQ-A-EP; more frontend code; not in reference skills
+  - _Stripe Checkout Sessions (previously selected)_ — redirect-based flow breaks the 3-step Maison checkout UX; rejects the multi-step review step
   - _Legacy Tokens_ — deprecated by Stripe; forbidden
 
 #### ADR-010: 2-layer auth pattern (cookie-only proxy + DB-backed layouts)
 
 - **Context:** The v1.1 PAD ADR-006 stated "Async support enables DB-backed auth checks (Better Auth session validation)" in proxy.ts. Validation against Stillwater §5.6 and tRPC+Drizzle §5.6 revealed this is the exact anti-pattern both skills ban. The 2-layer pattern mandates cookie-only checks in proxy.ts (Layer 1) and full validation in layouts (Layer 2).
-- **Decision:** Layer 1 (`apps/web/proxy.ts`): use `getSessionCookie(request)` from `better-auth/cookies` — cookie-existence-only, NO DB, NO RBAC, Edge-compatible. If cookie absent, redirect to `/auth/sign-in`. If present, `NextResponse.next()`. Layer 2 (Server Component layouts): `auth.api.getSession({ headers: await headers() })` + `requireRole(...roles)` — full validation, DB-backed.
+- **Decision:** Layer 1 (`apps/web/proxy.ts`): use `getSessionCookie(request)` from `better-auth/cookies` — cookie-existence-only, NO DB, NO RBAC, Edge-compatible. If cookie absent, redirect to `/auth/sign-in`. If present, `NextResponse.next()`. Layer 2 (Server Component layouts): `auth.api.getSession({ headers: await headers() })` + `canAccessStaff()` / `canAccessOwner()` (from `packages/auth/src/rbac.ts`) — full validation, DB-backed.
 - **Rationale:** Calling `auth.api.getSession()` in proxy.ts adds a DB query to EVERY request (performance killer), breaks Next.js 16's caching model, and is explicitly banned in both skills. The 2-layer pattern keeps proxy.ts fast (sub-millisecond, Edge-compatible) while pushing full validation to layouts where it runs once per page load.
 - **Consequences:**
   - ✅ Proxy.ts is fast (cookie-only, no DB, Edge-compatible)
@@ -229,7 +235,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
   - ✅ Aligns with Stillwater ADR-009 and tRPC+Drizzle §5.6
   - ❌ Two layers of auth logic (justified by performance gain)
   - ❌ Cannot do RBAC in proxy.ts (must be in layouts)
-- **Verification:** `rg 'auth\.api\.getSession' apps/web/proxy.ts` → MUST return zero matches. Source contract test in `apps/web/src/lib/__tests__/proxy-contract.test.ts`.
+- **Verification:** `rg 'auth\.api\.getSession' apps/web/proxy.ts` → MUST return zero matches. Source contract tests in `apps/web/src/lib/__tests__/proxy-contract.test.ts` (Layer-1 invariant) and `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` (api() / apiPublic() split).
 - **Alternatives Rejected:**
   - _`auth.api.getSession()` in proxy.ts (v1.1 approach)_ — banned anti-pattern; DB query per request; breaks caching
   - _Full RBAC in proxy.ts_ — too expensive; belongs in Layer 2
@@ -384,7 +390,7 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 │  Browser (Chrome / Safari / Firefox / Edge)                                       │
 │  ├─ Next.js 16 RSC (Server Components render on Vercel Edge)                     │
 │  ├─ Client Components (hydrated, minimal JS)                                      │
-│  ├─ Stripe Elements (card capture, Apple Pay, Google Pay via Checkout Session)  │
+│  ├─ Stripe Elements (card capture, Apple Pay, Google Pay via Payment Intents)    │
 └────────────────────────────────────┬─────────────────────────────────────────────┘
                                      │ HTTPS
                                      ▼
@@ -515,7 +521,7 @@ maison/
 │   │   │   │   │   │   ├── wishlist/
 │   │   │   │   │   │   ├── addresses/
 │   │   │   │   │   │   └── settings/
-│   │   │   │   ├── (admin)/                 # Route group: admin (RBAC: staff/admin)
+│   │   │   │   ├── (admin)/                 # Route group: admin (RBAC: staff/manager/owner)
 │   │   │   │   │   └── admin/
 │   │   │   │   │       ├── products/
 │   │   │   │   │       ├── orders/
@@ -562,10 +568,10 @@ maison/
 │   │   │   │   ├── useNavScrollHide.ts      # Hide-on-scroll header
 │   │   │   │   ├── useScrollProgress.ts     # Reading progress bar
 │   │   │   │   └── useCartMutation.ts       # Cart add/remove with optimistic update
-│   │   │   └── middleware/                  # (Empty — use proxy.ts instead)
+│   │   │   └── middleware/                  # (DOES NOT EXIST — correct per ADR-006: proxy.ts replaces middleware.ts. If you need middleware logic, add it to apps/web/proxy.ts.)
 │   │   ├── proxy.ts                         # ← AUTH + SECURITY (Next.js 16, replaces middleware.ts)
 │   │   ├── next.config.ts                   # CSP headers, image domains, webpack → Turbopack
-│   │   ├── tailwind.config.ts               # Minimal (v4 is CSS-first; this just sets content paths)
+│   │   ├── tailwind.config.ts               # OPTIONAL v4-style file (declares content paths only). Tailwind v4 is CSS-first via `@theme` in `src/app/globals.css`. This is NOT a Tailwind v3-style theme config — it is only scanned for class names.
 │   │   ├── postcss.config.mjs               # @tailwindcss/postcss (NO autoprefixer)
 │   │   ├── components.json                  # shadcn/ui config
 │   │   ├── instrumentation.ts               # Sentry + PostHog init
@@ -630,24 +636,25 @@ maison/
 │   │
 │   ├── api/                                 # @maison/api — tRPC routers (Layer 1)
 │   │   ├── src/
-│   │   │   ├── routers/                     # One file per router
+│   │   │   ├── routers/                     # One file per router (13 routers)
 │   │   │   │   ├── products.ts
 │   │   │   │   ├── collections.ts
 │   │   │   │   ├── cart.ts
 │   │   │   │   ├── checkout.ts
 │   │   │   │   ├── account.ts
-│   │   │   │   ├── wishlist.ts
 │   │   │   │   ├── newsletter.ts
 │   │   │   │   ├── contact.ts
-│   │   │   │   └── admin.ts                 # All admin.* procedures
+│   │   │   │   ├── admin.ts                 # All admin.* procedures (also performs audit-log writes inline — see §6.2)
+│   │   │   │   ├── discounts.ts             # Phase 2 promo codes
+│   │   │   │   ├── reviews.ts               # Phase 3 product reviews
+│   │   │   │   ├── trade.ts                 # Phase 3 trade/designer program
+│   │   │   │   ├── gift-cards.ts            # Phase 3 gift card balance + redemption
+│   │   │   │   └── loyalty.ts               # Phase 3 loyalty points ledger
 │   │   │   ├── middleware/
-│   │   │   │   ├── rateLimit.ts             # Upstash Redis, fail-open
-│   │   │   │   └── auth.ts                  # Session + RBAC checks
-│   │   │   ├── lib/
-│   │   │   │   └── ilike.ts                 # Case-insensitive LIKE helper
+│   │   │   │   └── rateLimit.ts             # Upstash Redis, fail-open
 │   │   │   ├── trpc.ts                      # tRPC init (context, procedures)
 │   │   │   ├── context.ts                   # tRPC context (session, db, req)
-│   │   │   ├── root.ts                      # Root router (appRouter)
+│   │   │   ├── root.ts                      # Root router (appRouter — 13 routers merged)
 │   │   │   └── index.ts
 │   │   └── package.json
 │   │
@@ -726,7 +733,7 @@ maison/
 ├── infrastructure/
 │   └── postgres/
 │       └── init/                            # Docker init scripts (extensions, etc.)
-│           └── 00-create-extensions.sql     # pgcrypto, pg_trgm (for FTS)
+│           └── 00-create-extensions.sql     # pgcrypto + pg_trgm (pg_trgm reserved for Phase 2+ FTS use; Phase 1 search uses `ilike` per ADR-012)
 │
 ├── e2e/                                     # Playwright E2E tests (repo-root)
 │   ├── checkout.spec.ts                     # Full purchase flow
@@ -769,7 +776,7 @@ maison/
 ├── README.md                                # Project overview + quick start
 ├── AGENTS.md                                # High-signal facts for AI agents
 ├── CLAUDE.md                                # Claude Code instructions
-└── PROJECT-ARCHITECTURE.md                  # ← You are here
+└── Project_Architecture_Document.md         # ← You are here
 ```
 
 ### 3.3 Critical Code Patterns
@@ -996,6 +1003,14 @@ erDiagram
 | `wishlist_items`   | Application           | Saved products                                  | UNIQUE (customer_id, product_id)                        |
 | `discounts`        | Application (Phase 2) | Promo codes                                     | Percentage / fixed / free shipping                      |
 | `audit_log`        | Application           | Admin action audit trail                        | Required for PCI DSS compliance                         |
+| `verifications`    | Better Auth managed   | Email verification tokens                       | Better Auth managed; tracks verification state          |
+| `payment_events`   | Application           | Stripe webhook event log (idempotency)          | `stripe_event_id` UNIQUE INDEX — first defense in ADR-014 dual-defense pattern |
+| `product_reviews`  | Application           | Customer product reviews                        | Phase 3 feature; rating + body text                     |
+| `gift_cards`       | Application           | Gift card balances + codes                      | Phase 3 feature; UNIQUE code                            |
+| `gift_card_redemptions` | Application      | Gift card application records                   | Tracks which order applied which gift card              |
+| `trade_applications` | Application         | Trade/designer program applications             | Phase 3 feature; status workflow                        |
+| `loyalty_accounts` | Application           | Customer loyalty program membership             | Phase 3 feature; points balance + tier                  |
+| `loyalty_transactions` | Application       | Loyalty point ledger (earn/spend)               | Append-only ledger; supports audit + reconciliation     |
 
 ### 4.3 Persistence Strategy
 
@@ -1386,8 +1401,8 @@ The `void offsetWidth` read forces a reflow, which is necessary to retrigger a C
 
 | Rule                                                     | Enforcement                                            | Layer       |
 | -------------------------------------------------------- | ------------------------------------------------------ | ----------- |
-| All mutating tRPC procedures require authentication      | tRPC middleware (`@maison/api/src/middleware/auth.ts`) | Layer 1     |
-| All `admin.*` procedures require `staff` or `admin` role | tRPC middleware (RBAC check)                           | Layer 1     |
+| All mutating tRPC procedures require authentication      | tRPC middleware (session check in `packages/api/src/trpc.ts`) | Layer 1     |
+| All admin procedures require `staff`, `manager`, or `owner` role (per ADR-008 procedure tiers) | tRPC middleware (RBAC check via `canAccessStaff()` / `canAccessOwner()` in `packages/auth/src/rbac.ts`) | Layer 1     |
 | All user inputs validated with Zod                       | tRPC input parsers (compile-time + runtime)            | Layer 1     |
 | All SQL parameterised (no string interpolation)          | Drizzle ORM (enforces parameterisation)                | Layer 0     |
 | All Stripe webhooks signature-verified                   | Route handler (`api/webhooks/stripe/route.ts`)         | API routes  |
@@ -1397,7 +1412,7 @@ The `void offsetWidth` read forces a reflow, which is necessary to retrigger a C
 | No secrets in client code                                | `NEXT_PUBLIC_*` prefix audit in CI                     | CI          |
 | Dependencies audited for CVEs                            | `pnpm audit --audit-level=high` in CI                  | CI          |
 | Supply-chain guardrail (24h release delay)               | `pnpm-workspace.yaml` `minimumReleaseAge: 1440`        | Install     |
-| Admin actions logged                                     | `audit_log` table + `@maison/api/src/lib/audit-log.ts` | Layer 1     |
+| Admin actions logged                                     | `audit_log` table + inline writes in `packages/api/src/routers/admin.ts` (see §6.2) | Layer 1     |
 | Sessions DB-backed (revocable)                           | Better Auth config                                     | Layer 1     |
 | HTTPS enforced                                           | Vercel (auto-TLS, HSTS header)                         | Edge        |
 
@@ -1408,8 +1423,8 @@ The `void offsetWidth` read forces a reflow, which is necessary to retrigger a C
 | `verifyStripeSignature`  | `packages/payments/src/webhooks.ts`             | Stripe webhook signature verification                   |
 | `verifySanitySignature`  | `apps/web/src/app/api/webhooks/sanity/route.ts` | Sanity webhook signature verification                   |
 | `rateLimit`              | `packages/api/src/middleware/rateLimit.ts`      | Upstash Redis sliding-window rate limit (fail-open)     |
-| `requireRole`            | `packages/api/src/middleware/auth.ts`           | RBAC role check (throws `UNAUTHORIZED` if insufficient) |
-| `auditLog`               | `packages/api/src/lib/audit-log.ts`             | Write to `audit_log` table (admin actions)              |
+| `requireRole`            | `packages/auth/src/rbac.ts`                    | RBAC role check (`canAccessStaff()` / `canAccessOwner()` — throws `UNAUTHORIZED` if insufficient) |
+| `auditLog`               | inline in `packages/api/src/routers/admin.ts`  | Write to `audit_log` table after successful admin mutations (e.g. `admin.productsCreate`); a future refactor may extract this to `packages/api/src/lib/audit-log.ts` |
 | `sanitizeInput`          | Zod schemas (per-procedure)                     | Input validation + sanitisation                         |
 | `generateIdempotencyKey` | Client-side (UUID v4)                           | Stripe idempotency key generation                       |
 
@@ -1423,7 +1438,7 @@ Login flow:
 2. Better Auth verifies password (bcrypt hash)
 3. Better Auth creates a row in `sessions` table (id, user_id, expires_at, ip, user_agent)
 4. Better Auth sets httpOnly cookie: `better-auth.session_token=<session_id>`
-5. Subsequent requests: proxy.ts reads cookie via `getSessionCookie()` (Layer 1 — cookie-existence-only, NO DB per ADR-010) → if absent, redirect to `/auth/sign-in`; if present, `NextResponse.next()` → Layer 2 layout calls `auth.api.getSession({ headers })` for full validation + RBAC via `requireRole()`
+5. Subsequent requests: proxy.ts reads cookie via `getSessionCookie()` (Layer 1 — cookie-existence-only, NO DB per ADR-010) → if absent, redirect to `/auth/sign-in`; if present, `NextResponse.next()` → Layer 2 layout calls `auth.api.getSession({ headers })` for full validation + RBAC via `canAccessStaff()` / `canAccessOwner()` (canonical helpers in `packages/auth/src/rbac.ts`)
 6. tRPC context reads session from request → available in all procedures
 ```
 
@@ -1433,10 +1448,10 @@ Login flow:
 | -------------------- | ---------------------------------------- | -------------------------------------------------------- | ------------------- |
 | `customer` (default) | Own account, orders, wishlist, addresses | `(shop)`, `(account)`, `account.*` procedures            | `protectedProcedure`|
 | `staff`              | All customer permissions + admin read    | `(admin)` (read-only), `admin.*.list` procedures         | `staffProcedure`    |
-| `manager` (NEW)      | Staff + admin mutations (products, orders)| All `staff` + `admin.*.create/update` procedures       | `staffProcedure`    |
+| `manager` (NEW)      | Staff + admin mutations (products, orders)| All `staff` + `admin.*.create/update` procedures       | `managerProcedure`  |
 | `owner`              | Full access (including role management)  | All routes, all `admin.*` procedures + `owner.*`         | `ownerProcedure`    |
 
-**tRPC procedure tiers (ADR-008):** `publicProcedure` → `protectedProcedure` → `staffProcedure` (roles: staff/manager/owner) → `ownerProcedure` (role: owner only). Note: `admin`/`adminWrite` are NOT valid tRPC v11 tier names.
+**tRPC procedure tiers (ADR-008):** `publicProcedure` → `protectedProcedure` → `staffProcedure` → `managerProcedure` → `ownerProcedure` (5 tiers per ADR-008). Note: `admin`/`adminWrite` are NOT valid tRPC v11 tier names (deprecated aliases removed from code). `managerProcedure` is defined per ADR-008 but not yet wired into routers — admin mutations currently use `ownerProcedure`. See REMEDIATION_PLAN_v4 §Deferred Items.
 
 **Token strategy:** Sessions are 30-day sliding expiry (refreshed on activity). OAuth tokens (Google, Apple) are stored in `accounts` table (Better Auth managed). No JWTs — database lookup per request is fast (indexed by session_id).
 
@@ -1451,8 +1466,8 @@ Login flow:
 | Brute-force login          | Automated password guessing                            | Rate limiting (10 attempts / 10 min per IP); account lockout after 5 failed attempts                             |
 | Webhook spoofing           | Fake Stripe/Sanity webhook                             | Signature verification with `STRIPE_WEBHOOK_SECRET` / `SANITY_WEBHOOK_SECRET`                                    |
 | Supply-chain attack        | Malicious npm package                                  | `minimumReleaseAge: 1440` (24h delay); `pnpm audit` in CI; dependabot alerts                                     |
-| Card data exposure         | Card numbers in our system                             | Stripe Checkout Sessions (ADR-009 — card data never touches our servers, PCI SAQ-A scope)                         |
-| Admin privilege escalation | Customer accessing admin routes                        | `proxy.ts` redirects unauthenticated users; tRPC `requireRole` middleware double-checks                          |
+| Card data exposure         | Card numbers in our system                             | Stripe Payment Intents (ADR-009 — card data stays inside Stripe Elements iframe, PCI SAQ-A scope)                         |
+| Admin privilege escalation | Customer accessing admin routes                        | `proxy.ts` redirects unauthenticated users; tRPC RBAC helpers (`canAccessStaff`/`canAccessOwner` in `packages/auth/src/rbac.ts`) double-check                          |
 | GDPR violation             | Customer data retained after erasure request           | `account.deleteAccount` procedure cascades to customer data; orders retained 7 years (tax law) with PII stripped |
 
 ### 6.5 GDPR / CCPA Compliance
@@ -1592,7 +1607,6 @@ test.describe('Checkout flow', () => {
 | `packages/auth`           | 90%              | Security critical         |
 | `apps/web`                | 70%              | UI coverage (NEW per ADR-019) |
 | `services/workers`        | 85%              | Background job reliability (NEW per ADR-019) |
-| `packages/payments`       | 90%              | Money critical            |
 | `packages/email`          | 70%              | Templates, lower risk     |
 | `packages/ui`             | 50%              | Visual, hard to unit test |
 | `packages/config`         | 80%              | Env validation critical   |
@@ -1613,7 +1627,22 @@ test.describe('Checkout flow', () => {
 - [ ] No `any` types (use `unknown` + type guard)
 - [ ] No hardcoded secrets (all env via `@maison/config` env validator)
 - [ ] DB migrations both up AND down tested
-- [ ] New env vars documented in `.env.example` + `PROJECT-ARCHITECTURE.md` §9.2
+- [ ] New env vars documented in `.env.example` + `Project_Architecture_Document.md` §9.2
+
+### 8.5 Contract Tests
+
+The codebase enforces a set of **contract tests** that pin invariants which the linter cannot catch. These run as part of `pnpm test` and fail the build if the contract is violated.
+
+| Contract test file                                            | ADR    | Invariant asserted                                                                                                  |
+| ------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/lib/__tests__/proxy-contract.test.ts`           | ADR-006/010 | `apps/web/proxy.ts` MUST NOT call `auth.api.getSession` (Layer-1 cookie-only invariant).                       |
+| `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` | ADR-006/010 | The `api()` / `apiPublic()` caller split is honoured for static vs dynamic routes (RSC routing invariant).     |
+| `apps/web/src/lib/__tests__/coverage-thresholds.contract.test.ts` | ADR-019 | Per-package coverage thresholds (db 80% / api 90% / payments 95% / auth 90% / web 70% / workers 85%) are enforced via `vitest.config.ts`. |
+| `apps/web/src/lib/__tests__/design-tokens.contract.test.ts`  | ADR-007 | Design-token radius tokens are concrete values (e.g. `--radius-sm: 2px` — fixed after a broken self-reference was caught in remediation). |
+| `packages/payments/src/webhooks.contract.test.ts`             | ADR-009/014 | Stripe Payment Intents webhook idempotency contract: `payment_intent.succeeded` is the confirmation trigger; `pg_advisory_xact_lock` + UNIQUE INDEX provide dual-defense idempotency. |
+| `services/workers/trigger.config.test.ts`                     | ADR-016 | Trigger.dev v4 config invariants: `machine: "micro"` (string literal), `maxDuration: 120` (CPU budget, not wall-clock), root SDK import `@trigger.dev/sdk`. |
+
+These contract tests are the canonical source-of-truth enforcers for the ADRs they reference. If an ADR is changed, the corresponding contract test must also be updated in the same PR.
 
 ---
 
@@ -1708,7 +1737,7 @@ jobs:
     steps:
       - checkout
       - setup-node@v4 (node 22)
-      - setup-pnpm@v4 (pnpm 11.9.0)
+      - setup-pnpm@v4 (pnpm 11.17.0)
       - pnpm install --frozen-lockfile
       - pnpm check-types
       - pnpm lint
@@ -1843,14 +1872,14 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | ------------ | ---------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ~~CRITICAL~~ | ~~Application code not yet scaffolded (Phase 0)~~                            | ~~Cannot run the storefront~~               | ✅ Resolved — Phase 0 scaffold complete                                                                                                          |
 | ~~HIGH~~     | ~~GitHub Actions CI workflow not yet created~~                               | ~~No automated quality gates~~              | ✅ Resolved — `.github/workflows/ci.yml` created                                                                                                 |
-| ~~HIGH~~     | ~~Drizzle schema not yet written~~                                           | ~~No DB layer~~                             | ✅ Resolved — 16 tables in `packages/db/src/schema/`, migration `0000_initial.sql`                                                               |
-| ~~HIGH~~     | ~~tRPC routers not yet implemented~~                                         | ~~No API layer~~                            | ✅ Resolved — 8 routers in `packages/api/src/routers/`                                                                                           |
+| ~~HIGH~~     | ~~Drizzle schema not yet written~~                                           | ~~No DB layer~~                             | ✅ Resolved — 24 tables in `packages/db/src/schema/`, migration `0000_initial.sql`                                                               |
+| ~~HIGH~~     | ~~tRPC routers not yet implemented~~                                         | ~~No API layer~~                            | ✅ Resolved — 13 routers in `packages/api/src/routers/`                                                                                           |
 | ~~MEDIUM~~   | ~~Sanity Studio schemas not yet defined~~                                    | ~~No CMS content management~~               | ✅ Resolved — 4 schemas (product, collection, journalArticle, siteSettings)                                                                      |
-| ~~MEDIUM~~   | ~~Playwright E2E test suite not yet written~~                                | ~~No automated user journey tests~~         | ✅ Resolved — 16 smoke tests + accessibility tests                                                                                               |
+| ~~MEDIUM~~   | ~~Playwright E2E test suite not yet written~~                                | ~~No automated user journey tests~~         | ✅ Resolved — 30 E2E tests (22 smoke + 8 accessibility)                                                                                          |
 | ~~HIGH~~     | ~~Homepage renders only Phase 0 hero + 4 products~~                          | ~~Brand experience incomplete~~             | ✅ Resolved — Full 15-section homepage with real data                                                                                            |
 | ~~HIGH~~     | ~~Stripe webhook handler returns 200 but doesn't update order status~~       | ~~Cannot process payments end-to-end~~      | ✅ Resolved — Webhook updates order to "confirmed" + sends OrderConfirmation email                                                               |
 | ~~HIGH~~     | ~~Cart router creates carts but no cart drawer UI~~                          | ~~No add-to-cart from PDP~~                 | ✅ Resolved — CartProvider + CartDrawer + AddToBagButton on PDP                                                                                  |
-| ~~HIGH~~     | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~          | ~~Cannot complete purchases~~               | ✅ Resolved (v1.2) — Multi-step checkout with real order creation + Stripe Checkout Sessions (ADR-009)                                                              |
+| ~~HIGH~~     | ~~Checkout page is a stub (no Stripe Elements, no order creation)~~          | ~~Cannot complete purchases~~               | ✅ Resolved (v1.2) — Multi-step checkout with real order creation + Stripe Payment Intents (ADR-009)                                                              |
 | ~~HIGH~~     | ~~Account dashboard is a stub (no order history, no wishlist UI)~~           | ~~Account section non-functional~~          | ✅ Resolved — Dashboard with order count + wishlist count, order history, wishlist grid                                                          |
 | ~~HIGH~~     | ~~Admin dashboard is a stub (no KPI queries, no product table)~~             | ~~Admin section non-functional~~            | ✅ Resolved — Dashboard with KPIs + recent orders + low-stock alerts, product table, order fulfillment, customer directory, inventory management |
 | ~~MEDIUM~~   | ~~Wishlist toggle on ProductCard is client-side only (not persisted to DB)~~ | ~~Wishlist lost on page refresh~~           | ✅ Resolved — WishlistButton persists to DB for auth users, localStorage for anon                                                                |
@@ -1879,7 +1908,7 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | ---------------------------------------------------- | ------ | -------------------------------------------------------------------------- |
 | `docs/PRD_unified.md`                                | ~1,374 | Product requirements — what to build (features, pages, data models, API)   |
 | `public/landing.html` (from `maison_landing_page_mockup_v2.zip`) | ~1,502 | Canonical visual reference — CSS tokens, sections, copy (see `docs/MAISON_Design_Guide.md` for full documentation) |
-| `PROJECT-ARCHITECTURE.md`                            | ~1,450 | This document — engineering blueprint                                      |
+| `Project_Architecture_Document.md`                  | ~2,038 | This document — engineering blueprint                                      |
 | `AGENTS.md`                                          | ~212   | High-signal facts for AI agents                                            |
 | `CLAUDE.md`                                          | ~248   | Claude Code instructions                                                   |
 | `README.md`                                          | ~490   | Project overview + quick start                                             |
@@ -1890,20 +1919,20 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | `docker-compose.yml`                                 | ~90    | Local Postgres + Redis + Stripe CLI                                        |
 | `scripts/db-setup.sh`                                | ~45    | One-shot DB setup                                                          |
 | `scripts/pre-commit-check.sh`                        | ~20    | Pre-commit quality gates                                                   |
-| `.github/workflows/ci.yml`                           | ~100   | GitHub Actions CI (8-gate pipeline)                                        |
+| `.github/workflows/ci.yml`                           | ~100   | GitHub Actions CI (4 jobs: `quality-gates`, `e2e`, `deploy-preview`, `deploy-production`. The `quality-gates` job enforces 8 gates internally: check-types, lint, test, audit, build, lighthouse, bundle-size, plus smoke+E2E tests in the `e2e` job) |
 | `playwright.config.ts`                               | ~45    | Playwright E2E config (desktop + mobile)                                   |
 | `packages/config/src/env.ts`                         | ~190   | Zod-validated env (t3-env, build-context fallback)                         |
 | `packages/config/src/site.ts`                        | ~110   | Brand metadata, nav, footer, shipping config                               |
 | `packages/db/src/index.ts`                           | ~90    | Drizzle client (Neon + node-postgres auto-detect)                          |
-| `packages/db/src/schema/index.ts`                    | ~60    | Schema barrel (re-exports all 16 tables + enums + relations)               |
+| `packages/db/src/schema/index.ts`                    | ~60    | Schema barrel (re-exports all 24 tables + enums + relations)               |
 | `packages/db/drizzle/migrations/0000_initial.sql`    | ~190   | Initial migration (all tables + enums + indexes)                           |
 | `packages/db/src/seed/index.ts`                      | ~100   | Seed script (8 collections + 13 products, idempotent)                      |
 | `packages/db/drizzle.config.ts`                      | ~45    | Drizzle Kit config (uses DATABASE_URL_UNPOOLED)                            |
 | `packages/auth/src/config.ts`                        | ~130   | Better Auth config (email/password + magic link + Google OAuth per ADR-013, `customSession` plugin, rate limiting) |
-| `packages/auth/src/rbac.ts`                          | ~50    | RBAC roles (customer/staff/manager/owner per ADR-008) + `requireRole()` helper |
+| `packages/auth/src/rbac.ts`                          | ~50    | RBAC roles (customer/staff/manager/owner per ADR-008) + `canAccessStaff()` / `canAccessOwner()` helpers |
 | `packages/api/src/trpc.ts`                           | ~65    | tRPC init + 5 procedure tiers (public/protected/staff/manager/owner per ADR-008) |
 | `packages/api/src/context.ts`                        | ~35    | Context builder (db + session w/ 5s timeout)                               |
-| `packages/api/src/root.ts`                           | ~30    | Root router (8 routers merged)                                             |
+| `packages/api/src/root.ts`                           | ~30    | Root router (13 routers merged)                                            |
 | `packages/api/src/routers/products.ts`               | ~130   | Products router (list, getBySlug, getRelated, search)                      |
 | `packages/api/src/middleware/rateLimit.ts`           | ~60    | Upstash Redis rate limit (fail-open)                                       |
 | `packages/payments/src/client.ts`                    | ~35    | Stripe client (lazy-init, stub fallback)                                   |
@@ -1950,7 +1979,7 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | **PRD**                  | Project Requirements Document — `docs/PRD_unified.md`                            |
 | **proxy.ts**             | Next.js 16 replacement for `middleware.ts` — supports async, runs on Edge        |
 | **RSC**                  | React Server Component — renders on server, ships zero JS                        |
-| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `admin` roles                 |
+| **RBAC**                 | Role-Based Access Control — `customer` / `staff` / `manager` / `owner` roles (per ADR-008) |
 | **Sepia reset**          | Image filter `sepia(0.22) saturate(1.05) hue-rotate(-6deg)` that drops to `sepia(0) saturate(1)` on hover. |
 | **Spotlight card**       | Floating product card overlapping the hero, breaking the centered-text cliché. Uses glass bg + blur(6px). |
 | **Statement ticker**     | Horizontal marquee of italic serif phrases alternating solid clay and outlined (`-webkit-text-stroke`). 32s linear infinite. |
@@ -1959,4 +1988,50 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 ---
 
-_End of Project Architecture Document v1.2. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+## REMEDIATION_HISTORY (v1.2.1 — reconciliation with post-remediation codebase)
+
+This section summarises the v1.2.1 reconciliation between this PAD and the post-remediation Maison codebase. It documents every factual correction applied so future maintainers can trace each change back to its source.
+
+1. **ADR-009 flipped to Payment Intents.** The previous v1.2 PAD selected Stripe Checkout Sessions. Re-evaluation during REMEDIATION_PLAN_v4 determined the 3-step Maison checkout UX (shipping → payment → review) requires inline card capture — Checkout Sessions' redirect-to-Stripe-then-back flow breaks the multi-step review step. Stripe Payment Intents + Stripe Elements + Stripe Tax is now the chosen implementation. PCI SAQ-A scope is preserved because card data stays inside the Stripe-owned Elements iframe.
+
+2. **24 database tables documented (was 16).** §4.2 previously listed 16 tables; the actual `packages/db/src/schema/` directory contains 24 tables. The 8 missing tables were added: `verifications`, `payment_events`, `product_reviews`, `gift_cards`, `gift_card_redemptions`, `trade_applications`, `loyalty_accounts`, `loyalty_transactions`. `accounts` was already documented (Better Auth managed). §11 "Known Issues" and §12 "Key Files Reference" updated to reflect 24 tables.
+
+3. **13 tRPC routers documented (was 8).** §3.2 previously listed 9 router files; the actual `packages/api/src/routers/` directory contains 13 routers. The 4 missing routers were added: `discounts.ts` (Phase 2), `reviews.ts` (Phase 3), `trade.ts` (Phase 3), `gift-cards.ts` (Phase 3), `loyalty.ts` (Phase 3). The `wishlist.ts` router was merged into `account.ts` (wishlist procedures live under `account.*`). §11 "Known Issues" and §12 "Key Files Reference" updated to reflect 13 routers merged in `root.ts`.
+
+4. **Deprecated procedure-tier aliases removed from code.** `adminProcedure` / `adminWriteProcedure` (v1.1 names) are not valid tRPC v11 tier names and have been removed from the codebase. The 5 valid tiers per ADR-008 are `publicProcedure` → `protectedProcedure` → `staffProcedure` → `managerProcedure` → `ownerProcedure`. `managerProcedure` is defined per ADR-008 but not yet wired into routers — admin mutations currently use `ownerProcedure`. See REMEDIATION_PLAN_v4 §Deferred Items.
+
+5. **Coverage thresholds enforced via ADR-019 (`vitest.config.ts`).** The duplicate `packages/payments: 90%` row in §8.3 was removed; the canonical threshold is `packages/payments: 95%` (money-critical). All thresholds are now enforced at the vitest config level via `apps/web/src/lib/__tests__/coverage-thresholds.contract.test.ts` (ADR-019 contract test).
+
+6. **Trigger.dev config now has `machine: "micro"` and `maxDuration: 120` per ADR-016.** The v3-style object form for `machine` is forbidden in v4 — must be a string literal. `maxDuration` is CPU budget, not wall-clock. Enforced via `services/workers/trigger.config.test.ts` contract test (ADR-016).
+
+7. **5 new contract tests added.** The contract test suite now covers six invariants across the codebase (see §8.5 for the full table):
+   - `apps/web/src/lib/__tests__/proxy-contract.test.ts` (ADR-006/010 — Layer-1 invariant)
+   - `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` (ADR-006/010 — api()/apiPublic() split)
+   - `apps/web/src/lib/__tests__/coverage-thresholds.contract.test.ts` (ADR-019)
+   - `apps/web/src/lib/__tests__/design-tokens.contract.test.ts` (ADR-007 radius tokens)
+   - `packages/payments/src/webhooks.contract.test.ts` (ADR-009/014 Payment Intents + idempotency)
+   - `services/workers/trigger.config.test.ts` (ADR-016 Trigger.dev config)
+
+8. **`--radius-sm: 2px` token fixed.** The original `globals.css` had a broken self-reference for `--radius-sm`. The `design-tokens.contract.test.ts` contract test now enforces that radius tokens resolve to concrete pixel values. Documented in §8.5 and REMEDIATION_PLAN_v4.
+
+9. **pnpm 11.17.0 (was 11.9.0).** The `packageManager` field in the root `package.json` and the GitHub Actions `setup-pnpm` step were both updated to pnpm 11.17.0. §1.2 tech-stack table and §9.4 CI/CD pipeline updated accordingly.
+
+10. **Filename references updated to `Project_Architecture_Document.md`.** The file is named `Project_Architecture_Document.md` (snake_case), not `PROJECT-ARCHITECTURE.md`. §3.2 directory tree, §8.4 checklist, and §12 Key Files Reference all updated.
+
+11. **30 E2E tests (was 16).** The Playwright suite was expanded to 30 tests: 22 smoke tests covering P0 user journeys + 8 accessibility tests (axe-core) covering all public pages. §11 "Known Issues" updated.
+
+12. **`apps/web/src/middleware/` directory does NOT exist.** §3.2 clarified that this directory is intentionally absent per ADR-006 — `proxy.ts` replaces `middleware.ts` in Next.js 16. Any middleware logic must live in `apps/web/proxy.ts`.
+
+13. **`packages/api/src/lib/` directory does NOT exist.** §6.2 clarified that audit logging is performed inline in `packages/api/src/routers/admin.ts` (e.g., `admin.productsCreate` writes to the `audit_log` table after a successful mutation). A future refactor may extract this to `packages/api/src/lib/audit-log.ts`.
+
+14. **`packages/api/src/middleware/auth.ts` does NOT exist.** The canonical RBAC helpers `canAccessStaff()` / `canAccessOwner()` live in `packages/auth/src/rbac.ts`. §6.1 Security Rules, §6.2 Security Utilities, §6.3 Authentication & Authorization, ADR-006, and ADR-010 all updated to reference the canonical location.
+
+15. **`apps/web/tailwind.config.ts` clarifying note added.** Tailwind v4 is CSS-first (`@theme` in `globals.css`). The `apps/web/tailwind.config.ts` file is OPTIONAL and only declares content paths (scanned for class names). It is NOT a Tailwind v3-style theme config.
+
+16. **`pg_trgm` extension clarification.** §3.2 clarified that `00-create-extensions.sql` installs `pg_trgm` for future Phase 2+ FTS use; Phase 1 search uses `ilike` per ADR-012 (no `tsvector` columns, no GIN indexes in Phase 1).
+
+17. **"8-gate pipeline" clarified.** §12 Key Files Reference now documents that CI runs 4 jobs (`quality-gates`, `e2e`, `deploy-preview`, `deploy-production`); the `quality-gates` job enforces 8 gates internally (check-types, lint, test, audit, build, lighthouse, bundle-size, plus smoke+E2E tests in the `e2e` job).
+
+---
+
+_End of Project Architecture Document v1.2.1. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

@@ -113,16 +113,46 @@ describe('tRPC procedure tiers (ADR-008 — Stillwater v3.0.0 §15.17)', () => {
     expect(trpc.ownerProcedure).toBeDefined();
   });
 
-  it('does NOT export old admin/adminWrite tier names', async () => {
+  it('does NOT export old admin/adminWrite tier names (ADR-008 — aliases removed)', async () => {
+    // Per ADR-008 + REMEDIATION_PLAN_v4 Task 1.1: deprecated aliases
+    // `adminProcedure` and `adminWriteProcedure` MUST be removed from
+    // the public surface. Routers must import canonical tier names.
     const trpc = await import('./trpc');
-    // Old names are deprecated aliases — they should NOT exist as primary exports
-    // (backward compat re-exports are acceptable but not required)
-    // If they exist as aliases, they must point to the new tiers
-    if ('adminProcedure' in trpc) {
-      expect(trpc.adminProcedure).toBe(trpc.staffProcedure);
+    expect(trpc).not.toHaveProperty('adminProcedure');
+    expect(trpc).not.toHaveProperty('adminWriteProcedure');
+  });
+
+  it('package entrypoint does NOT re-export deprecated aliases', async () => {
+    // `@maison/api` index.ts must not re-export `adminProcedure` / `adminWriteProcedure`
+    const api = await import('./index');
+    expect(api).not.toHaveProperty('adminProcedure');
+    expect(api).not.toHaveProperty('adminWriteProcedure');
+  });
+});
+
+describe('Router migration (ADR-008 — no deprecated alias imports)', () => {
+  it('no router file imports adminProcedure or adminWriteProcedure', async () => {
+    // Contract test: scan all router source files and assert they use
+    // canonical tier names (staffProcedure / managerProcedure / ownerProcedure),
+    // not the deprecated aliases.
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const routersDir = path.resolve(__dirname, 'routers');
+    const files = (await fs.readdir(routersDir)).filter(
+      (f) => f.endsWith('.ts') && !f.endsWith('.test.ts'),
+    );
+
+    const violations: string[] = [];
+    for (const file of files) {
+      const fullPath = path.join(routersDir, file);
+      const source = await fs.readFile(fullPath, 'utf8');
+      if (/\badminProcedure\b/.test(source)) {
+        violations.push(`${file}: references adminProcedure`);
+      }
+      if (/\badminWriteProcedure\b/.test(source)) {
+        violations.push(`${file}: references adminWriteProcedure`);
+      }
     }
-    if ('adminWriteProcedure' in trpc) {
-      expect(trpc.adminWriteProcedure).toBe(trpc.ownerProcedure);
-    }
+    expect(violations).toEqual([]);
   });
 });

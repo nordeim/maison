@@ -9,7 +9,7 @@
 import { z } from 'zod';
 import { eq, and, desc } from 'drizzle-orm';
 import { giftCards, customers } from '@maison/db';
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '../trpc';
+import { router, publicProcedure, protectedProcedure, staffProcedure } from '../trpc';
 
 /**
  * Generate a unique gift card code: MAIS-GC-XXXX-XXXX
@@ -147,7 +147,7 @@ export const giftCardsRouter = router({
   /**
    * Admin: list all gift cards.
    */
-  listAll: adminProcedure.query(async ({ ctx }) => {
+  listAll: staffProcedure.query(async ({ ctx }) => {
     return ctx.db.select().from(giftCards).orderBy(desc(giftCards.createdAt));
   }),
 });

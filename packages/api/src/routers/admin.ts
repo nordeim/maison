@@ -2,8 +2,8 @@
  * Maison — Admin router
  *
  * Admin procedures for product, order, customer, inventory management.
- * Read procedures require staff or admin role (adminProcedure).
- * Mutation procedures require admin role (adminWriteProcedure).
+ * Read procedures require staff/manager/owner role (staffProcedure — ADR-008).
+ * Mutation procedures require owner role (ownerProcedure — ADR-008).
  */
 
 import { z } from 'zod';
@@ -21,13 +21,13 @@ import {
   discounts,
   cartItems,
 } from '@maison/db';
-import { router, adminProcedure, adminWriteProcedure } from '../trpc';
+import { router, staffProcedure, ownerProcedure } from '../trpc';
 
 export const adminRouter = router({
   /**
    * Dashboard overview — KPIs + recent orders.
    */
-  overview: adminProcedure.query(async ({ ctx }) => {
+  overview: staffProcedure.query(async ({ ctx }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -99,7 +99,7 @@ export const adminRouter = router({
   /**
    * List products (admin view — includes inactive).
    */
-  productsList: adminProcedure
+  productsList: staffProcedure
     .input(
       z.object({
         search: z.string().optional(),
@@ -168,7 +168,7 @@ export const adminRouter = router({
   /**
    * Create product (admin only).
    */
-  productsCreate: adminWriteProcedure
+  productsCreate: ownerProcedure
     .input(
       z.object({
         name: z.string().min(1),
@@ -199,7 +199,7 @@ export const adminRouter = router({
   /**
    * Update product (admin only).
    */
-  productsUpdate: adminWriteProcedure
+  productsUpdate: ownerProcedure
     .input(
       z.object({
         id: z.string().uuid(),
@@ -234,7 +234,7 @@ export const adminRouter = router({
   /**
    * List orders (admin view).
    */
-  ordersList: adminProcedure
+  ordersList: staffProcedure
     .input(
       z.object({
         status: z
@@ -281,7 +281,7 @@ export const adminRouter = router({
   /**
    * Update order status (admin only — fulfillment actions).
    */
-  ordersUpdateStatus: adminWriteProcedure
+  ordersUpdateStatus: ownerProcedure
     .input(
       z.object({
         orderId: z.string().uuid(),
@@ -321,7 +321,7 @@ export const adminRouter = router({
   /**
    * List customers (admin view).
    */
-  customersList: adminProcedure
+  customersList: staffProcedure
     .input(
       z.object({
         search: z.string().optional(),
@@ -379,7 +379,7 @@ export const adminRouter = router({
   /**
    * List inventory (all variants with stock levels).
    */
-  inventoryList: adminProcedure
+  inventoryList: staffProcedure
     .input(z.object({ lowStockOnly: z.boolean().default(false) }))
     .query(async ({ input, ctx }) => {
       const whereClause = input.lowStockOnly
@@ -421,7 +421,7 @@ export const adminRouter = router({
   /**
    * Update inventory (restock a variant).
    */
-  inventoryUpdate: adminWriteProcedure
+  inventoryUpdate: ownerProcedure
     .input(
       z.object({
         variantId: z.string().uuid(),
@@ -448,7 +448,7 @@ export const adminRouter = router({
   /**
    * List all discount codes (admin only).
    */
-  discountsList: adminProcedure.query(async ({ ctx }) => {
+  discountsList: staffProcedure.query(async ({ ctx }) => {
     const allDiscounts = await ctx.db.select().from(discounts).orderBy(desc(discounts.createdAt));
 
     return allDiscounts;
@@ -457,7 +457,7 @@ export const adminRouter = router({
   /**
    * Create a discount code (admin only).
    */
-  discountsCreate: adminWriteProcedure
+  discountsCreate: ownerProcedure
     .input(
       z.object({
         code: z
@@ -502,7 +502,7 @@ export const adminRouter = router({
   /**
    * Deactivate a discount (admin only — soft delete).
    */
-  discountsDeactivate: adminWriteProcedure
+  discountsDeactivate: ownerProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
@@ -520,7 +520,7 @@ export const adminRouter = router({
   /**
    * Analytics: revenue over time (last 30 days, grouped by day).
    */
-  analyticsRevenue: adminProcedure
+  analyticsRevenue: staffProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(async ({ input, ctx }) => {
       const daysAgo = new Date();
@@ -548,7 +548,7 @@ export const adminRouter = router({
   /**
    * Analytics: top products by revenue.
    */
-  analyticsTopProducts: adminProcedure
+  analyticsTopProducts: staffProcedure
     .input(z.object({ limit: z.number().min(1).max(20).default(10) }))
     .query(async ({ input, ctx }) => {
       const result = await ctx.db.execute(sql`
@@ -578,7 +578,7 @@ export const adminRouter = router({
    * Analytics: conversion funnel (views, carts, checkouts, purchases).
    * Phase 3: views/carts are approximated from PostHog events (stub).
    */
-  analyticsFunnel: adminProcedure.query(async ({ ctx }) => {
+  analyticsFunnel: staffProcedure.query(async ({ ctx }) => {
     const totalOrders = await ctx.db
       .select({ count: count() })
       .from(orders)
@@ -598,7 +598,7 @@ export const adminRouter = router({
    * Analytics: customer cohorts (signup month + retention).
    * Phase 3: simplified — returns new customers per month.
    */
-  analyticsCohorts: adminProcedure.query(async ({ ctx }) => {
+  analyticsCohorts: staffProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.execute(sql`
       SELECT
         DATE_TRUNC('month', ${customers.createdAt}) as cohort_month,

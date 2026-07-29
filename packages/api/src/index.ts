@@ -5,6 +5,7 @@ export {
   middleware,
   publicProcedure,
   protectedProcedure,
-  adminProcedure,
-  adminWriteProcedure,
+  staffProcedure,
+  managerProcedure,
+  ownerProcedure,
 } from './trpc';

@@ -11,7 +11,7 @@
 import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
 import { loyaltyAccounts, loyaltyTransactions, customers, users } from '@maison/db';
-import { router, protectedProcedure, adminProcedure } from '../trpc';
+import { router, protectedProcedure, staffProcedure } from '../trpc';
 import { sql } from 'drizzle-orm';
 
 const TIER_THRESHOLDS = {
@@ -123,7 +123,7 @@ export const loyaltyRouter = router({
   /**
    * Admin: list all loyalty accounts.
    */
-  listAll: adminProcedure.query(async ({ ctx }) => {
+  listAll: staffProcedure.query(async ({ ctx }) => {
     const accounts = await ctx.db
       .select({
         id: loyaltyAccounts.id,

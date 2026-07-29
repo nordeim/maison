@@ -8,5 +8,17 @@ export default defineConfig({
     // vitest exits 1 with "No test files found" and blocks `turbo test`.
     // Matches the Stillwater reference pattern.
     passWithNoTests: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts'],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
+    },
   },
 });

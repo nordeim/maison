@@ -10,7 +10,7 @@
 import { z } from 'zod';
 import { eq, and, sql } from 'drizzle-orm';
 import { discounts } from '@maison/db';
-import { router, publicProcedure, adminProcedure, adminWriteProcedure } from '../trpc';
+import { router, publicProcedure, staffProcedure, ownerProcedure } from '../trpc';
 
 export const discountsRouter = router({
   /**
@@ -102,7 +102,7 @@ export const discountsRouter = router({
   /**
    * List all discounts (admin only).
    */
-  list: adminProcedure.query(async ({ ctx }) => {
+  list: staffProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select()
       .from(discounts)
@@ -112,7 +112,7 @@ export const discountsRouter = router({
   /**
    * Create a discount (admin only).
    */
-  create: adminWriteProcedure
+  create: ownerProcedure
     .input(
       z.object({
         code: z
@@ -148,7 +148,7 @@ export const discountsRouter = router({
   /**
    * Deactivate a discount (admin only — soft delete).
    */
-  deactivate: adminWriteProcedure
+  deactivate: ownerProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));

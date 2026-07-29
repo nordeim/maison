@@ -106,9 +106,6 @@ async function processEventByType(
     case 'charge.refunded':
       await handleChargeRefunded(event.data.object as Stripe.Charge, tx);
       break;
-    case 'checkout.session.completed':
-      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, tx);
-      break;
     default:
       console.log(`[stripe] Unhandled event type: ${event.type}`);
   }
@@ -217,53 +214,4 @@ async function handleChargeRefunded(
     .where(eq(orders.id, order.id));
 
   console.log(`[stripe] Order ${order.orderNumber} refunded`);
-}
-
-/**
- * checkout.session.completed — handle Stripe Checkout Session completion (ADR-009).
- *
- * When using Stripe Checkout Sessions, this is the primary webhook event
- * (replaces payment_intent.succeeded as the confirmation trigger).
- */
-async function handleCheckoutSessionCompleted(
-  session: Stripe.Checkout.Session,
-  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
-): Promise<void> {
-  console.log('[stripe] checkout.session.completed:', session.id);
-
-  // Find the order by stripe_checkout_session_id (if we store it)
-  // For now, look up by metadata or payment_intent
-  const paymentIntentId = session.payment_intent as string | null;
-  if (!paymentIntentId) {
-    console.warn(`[stripe] Checkout session ${session.id} has no payment_intent`);
-    return;
-  }
-
-  const [order] = await tx
-    .select()
-    .from(orders)
-    .where(eq(orders.stripePaymentIntentId, paymentIntentId))
-    .limit(1);
-
-  if (!order) {
-    console.warn(`[stripe] No order found for checkout session ${session.id}`);
-    return;
-  }
-
-  // Idempotency: if already confirmed, skip
-  if (order.status === 'confirmed' || order.status === 'shipped' || order.status === 'delivered') {
-    console.log(`[stripe] Order ${order.orderNumber} already ${order.status}, skipping`);
-    return;
-  }
-
-  // Update order to confirmed
-  await tx
-    .update(orders)
-    .set({
-      status: 'confirmed',
-      updatedAt: new Date(),
-    })
-    .where(eq(orders.id, order.id));
-
-  console.log(`[stripe] Order ${order.orderNumber} confirmed via Checkout Session`);
 }
