@@ -41,11 +41,11 @@ const baseURL = process.env['BETTER_AUTH_URL'];
 if (!baseURL && !isBuildContext) {
   throw new Error(
     '[auth] BETTER_AUTH_URL is not set. Set it to your app URL ' +
-      '(http://localhost:3000 for dev, https://maison-living.com for prod) ' +
+      '(http://localhost:3000 for dev, https://maison.jesspete.shop for prod) ' +
       'in .env.local or Vercel project settings.',
   );
 }
-const effectiveBaseURL = baseURL ?? 'http://localhost:3000';
+const effectiveBaseURL = baseURL ?? 'https://maison.jesspete.shop';
 
 const emailFrom = process.env['EMAIL_FROM'] ?? 'hello@maison-living.com';
 

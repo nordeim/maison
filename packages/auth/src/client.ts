@@ -8,7 +8,7 @@
 import { createAuthClient } from 'better-auth/react';
 
 export const authClient = createAuthClient({
-  baseURL: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+  baseURL: process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://maison.jesspete.shop',
 });
 
 // NOTE: Better Auth 1.6.25 renamed the client method `forgetPassword` to

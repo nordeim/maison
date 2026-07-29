@@ -29,7 +29,7 @@ const PLACEHOLDERS = {
   DATABASE_URL: 'postgresql://placeholder@localhost:5432/placeholder',
   DATABASE_URL_UNPOOLED: 'postgresql://placeholder@localhost:5432/placeholder',
   BETTER_AUTH_SECRET: 'placeholder-secret-at-least-32-characters-long',
-  BETTER_AUTH_URL: 'http://localhost:3000',
+  BETTER_AUTH_URL: 'https://maison.jesspete.shop',
   GOOGLE_CLIENT_ID: 'placeholder.apps.googleusercontent.com',
   GOOGLE_CLIENT_SECRET: 'placeholder',
   STRIPE_SECRET_KEY: 'sk_test_placeholder',

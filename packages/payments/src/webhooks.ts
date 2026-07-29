@@ -174,7 +174,7 @@ async function handlePaymentIntentSucceeded(
         shippingCents: order.shippingCostCents,
         taxCents: order.taxCents,
         totalCents: order.totalCents,
-        orderUrl: `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'}/account/orders`,
+        orderUrl: `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://maison.jesspete.shop'}/account/orders`,
       }),
     });
 

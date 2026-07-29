@@ -39,7 +39,7 @@ import { headers } from 'next/headers';
 
 import { appRouter, createContext } from '@maison/api';
 
-const TRPC_ENDPOINT = 'http://localhost:3000/api/trpc';
+const TRPC_ENDPOINT = 'https://maison.jesspete.shop/api/trpc';
 
 /**
  * Build a tRPC caller with the current request's headers and session.
