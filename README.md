@@ -360,7 +360,7 @@ Full token reference: `packages/ui/src/tokens/colors.css` and `docs/landing_page
 
 ### Anti-Generic Commitments
 
-Per `~/.pi/agent/skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`:
+Per `skills/avant-garde-design-v4/references/12-anti-generic-checklist.md`:
 
 - ❌ No bento grids (use asymmetry or vertical narrative instead)
 - ❌ No L/R hero split (use full-bleed editorial hero)
@@ -456,7 +456,7 @@ REFACTOR → Clean up the code while keeping the test green
 | [`AGENTS.md`](./AGENTS.md)                                           | High-signal facts for AI coding agents         | AI agents (Claude, Cursor, Copilot) |
 | [`CLAUDE.md`](./CLAUDE.md)                                           | Claude Code-specific instructions              | Claude Code                         |
 | [`docs/landing_page_unified.html`](./docs/landing_page_unified.html) | Canonical visual reference for the storefront  | Designers, frontend engineers       |
-| `~/.pi/agent/skills/skills-catalog.md`                               | Skills organised by category                   | All contributors                    |
+| `skills/skills-catalog.md`                               | Skills organised by category                   | All contributors                    |
 
 ---
 
