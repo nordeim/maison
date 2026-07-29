@@ -3,7 +3,7 @@
  *
  * Per PROJECT-ARCHITECTURE.md §6.3: this is the actual security boundary
  * for the admin route group. proxy.ts only checks cookie existence;
- * this layout validates the session AND checks RBAC role (staff/admin).
+ * this layout validates the session AND checks RBAC role (staff/manager/owner per ADR-008).
  *
  * If no valid session: redirect to /auth/sign-in.
  * If session role is "customer": render 403 Forbidden.
@@ -12,7 +12,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { auth, canReadAdmin } from '@maison/auth';
+import { auth, canAccessStaff } from '@maison/auth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/auth/sign-in?callbackUrl=/admin');
   }
 
-  if (!canReadAdmin(session.user.role)) {
+  if (!canAccessStaff(session.user.role)) {
     return (
       <main
         style={{

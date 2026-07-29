@@ -102,3 +102,27 @@ describe('tRPC error handling', () => {
     expect(error.code).toBe('INTERNAL_SERVER_ERROR');
   });
 });
+
+describe('tRPC procedure tiers (ADR-008 — Stillwater v3.0.0 §15.17)', () => {
+  it('exports 5 procedure tiers with ADR-008 names', async () => {
+    const trpc = await import('./trpc');
+    expect(trpc.publicProcedure).toBeDefined();
+    expect(trpc.protectedProcedure).toBeDefined();
+    expect(trpc.staffProcedure).toBeDefined();
+    expect(trpc.managerProcedure).toBeDefined();
+    expect(trpc.ownerProcedure).toBeDefined();
+  });
+
+  it('does NOT export old admin/adminWrite tier names', async () => {
+    const trpc = await import('./trpc');
+    // Old names are deprecated aliases — they should NOT exist as primary exports
+    // (backward compat re-exports are acceptable but not required)
+    // If they exist as aliases, they must point to the new tiers
+    if ('adminProcedure' in trpc) {
+      expect(trpc.adminProcedure).toBe(trpc.staffProcedure);
+    }
+    if ('adminWriteProcedure' in trpc) {
+      expect(trpc.adminWriteProcedure).toBe(trpc.ownerProcedure);
+    }
+  });
+});

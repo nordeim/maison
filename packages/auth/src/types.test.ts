@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import type { Session } from './types';
 import { isAdmin, isStaffOrAdmin } from './types';
 
-function sessionFor(role: 'customer' | 'staff' | 'admin'): Session {
+function sessionFor(role: 'customer' | 'staff' | 'manager' | 'owner'): Session {
   return {
     user: {
       id: 'u_1',
@@ -19,12 +19,12 @@ function sessionFor(role: 'customer' | 'staff' | 'admin'): Session {
   };
 }
 
-describe('isAdmin', () => {
-  it('returns true for an admin session', () => {
-    expect(isAdmin(sessionFor('admin'))).toBe(true);
+describe('isAdmin (owner-tier — ADR-008)', () => {
+  it('returns true for an owner session', () => {
+    expect(isAdmin(sessionFor('owner'))).toBe(true);
   });
 
-  it.each(['staff', 'customer'] as const)('returns false for a %s session', (role) => {
+  it.each(['staff', 'manager', 'customer'] as const)('returns false for a %s session', (role) => {
     expect(isAdmin(sessionFor(role))).toBe(false);
   });
 
@@ -33,8 +33,8 @@ describe('isAdmin', () => {
   });
 });
 
-describe('isStaffOrAdmin', () => {
-  it.each(['staff', 'admin'] as const)('returns true for a %s session', (role) => {
+describe('isStaffOrAdmin (staff-tier — ADR-008)', () => {
+  it.each(['staff', 'manager', 'owner'] as const)('returns true for a %s session', (role) => {
     expect(isStaffOrAdmin(sessionFor(role))).toBe(true);
   });
 

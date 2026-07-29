@@ -110,33 +110,51 @@ The design tokens from `docs/landing_page_unified.html` (CSS custom properties l
 
 - Config lives in `packages/auth/src/config.ts`. The web app imports via `@maison/auth`.
 - Sessions are stored in PostgreSQL (table `sessions`), not JWTs. This enables revocation.
-- RBAC roles: `customer`, `staff`, `admin`. Checked via tRPC middleware, not in `proxy.ts` (proxy only checks "is authenticated").
+- RBAC roles (ADR-008): `customer`, `staff`, `manager`, `owner`. Checked via tRPC middleware (`staffProcedure` / `managerProcedure` / `ownerProcedure`), not in `proxy.ts` (proxy only checks "is authenticated" via `getSessionCookie()`).
 - `BETTER_AUTH_URL` MUST be set in production. The config throws at module load if unset — this is intentional (fail fast, not fail silently).
-- OAuth providers (Google, Apple) are Phase 2. Email/password is the v1 auth method.
+- Email/password is the v1 auth method (hybrid — Magic Link + Google OAuth are Phase 2 per ADR-013).
+- `customSession` plugin enriches session with user role from `users` table.
 
 ---
 
-## tRPC v11 patterns
+## tRPC v11 patterns (ADR-008 — 5 procedure tiers)
 
-1. **Server-side caller for RSC.** Import from `apps/web/src/lib/trpc/server.ts`. This calls the router directly (no HTTP round-trip) — perfect for Server Components.
+1. **5 procedure tiers** (per ADR-008, aligned with Stillwater v3.0.0 §15.17):
+   - `publicProcedure` — no auth required
+   - `protectedProcedure` — any authenticated user
+   - `staffProcedure` — staff, manager, or owner role (admin read)
+   - `managerProcedure` — manager or owner role (admin mutations)
+   - `ownerProcedure` — owner role only (role management, store settings)
+   - **Deprecated aliases**: `adminProcedure` → `staffProcedure`, `adminWriteProcedure` → `ownerProcedure` (will be removed in v2.0)
 
-2. **Client-side caller via React Query.** Import `trpc` from `apps/web/src/lib/trpc/client.tsx`. Wrap the app in `TRPCProvider`. Mutations use `useMutation` pattern.
+2. **Server-side caller for RSC.** Import from `apps/web/src/lib/trpc/server.ts`. Use `api()` for auth-guarded routes (session-aware, forces dynamic) or `apiPublic()` for public routes (session-free, allows static prerender). This calls the router directly (no HTTP round-trip) — perfect for Server Components.
 
-3. **Input validation with Zod.** Every procedure has an `input` parser. Never trust untyped input.
+3. **Client-side caller via React Query.** Import `trpc` from `apps/web/src/lib/trpc/client.tsx`. Wrap the app in `TRPCProvider`. Mutations use `useMutation` pattern.
 
-4. **Rate limiting middleware** in `packages/api/src/middleware/rateLimit.ts`. Uses Upstash Redis. **Fails open** if Redis is down — do not "fix" this to fail-closed (would block legitimate users during outages).
+4. **Input validation with Zod v4** (ADR-018). Every procedure has an `input` parser. Use `z.email()` (NOT `z.string().email()` — deprecated in v4). Never trust untyped input.
 
-5. **Idempotency keys** on all payment/inventory mutations. Client generates a UUID, passes as header `x-idempotency-key`. Server stores in `orders.stripe_idempotency_key` (unique constraint).
+5. **Rate limiting middleware** in `packages/api/src/middleware/rateLimit.ts`. Uses Upstash Redis. **Fails open** if Redis is down — do not "fix" this to fail-closed (would block legitimate users during outages).
 
 ---
 
-## Stripe webhook idempotency
+## Stripe (ADR-009 — Checkout Sessions + ADR-014 — idempotency)
 
-Stripe retries webhooks. If your handler isn't idempotent, you'll double-process orders.
-
-- The `orders.stripe_idempotency_key` column has a UNIQUE constraint. Inserting a duplicate raises an error — catch it and return 200 (Stripe already got a 200, so don't retry).
-- The webhook route at `apps/web/src/app/api/webhooks/stripe/route.ts` must verify the Stripe signature using `STRIPE_WEBHOOK_SECRET`. Never expose the secret to the client.
+- **Stripe Checkout Sessions** (not Payment Intents — per ADR-009). PCI SAQ-A scope (card data never touches our servers).
+- **Webhook idempotency** via dual-defense pattern (ADR-014): `payment_events` table + `pg_advisory_xact_lock`. See `packages/payments/src/idempotency.ts` for `isUniqueViolation` + `hashStringToBigInt` helpers.
+- **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `STRIPE_WEBHOOK_SECRET`.
+- **Apple Pay / Google Pay** are native to Stripe Checkout Sessions (no separate integration needed).
+- **Stripe Tax** via `automatic_tax: { enabled: true }` in Checkout Session params.
 - Local dev: use the Stripe CLI (`docker compose --profile stripe up -d stripe`) to forward events to `localhost:3000/api/webhooks/stripe`.
+
+---
+
+## Trigger.dev v4 (ADR-016)
+
+- **Import from `@trigger.dev/sdk` root** (NOT `/v4` — subpath doesn't exist; NOT `/v3` — deprecated April 1, 2026).
+- Config in `services/workers/trigger.config.ts`.
+- `machine: "micro"` (string literal, not object form).
+- `tasks.trigger('task-id', payload)` API (NOT `TriggerClient.sendEvent()`).
+- Workers `package.json` MUST have `"type": "module"`.
 
 ---
 

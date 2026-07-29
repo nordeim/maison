@@ -1,18 +1,19 @@
 /**
  * Maison — Stripe webhook event handlers
  *
- * Idempotent — safe for Stripe's 3x retry. The orders table has a UNIQUE
- * constraint on stripe_idempotency_key; duplicate inserts raise an error
- * which we catch and return 200 (so Stripe stops retrying).
+ * Idempotent via dual-defense pattern (ADR-014):
+ *   1. payment_events.stripe_event_id UNIQUE INDEX (first defense)
+ *   2. pg_advisory_xact_lock (second defense — transaction-scoped)
  *
- * Per nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth skill §5.5.
+ * Per Stillwater v3.0.0 §15.21.1 and ADR-014.
  */
 
 import type Stripe from 'stripe';
 import { stripe } from './client';
 import { db } from '@maison/db';
-import { orders, lineItems } from '@maison/db';
+import { orders, lineItems, paymentEvents } from '@maison/db';
 import { eq, sql } from 'drizzle-orm';
+import { isUniqueViolation, hashStringToBigInt } from './idempotency';
 
 type StripeEvent = Stripe.Event;
 
@@ -29,19 +30,84 @@ export function constructWebhookEvent(
 }
 
 /**
- * Handle a verified Stripe webhook event.
- * Idempotent — safe to call multiple times with the same event.
+ * Handle a verified Stripe webhook event with dual-defense idempotency (ADR-014).
+ *
+ * Pattern:
+ *   1. Fast-path: check if event already processed (payment_events table)
+ *   2. Open transaction + acquire pg_advisory_xact_lock
+ *   3. Double-check inside lock
+ *   4. Process event + insert payment_events record
+ *   5. On unique violation (23505): return success (already processed)
  */
 export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
+  // 1. Fast-path idempotency check — return early if already processed
+  const [existing] = await db
+    .select({ id: paymentEvents.id })
+    .from(paymentEvents)
+    .where(eq(paymentEvents.stripeEventId, event.id))
+    .limit(1);
+
+  if (existing) {
+    console.log(`[stripe] Event ${event.id} (${event.type}) already processed, skipping`);
+    return;
+  }
+
+  // 2-5. Dual-defense: transaction + advisory lock + double-check + process
+  try {
+    await db.transaction(async (tx) => {
+      // Acquire transaction-scoped advisory lock (auto-releases at COMMIT/ROLLBACK)
+      const lockKey = hashStringToBigInt(event.id);
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${lockKey})`);
+
+      // 3. Double-check inside lock (concurrent request may have inserted)
+      const [doubleCheck] = await tx
+        .select({ id: paymentEvents.id })
+        .from(paymentEvents)
+        .where(eq(paymentEvents.stripeEventId, event.id))
+        .limit(1);
+
+      if (doubleCheck) {
+        console.log(`[stripe] Event ${event.id} processed by concurrent request, skipping`);
+        return;
+      }
+
+      // 4. Process the event
+      await processEventByType(event, tx);
+
+      // Insert payment_events record (marks as processed)
+      await tx.insert(paymentEvents).values({
+        stripeEventId: event.id,
+        stripeEventType: event.type,
+        orderId: null, // Set by specific handlers if applicable
+        payload: event as unknown as Record<string, unknown>,
+      });
+    });
+  } catch (err) {
+    // 5. On unique violation: already processed by a concurrent request — success
+    if (isUniqueViolation(err)) {
+      console.log(`[stripe] Event ${event.id} idempotency conflict resolved (already processed)`);
+      return;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Dispatch to the appropriate event handler (inside the transaction).
+ */
+async function processEventByType(
+  event: StripeEvent,
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<void> {
   switch (event.type) {
     case 'payment_intent.succeeded':
-      await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+      await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, tx);
       break;
     case 'charge.refunded':
-      await handleChargeRefunded(event.data.object as Stripe.Charge);
+      await handleChargeRefunded(event.data.object as Stripe.Charge, tx);
       break;
     case 'checkout.session.completed':
-      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, tx);
       break;
     default:
       console.log(`[stripe] Unhandled event type: ${event.type}`);
@@ -52,11 +118,14 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
  * payment_intent.succeeded — update order to "confirmed" and send email.
  * Idempotent: if the order is already confirmed, do nothing.
  */
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentSucceeded(
+  paymentIntent: Stripe.PaymentIntent,
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<void> {
   console.log('[stripe] payment_intent.succeeded:', paymentIntent.id);
 
   // Find the order by stripe_payment_intent_id
-  const [order] = await db
+  const [order] = await tx
     .select()
     .from(orders)
     .where(eq(orders.stripePaymentIntentId, paymentIntent.id))
@@ -74,7 +143,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   }
 
   // Update order to confirmed
-  await db
+  await tx
     .update(orders)
     .set({
       status: 'confirmed',
@@ -88,7 +157,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   try {
     const { sendEmail, OrderConfirmationEmail } = await import('@maison/email');
 
-    const orderLineItems = await db.select().from(lineItems).where(eq(lineItems.orderId, order.id));
+    const orderLineItems = await tx.select().from(lineItems).where(eq(lineItems.orderId, order.id));
 
     await sendEmail({
       to: order.email,
@@ -122,13 +191,16 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 /**
  * charge.refunded — update order to "refunded".
  */
-async function handleChargeRefunded(charge: Stripe.Charge) {
+async function handleChargeRefunded(
+  charge: Stripe.Charge,
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<void> {
   console.log('[stripe] charge.refunded:', charge.id);
 
   const paymentIntentId = charge.payment_intent as string;
   if (!paymentIntentId) return;
 
-  const [order] = await db
+  const [order] = await tx
     .select()
     .from(orders)
     .where(eq(orders.stripePaymentIntentId, paymentIntentId))
@@ -136,7 +208,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
   if (!order) return;
 
-  await db
+  await tx
     .update(orders)
     .set({
       status: 'refunded',
@@ -148,10 +220,50 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 }
 
 /**
- * checkout.session.completed — alternative to payment_intent.succeeded
- * when using Stripe Checkout Sessions.
+ * checkout.session.completed — handle Stripe Checkout Session completion (ADR-009).
+ *
+ * When using Stripe Checkout Sessions, this is the primary webhook event
+ * (replaces payment_intent.succeeded as the confirmation trigger).
  */
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutSessionCompleted(
+  session: Stripe.Checkout.Session,
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+): Promise<void> {
   console.log('[stripe] checkout.session.completed:', session.id);
-  // Phase 2: implement if using Checkout Sessions
+
+  // Find the order by stripe_checkout_session_id (if we store it)
+  // For now, look up by metadata or payment_intent
+  const paymentIntentId = session.payment_intent as string | null;
+  if (!paymentIntentId) {
+    console.warn(`[stripe] Checkout session ${session.id} has no payment_intent`);
+    return;
+  }
+
+  const [order] = await tx
+    .select()
+    .from(orders)
+    .where(eq(orders.stripePaymentIntentId, paymentIntentId))
+    .limit(1);
+
+  if (!order) {
+    console.warn(`[stripe] No order found for checkout session ${session.id}`);
+    return;
+  }
+
+  // Idempotency: if already confirmed, skip
+  if (order.status === 'confirmed' || order.status === 'shipped' || order.status === 'delivered') {
+    console.log(`[stripe] Order ${order.orderNumber} already ${order.status}, skipping`);
+    return;
+  }
+
+  // Update order to confirmed
+  await tx
+    .update(orders)
+    .set({
+      status: 'confirmed',
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, order.id));
+
+  console.log(`[stripe] Order ${order.orderNumber} confirmed via Checkout Session`);
 }

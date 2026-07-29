@@ -24,12 +24,16 @@ export interface Session {
   };
 }
 
-/** Helper to check if a session belongs to an admin. */
+/** Helper to check if a session belongs to an owner (highest privilege — ADR-008). */
 export function isAdmin(session: Session | null): boolean {
-  return session?.user.role === 'admin';
+  return session?.user.role === 'owner';
 }
 
-/** Helper to check if a session belongs to staff or admin. */
+/** Helper to check if a session belongs to staff, manager, or owner (staff-tier — ADR-008). */
 export function isStaffOrAdmin(session: Session | null): boolean {
-  return session?.user.role === 'staff' || session?.user.role === 'admin';
+  return (
+    session?.user.role === 'staff' ||
+    session?.user.role === 'manager' ||
+    session?.user.role === 'owner'
+  );
 }

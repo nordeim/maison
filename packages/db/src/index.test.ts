@@ -26,6 +26,7 @@ describe('DB schema', () => {
     expect(schema.wishlistItems).toBeDefined();
     expect(schema.discounts).toBeDefined();
     expect(schema.auditLog).toBeDefined();
+    expect(schema.paymentEvents).toBeDefined(); // ADR-014
   });
 
   it('exports enum types', () => {
@@ -35,8 +36,8 @@ describe('DB schema', () => {
     expect(schema.shippingMethodEnum).toBeDefined();
   });
 
-  it('has correct role values', () => {
-    expect(schema.userRoleEnum.enumValues).toEqual(['customer', 'staff', 'admin']);
+  it('has correct role values (ADR-008)', () => {
+    expect(schema.userRoleEnum.enumValues).toEqual(['customer', 'staff', 'manager', 'owner']);
   });
 
   it('has correct order status values', () => {

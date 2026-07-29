@@ -42,6 +42,9 @@ export type { CartItem, NewCartItem } from './cart-items';
 export { orders } from './orders';
 export type { Order, NewOrder } from './orders';
 
+export { paymentEvents } from './payment-events';
+export type { PaymentEvent, NewPaymentEvent } from './payment-events';
+
 export { lineItems } from './line-items';
 export type { LineItem } from './line-items';
 

@@ -2,71 +2,94 @@ import { describe, it, expect } from 'vitest';
 
 import {
   ROLES,
-  ADMIN_ROLES,
-  ADMIN_WRITE_ROLES,
+  STAFF_ROLES,
+  OWNER_ROLES,
+  canAccessStaff,
+  canAccessOwner,
   canReadAdmin,
   canWriteAdmin,
   isValidRole,
 } from './rbac';
 import type { UserRole } from '@maison/db';
 
-describe('RBAC role tables', () => {
-  it('declares the three Maison roles in escalating-access order', () => {
-    expect(ROLES).toEqual(['customer', 'staff', 'admin']);
+describe('RBAC role tables (ADR-008 — aligned with Stillwater v3.0.0 §15.17)', () => {
+  it('declares the four Maison roles in escalating-access order', () => {
+    expect(ROLES).toEqual(['customer', 'staff', 'manager', 'owner']);
   });
 
-  it('grants admin read access to staff + admin (not customers)', () => {
-    expect([...ADMIN_ROLES]).toEqual(['staff', 'admin']);
+  it('grants staff-tier access to staff + manager + owner (not customers)', () => {
+    expect([...STAFF_ROLES]).toEqual(['staff', 'manager', 'owner']);
   });
 
-  it('grants admin write access to admin only', () => {
-    expect([...ADMIN_WRITE_ROLES]).toEqual(['admin']);
+  it('grants owner-tier access to owner only', () => {
+    expect([...OWNER_ROLES]).toEqual(['owner']);
   });
 });
 
-describe('canReadAdmin', () => {
+describe('canAccessStaff (staffProcedure tier — ADR-008)', () => {
   it.each([
     ['staff', true],
-    ['admin', true],
-  ] as const)('grants read access to %s', (role, expected) => {
-    expect(canReadAdmin(role)).toBe(expected);
+    ['manager', true],
+    ['owner', true],
+  ] as const)('grants staff-tier access to %s', (role, expected) => {
+    expect(canAccessStaff(role)).toBe(expected);
   });
 
-  it('denies read access to customers', () => {
-    expect(canReadAdmin('customer')).toBe(false);
+  it('denies staff-tier access to customers', () => {
+    expect(canAccessStaff('customer')).toBe(false);
   });
 
-  it.each([null, undefined])(`denies read access when role is %s`, (role) => {
-    expect(canReadAdmin(role)).toBe(false);
+  it.each([null, undefined])(`denies staff-tier access when role is %s`, (role) => {
+    expect(canAccessStaff(role)).toBe(false);
   });
 });
 
-describe('canWriteAdmin', () => {
-  it('grants write access to admin', () => {
-    expect(canWriteAdmin('admin')).toBe(true);
+describe('canAccessOwner (ownerProcedure tier — ADR-008)', () => {
+  it('grants owner-tier access to owner', () => {
+    expect(canAccessOwner('owner')).toBe(true);
   });
 
   it.each([
     ['customer', false],
     ['staff', false],
-  ] as const)('denies write access to %s', (role, expected) => {
-    expect(canWriteAdmin(role)).toBe(expected);
+    ['manager', false],
+  ] as const)('denies owner-tier access to %s', (role, expected) => {
+    expect(canAccessOwner(role)).toBe(expected);
   });
 
-  it.each([null, undefined])(`denies write access when role is %s`, (role) => {
-    expect(canWriteAdmin(role)).toBe(false);
+  it.each([null, undefined])(`denies owner-tier access when role is %s`, (role) => {
+    expect(canAccessOwner(role)).toBe(false);
+  });
+});
+
+// Deprecated aliases (backward compat — canReadAdmin == canAccessStaff, canWriteAdmin == canAccessOwner)
+describe('canReadAdmin (deprecated alias for canAccessStaff)', () => {
+  it('matches canAccessStaff behavior', () => {
+    expect(canReadAdmin('staff')).toBe(true);
+    expect(canReadAdmin('manager')).toBe(true);
+    expect(canReadAdmin('owner')).toBe(true);
+    expect(canReadAdmin('customer')).toBe(false);
+  });
+});
+
+describe('canWriteAdmin (deprecated alias for canAccessOwner)', () => {
+  it('matches canAccessOwner behavior', () => {
+    expect(canWriteAdmin('owner')).toBe(true);
+    expect(canWriteAdmin('manager')).toBe(false);
+    expect(canWriteAdmin('staff')).toBe(false);
+    expect(canWriteAdmin('customer')).toBe(false);
   });
 });
 
 describe('isValidRole', () => {
-  it.each(['customer', 'staff', 'admin'])('accepts %s as a valid role', (role) => {
+  it.each(['customer', 'staff', 'manager', 'owner'])('accepts %s as a valid role', (role) => {
     expect(isValidRole(role)).toBe(true);
     // Type guard must narrow so the assignment below type-checks.
     const narrowed: UserRole = role;
     expect(narrowed).toBe(role);
   });
 
-  it.each(['superuser', '', 'ADMIN', 'customer ', 0, false, {}, null, undefined])(
+  it.each(['superuser', 'admin', '', 'ADMIN', 'customer ', 0, false, {}, null, undefined])(
     'rejects %p as a role',
     (value) => {
       expect(isValidRole(value)).toBe(false);

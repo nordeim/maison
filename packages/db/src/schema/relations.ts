@@ -18,6 +18,7 @@ import { productImages } from './product-images';
 import { carts } from './carts';
 import { cartItems } from './cart-items';
 import { orders } from './orders';
+import { paymentEvents } from './payment-events';
 import { lineItems } from './line-items';
 import { wishlistItems } from './wishlist-items';
 
@@ -103,6 +104,14 @@ export const orderRelations = relations(orders, ({ one, many }) => ({
     references: [customers.id],
   }),
   lineItems: many(lineItems),
+  paymentEvents: many(paymentEvents),
+}));
+
+export const paymentEventRelations = relations(paymentEvents, ({ one }) => ({
+  order: one(orders, {
+    fields: [paymentEvents.orderId],
+    references: [orders.id],
+  }),
 }));
 
 export const lineItemRelations = relations(lineItems, ({ one }) => ({

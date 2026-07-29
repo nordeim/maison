@@ -6,8 +6,8 @@
 
 import { pgEnum } from 'drizzle-orm/pg-core';
 
-/** User role — determines access level (RBAC). */
-export const userRoleEnum = pgEnum('user_role', ['customer', 'staff', 'admin']);
+/** User role — determines access level (RBAC). Per ADR-008 — aligned with Stillwater v3.0.0 §15.17. */
+export const userRoleEnum = pgEnum('user_role', ['customer', 'staff', 'manager', 'owner']);
 
 /** Order status — lifecycle of an order from placement to delivery. */
 export const orderStatusEnum = pgEnum('order_status', [

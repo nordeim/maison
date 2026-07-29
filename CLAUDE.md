@@ -28,12 +28,14 @@
 
 Read these in order:
 
-1. **`docs/PRD_unified.md`** — what to build (features, pages, data models, API surface)
-2. **`docs/landing_page_unified.html`** — how it should look (canonical design tokens: `--bg #faf8f5`, `--clay #a86b4a`, `--gold #c4a265`; Cormorant Garamond + Inter typography; 15 homepage sections)
-3. **`PROJECT-ARCHITECTURE.md`** — how to build it (ADRs, layer model, DB schemas, security posture)
-4. **`AGENTS.md`** — high-signal facts (read this before any commit)
-5. **`~/.pi/agent/skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` §9 (Anti-Patterns) + §13 (Pitfalls)** — read before writing new code; documents 50+ gotchas
-6. **`~/.pi/agent/skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`** — concrete Stillwater reference (real file paths, working configs, 651 tests, 11 ADRs)
+1. **`docs/MAISON_PRD_v1.2.md`** — what to build (features, pages, data models, API surface) — v1.2 aligned with 3 coding skills
+2. **`docs/MAISON_PAD_v1.2.md`** — how to build it (20 ADRs, layer model, schemas, security posture) — v1.2
+3. **`docs/MAISON_Design_Guide.md`** — canonical design system reference (1,336 lines, 15 sections)
+4. **`docs/landing_page_unified.html`** — how it should look (canonical design tokens: `--bg #faf8f5`, `--clay #a86b4a`, `--gold #c4a265`; Cormorant Garamond + Inter typography; 17 homepage sections)
+5. **`docs/PRD_PAD_Validation_Against_Skills.md`** — 15 findings audit against 3 coding skills (Stillwater, tRPC+Drizzle, TypeScript patterns)
+6. **`AGENTS.md`** — high-signal facts (read this before any commit)
+7. **`~/.pi/agent/skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth/SKILL.md` §9 (Anti-Patterns) + §13 (Pitfalls)** — read before writing new code; documents 50+ gotchas
+8. **`~/.pi/agent/skills/nextjs16-react19-tailwind4-better-auth-monorepo/SKILL.md`** — concrete Stillwater reference (real file paths, working configs, 651 tests, 11 ADRs)
 
 If you skip any of these, you will reproduce bugs that have already been solved.
 
@@ -99,13 +101,19 @@ When asked to implement a feature, follow this discipline:
 - **Custom utilities** in `@layer utilities { ... }` within `globals.css`.
 - **The `prettier-plugin-tailwindcss`** auto-sorts classes on format — don't fight it.
 
-### tRPC v11
+### tRPC v11 (ADR-008 — 5 procedure tiers)
 
-- **Every procedure has a Zod input parser.** Never accept untyped input.
-- **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. This calls the router directly (no HTTP round-trip).
+- **5 procedure tiers** (per ADR-008, aligned with Stillwater v3.0.0 §15.17):
+  - `publicProcedure` — no auth required
+  - `protectedProcedure` — any authenticated user
+  - `staffProcedure` — staff, manager, or owner role (admin read)
+  - `managerProcedure` — manager or owner role (admin mutations)
+  - `ownerProcedure` — owner role only (role management, store settings)
+  - **Deprecated aliases**: `adminProcedure` → `staffProcedure`, `adminWriteProcedure` → `ownerProcedure` (will be removed in v2.0)
+- **Every procedure has a Zod v4 input parser** (ADR-018). Use `z.email()` (NOT `z.string().email()` — deprecated). Never accept untyped input.
+- **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. Use `api()` for auth-guarded routes (forces dynamic) or `apiPublic()` for public routes (allows static prerender).
 - **Client-side via React Query** — `apps/web/src/lib/trpc/client.tsx` exports `trpc` and `TRPCProvider`.
 - **Rate limiting middleware fails OPEN** — if Redis is down, allow the request. Log for review. Do NOT change to fail-closed.
-- **`api()` vs `apiPublic()` — the rendering-strategy split.** `api()` calls `next/headers` → forces the route dynamic (ƒ). `apiPublic()` builds context with an empty request (no `headers()`) → keeps the route static-prerenderable (○). Public shop routes (`/`, `/collections`, `/products`, `/search`) MUST use `apiPublic()`. Auth-guarded routes (`/account/*`, `/admin/*`) MUST use `api()`. Never swap them. `DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*` are **expected and correct** — do NOT add `export const dynamic = 'force-dynamic'` to silence them (incompatible with `cacheComponents: true` — see AGENTS.md §Things that look wrong). Regression test: `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts`.
 
 ### Drizzle ORM
 
@@ -119,14 +127,23 @@ When asked to implement a feature, follow this discipline:
 - **Config in `packages/auth/src/config.ts`.** Web app imports via `@maison/auth`.
 - **Sessions in PostgreSQL, not JWTs.** Enables revocation.
 - **`BETTER_AUTH_URL` must be set in production** — config throws at module load if unset (intentional fail-fast).
-- **RBAC roles:** `customer`, `staff`, `admin`. Checked in tRPC middleware (not `proxy.ts` — proxy only checks "is authenticated").
+- **RBAC roles (ADR-008):** `customer`, `staff`, `manager`, `owner`. Checked in tRPC middleware (`staffProcedure` / `managerProcedure` / `ownerProcedure` — not `proxy.ts` which only checks cookie-existence via `getSessionCookie()`).
+- **`customSession` plugin** enriches session with user role from `users` table.
 
-### Stripe
+### Stripe (ADR-009 — Checkout Sessions + ADR-014 — idempotency)
 
-- **Payment Intents, not legacy Tokens.** Always.
-- **Idempotency keys on every mutating call.** Client generates UUID, passes as `x-idempotency-key` header. Stored in `orders.stripe_idempotency_key` (UNIQUE).
+- **Stripe Checkout Sessions** (not Payment Intents — per ADR-009). PCI SAQ-A scope (card data never touches our servers).
+- **Webhook idempotency via dual-defense pattern** (ADR-014): `payment_events` table + `pg_advisory_xact_lock` (transaction-scoped). See `packages/payments/src/idempotency.ts`.
 - **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `STRIPE_WEBHOOK_SECRET`.
-- **No card data touches our servers.** Stripe Elements collects card data client-side. PCI SAQ-A scope.
+- **Apple Pay / Google Pay** are native to Stripe Checkout Sessions.
+- **Stripe Tax** via `automatic_tax: { enabled: true }` in Checkout Session params.
+
+### Trigger.dev v4 (ADR-016)
+
+- **Import from `@trigger.dev/sdk` root** (NOT `/v4` — subpath doesn't exist; NOT `/v3` — deprecated April 1, 2026).
+- **`machine: "micro"`** (string literal, not object form).
+- **`tasks.trigger('task-id', payload)`** API (NOT `TriggerClient.sendEvent()`).
+- **Workers `package.json` MUST have `"type": "module"`.**
 
 ---
 
