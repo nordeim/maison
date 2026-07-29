@@ -62,6 +62,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/images/**' },
       // Unsplash (seed data — replace with Cloudflare in production)
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      // Pexels (seed data — borrowed from reference mockup for UAT)
+      { protocol: 'https', hostname: 'images.pexels.com', pathname: '/**' },
     ],
     dangerouslyAllowSVG: false,
     contentDispositionType: 'attachment',
@@ -82,7 +84,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https: https://imagedelivery.net https://cdn.sanity.io https://images.unsplash.com",
+              "img-src 'self' data: blob: https: https://imagedelivery.net https://cdn.sanity.io https://images.unsplash.com https://images.pexels.com",
               "font-src 'self' data:",
               "connect-src 'self' https://api.stripe.com wss: https://*.sentry.io https://*.posthog.com",
               'frame-src https://js.stripe.com',

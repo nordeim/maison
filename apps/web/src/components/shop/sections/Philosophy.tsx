@@ -34,21 +34,21 @@ export function Philosophy() {
           }}
         >
           <Image
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80"
+            src="https://images.pexels.com/photos/38428357/pexels-photo-38428357.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1100&w=600"
             alt="Artisan workshop with hand tools"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             style={{ objectFit: 'cover', gridColumn: 1, gridRow: '1 / 3' }}
           />
           <Image
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80"
+            src="https://images.pexels.com/photos/31149584/pexels-photo-31149584.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400"
             alt="Quiet living space"
             fill
             sizes="(max-width: 1024px) 50vw, 25vw"
             style={{ objectFit: 'cover', gridColumn: 2, gridRow: 1 }}
           />
           <Image
-            src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80"
+            src="https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=400"
             alt="Detail of crafted object"
             fill
             sizes="(max-width: 1024px) 50vw, 25vw"

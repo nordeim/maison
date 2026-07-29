@@ -23,7 +23,7 @@ export function Hero() {
     >
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <Image
-          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80"
+          src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1400&w=2000"
           alt="A sunlit Scandinavian living room with linen armchair and oak side table"
           fill
           priority

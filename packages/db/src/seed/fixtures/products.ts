@@ -1,9 +1,9 @@
 /**
- * Maison — Seed fixtures: 13 products
+ * Maison — Seed fixtures: 20 products (13 original + 7 UAT additions)
  *
  * Matches the products rendered in docs/landing_page_unified.html
- * and documented in docs/PRD_unified.md §15.2.
- * Images use Unsplash URLs (same as the landing page mockup).
+ * and documented in docs/MAISON_PRD_v1.2.md §15.2.
+ * Images use Pexels URLs (borrowed from reference mockup for UAT).
  */
 
 import type { NewProduct } from '../../schema';
@@ -206,6 +206,126 @@ export const seedProducts: NewProduct[] = [
     isBestseller: false,
     isActive: true,
   },
+  // ── UAT additions (7 products for broader test coverage) ──────────
+  {
+    slug: 'linen-bed-throw-stripe',
+    name: 'Striped Linen Bed Throw',
+    collectionId: undefined,
+    priceCents: 24500,
+    currency: 'USD',
+    shortDescription: 'Oversized stonewashed linen throw with woven stripes.',
+    longDescription:
+      'An oversized, stonewashed European linen throw with a subtle woven stripe pattern. Perfect for draping across the foot of a bed or over a reading armchair. The linen softens with every wash, developing a lived-in quality that only improves with age.',
+    materials: '100% stonewashed European linen',
+    dimensions: '140cm × 200cm',
+    weightGrams: 850,
+    featured: false,
+    isNew: true,
+    isBestseller: false,
+    isActive: true,
+  },
+  {
+    slug: 'oak-wall-shelf',
+    name: 'Floating Oak Wall Shelf',
+    collectionId: undefined,
+    priceCents: 18500,
+    currency: 'USD',
+    shortDescription: 'Minimalist floating shelf in solid FSC oak.',
+    longDescription:
+      'A clean, floating wall shelf in solid FSC-certified oak with a hidden bracket system. The shelf appears to hover against the wall — no visible hardware. Finished with raw linseed oil to preserve the natural grain. Holds up to 15kg evenly distributed.',
+    materials: 'Solid FSC oak, steel bracket (hidden)',
+    dimensions: 'L 60cm × D 22cm × H 3cm',
+    weightGrams: 1800,
+    featured: false,
+    isNew: true,
+    isBestseller: false,
+    isActive: true,
+  },
+  {
+    slug: 'ceramic-dinner-plates-set',
+    name: 'Stoneware Dinner Plates (Set of 4)',
+    collectionId: undefined,
+    priceCents: 16500,
+    currency: 'USD',
+    shortDescription: 'Set of 4 hand-thrown stoneware dinner plates.',
+    longDescription:
+      'A set of four hand-thrown stoneware dinner plates, each slightly unique in its rim profile and glaze pooling. The matte ash glaze reveals the warmth of the clay beneath. Dishwasher and microwave safe. Made in our Gothenburg ceramics studio.',
+    materials: 'High-fire stoneware, ash glaze',
+    dimensions: 'Ø 26cm × H 2.5cm (each)',
+    weightGrams: 1200,
+    featured: false,
+    isNew: false,
+    isBestseller: true,
+    isActive: true,
+  },
+  {
+    slug: 'brass-candle-holder',
+    name: 'Solid Brass Candle Holder',
+    collectionId: undefined,
+    priceCents: 7500,
+    currency: 'USD',
+    shortDescription: 'Minimalist solid brass candle holder for taper candles.',
+    longDescription:
+      'A weighted, solid brass candle holder with a softly brushed finish. Designed for standard taper candles. The brass develops a natural patina over time — embrace the aging or polish to restore the original lustre. Felt base protects surfaces.',
+    materials: 'Solid brass, brushed finish',
+    dimensions: 'Ø 8cm × H 10cm',
+    weightGrams: 480,
+    featured: false,
+    isNew: false,
+    isBestseller: false,
+    isActive: true,
+  },
+  {
+    slug: 'wool-floor-cushion',
+    name: 'Hand-Felted Wool Floor Cushion',
+    collectionId: undefined,
+    priceCents: 19500,
+    currency: 'USD',
+    shortDescription: 'Spacious floor cushion in hand-felted New Zealand wool.',
+    longDescription:
+      'A generously sized floor cushion hand-felted from 100% New Zealand wool. The natural lanolin makes it naturally stain-resistant. The cover is removable for dry cleaning. Perfect for casual seating, meditation, or as a footrest. Available in sand and charcoal.',
+    materials: '100% New Zealand wool, cotton lining',
+    dimensions: '65cm × 65cm × 15cm',
+    weightGrams: 2200,
+    featured: false,
+    isNew: true,
+    isBestseller: false,
+    isActive: true,
+  },
+  {
+    slug: 'oak-cutting-board',
+    name: 'Oak Cutting Board with Handle',
+    collectionId: undefined,
+    priceCents: 9500,
+    currency: 'USD',
+    shortDescription: 'Solid oak cutting board with cutout handle.',
+    longDescription:
+      'A solid FSC oak cutting board with a practical cutout handle for hanging or carrying. Finished with food-safe linseed oil. The end-grain surface is gentle on knives and self-heals with use. Each board is unique in its grain pattern.',
+    materials: 'Solid FSC oak, food-safe linseed oil finish',
+    dimensions: 'L 42cm × W 24cm × H 2cm',
+    weightGrams: 900,
+    featured: false,
+    isNew: false,
+    isBestseller: false,
+    isActive: true,
+  },
+  {
+    slug: 'linen-apron',
+    name: 'Washed Linen Apron',
+    collectionId: undefined,
+    priceCents: 6500,
+    currency: 'USD',
+    shortDescription: 'Full-length linen apron with adjustable straps.',
+    longDescription:
+      'A full-length apron in stonewashed European linen with adjustable neck and waist straps. Two front pockets. The linen softens with each wash. Made for daily use in the kitchen, studio, or workshop. Unisex sizing.',
+    materials: '100% washed European linen',
+    dimensions: 'One size (adjustable)',
+    weightGrams: 350,
+    featured: false,
+    isNew: true,
+    isBestseller: false,
+    isActive: true,
+  },
 ];
 
 /**
@@ -225,6 +345,14 @@ export const productCollectionMap: Record<string, string> = {
   'sculptural-bud-vase': 'objects',
   'winter-hearth-candle': 'seasonal',
   'curated-gift-box': 'gifts',
+  // UAT additions
+  'linen-bed-throw-stripe': 'textiles',
+  'oak-wall-shelf': 'furniture',
+  'ceramic-dinner-plates-set': 'ceramics',
+  'brass-candle-holder': 'objects',
+  'wool-floor-cushion': 'textiles',
+  'oak-cutting-board': 'objects',
+  'linen-apron': 'textiles',
 };
 
 /**
@@ -232,55 +360,84 @@ export const productCollectionMap: Record<string, string> = {
  */
 export const productImagesMap: Record<string, string[]> = {
   'arc-pendant-light': [
-    'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80',
-    'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80',
+    'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'orb-table-lamp': [
-    'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80',
-    'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&q=80',
+    'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'berg-floor-lamp': [
-    'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80',
-    'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80',
+    'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'large-sculptural-vessel': [
-    'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80',
-    'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=600&q=80',
+    'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/5754097/pexels-photo-5754097.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'everyday-serving-bowl': [
-    'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600&q=80',
-    'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80',
+    'https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'harvest-dining-table': [
-    'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600&q=80',
-    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
+    'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'halden-linen-armchair': [
-    'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&q=80',
-    'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80',
+    'https://images.pexels.com/photos/2082090/pexels-photo-2082090.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/23471276/pexels-photo-23471276.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'solside-oak-table': [
-    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
-    'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&q=80',
+    'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/22743854/pexels-photo-22743854.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
   ],
   'washed-linen-throw': [
-    'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=600&q=80',
-    'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80',
+    'https://images.pexels.com/photos/31034512/pexels-photo-31034512.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/31034508/pexels-photo-31034508.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'hand-felted-wool-cushion': [
-    'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80',
-    'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=600&q=80',
+    'https://images.pexels.com/photos/31034508/pexels-photo-31034508.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/31034512/pexels-photo-31034512.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'sculptural-bud-vase': [
-    'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&q=80',
-    'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80',
+    'https://images.pexels.com/photos/5754116/pexels-photo-5754116.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'winter-hearth-candle': [
-    'https://images.unsplash.com/photo-1602028923579-99e1f9d8d4f0?w=600&q=80',
-    'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&q=80',
+    'https://images.pexels.com/photos/8311558/pexels-photo-8311558.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/5754116/pexels-photo-5754116.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
   'curated-gift-box': [
-    'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80',
-    'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&q=80',
+    'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/5754116/pexels-photo-5754116.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+  ],
+  // UAT additions
+  'linen-bed-throw-stripe': [
+    'https://images.pexels.com/photos/31034512/pexels-photo-31034512.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/31034508/pexels-photo-31034508.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+  ],
+  'oak-wall-shelf': [
+    'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/22743854/pexels-photo-22743854.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+  ],
+  'ceramic-dinner-plates-set': [
+    'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/5754097/pexels-photo-5754097.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+  ],
+  'brass-candle-holder': [
+    'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+  ],
+  'wool-floor-cushion': [
+    'https://images.pexels.com/photos/31034508/pexels-photo-31034508.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/31034512/pexels-photo-31034512.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+  ],
+  'oak-cutting-board': [
+    'https://images.pexels.com/photos/22743854/pexels-photo-22743854.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+    'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=600',
+  ],
+  'linen-apron': [
+    'https://images.pexels.com/photos/31034512/pexels-photo-31034512.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
+    'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=800&w=600',
   ],
 };

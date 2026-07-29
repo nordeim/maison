@@ -17,25 +17,29 @@ const FALLBACK_CATEGORIES = [
   {
     slug: 'furniture',
     name: 'Furniture',
-    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
+    image:
+      'https://images.pexels.com/photos/29559667/pexels-photo-29559667.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=600&w=800',
     count: '42 pieces',
   },
   {
     slug: 'lighting',
     name: 'Lighting',
-    image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&q=80',
+    image:
+      'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=600&w=800',
     count: '28 pieces',
   },
   {
     slug: 'textiles',
     name: 'Textiles',
-    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80',
+    image:
+      'https://images.pexels.com/photos/31034508/pexels-photo-31034508.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=600&w=800',
     count: '36 pieces',
   },
   {
     slug: 'ceramics',
     name: 'Ceramics',
-    image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80',
+    image:
+      'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=600&w=800',
     count: '24 pieces',
   },
 ];

@@ -12,7 +12,8 @@ const ARTICLES = [
     title: 'Why oak gets better with age',
     excerpt:
       'A short guide to oiling, brushing, and accepting the small marks a piece will gather over a decade of use.',
-    image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=700&q=80',
+    image:
+      'https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=700',
   },
   {
     slug: 'lighting-a-room-for-autumn',
@@ -21,7 +22,8 @@ const ARTICLES = [
     title: 'Lighting a room for autumn',
     excerpt:
       'Three small changes — lamp height, bulb temperature, layering — that shift how a room feels at dusk.',
-    image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=700&q=80',
+    image:
+      'https://images.pexels.com/photos/36299919/pexels-photo-36299919.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=700',
   },
   {
     slug: 'day-in-the-aalborg-workshop',
@@ -30,7 +32,8 @@ const ARTICLES = [
     title: 'A day in the Aalborg workshop',
     excerpt:
       'We spend a morning with founder Mette and her team as they finish the autumn run of dining chairs.',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80',
+    image:
+      'https://images.pexels.com/photos/38428357/pexels-photo-38428357.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=700',
   },
 ];
 

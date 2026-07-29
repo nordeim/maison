@@ -18,7 +18,7 @@ export function HyggeEdit() {
     >
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <Image
-          src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1600&q=80"
+          src="https://images.pexels.com/photos/667829/pexels-photo-667829.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1400&w=2000"
           alt="A warm, dimly lit Scandinavian living room at dusk"
           fill
           sizes="100vw"

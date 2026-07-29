@@ -32,7 +32,7 @@ export function FeaturedCollection() {
           }}
         >
           <Image
-            src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=900&q=80"
+            src="https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1100&w=900"
             alt="Sculptural Arc Pendant Light in hand-bent brass and linen"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"

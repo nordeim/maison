@@ -33,7 +33,7 @@ export default function AboutPage() {
       >
         <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
           <Image
-            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1600&q=80"
+            src="https://images.pexels.com/photos/38428357/pexels-photo-38428357.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1200&w=1600"
             alt="Maison workshop"
             fill
             sizes="100vw"
@@ -306,7 +306,7 @@ export default function AboutPage() {
             }}
           >
             <Image
-              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+              src="https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=800"
               alt="Mette Sørensen in the Aalborg workshop"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"

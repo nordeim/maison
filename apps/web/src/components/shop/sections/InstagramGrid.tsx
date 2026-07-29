@@ -5,12 +5,12 @@
 import Image from 'next/image';
 
 const IMAGES = [
-  'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80',
-  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&q=80',
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80',
-  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80',
-  'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80',
-  'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=400&q=80',
+  'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=400&w=400',
+  'https://images.pexels.com/photos/14367655/pexels-photo-14367655.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=400&w=400',
+  'https://images.pexels.com/photos/31149584/pexels-photo-31149584.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400',
+  'https://images.pexels.com/photos/667829/pexels-photo-667829.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=400&w=400',
+  'https://images.pexels.com/photos/4053188/pexels-photo-4053188.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400',
+  'https://images.pexels.com/photos/5754116/pexels-photo-5754116.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400',
 ];
 
 export function InstagramGrid() {
