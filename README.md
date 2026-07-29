@@ -183,11 +183,11 @@ maison/
 ├── 📂 tooling/                        # Shared ESLint, TypeScript, Tailwind configs
 ├── 📂 infrastructure/postgres/init/   # Docker init scripts
 ├── 📂 e2e/                            # Playwright E2E tests
-├── 📂 docs/                           # PRD, design references, skill docs
-│   ├── 📄 PRD_unified.md              # ← Unified Project Requirements Document
+├── 📂 docs/                           # design references and misc project docs
+│   ├── 📄 MAISON_Design_Guide.md      # ← Visual Aesthetics & UI/UX Design Guide
 │   ├── 📄 landing_page_unified.html   # ← Canonical visual reference
 │   └── 📄 ssh_git_wrapper_v3.py       # SSH push wrapper (no openssh-client)
-├── 📂 skills/                         # ClawHub skills — vendored, deleted from worktree; see `skills/`
+├── 📂 skills/                         # skills — see `skills/skills-catalog.md` for a listing
 ├── 📂 scripts/                        # Repo scripts (db-setup.sh, pre-commit)
 ├── 📄 .env.example                    # Environment variable template
 ├── 📄 docker-compose.yml              # Local Postgres + Redis + Stripe CLI
@@ -197,7 +197,8 @@ maison/
 ├── 📄 README.md                       # ← You are here
 ├── 📄 AGENTS.md                       # AI agent onboarding (high-signal facts)
 ├── 📄 CLAUDE.md                       # Claude Code instructions
-└── 📄 PROJECT-ARCHITECTURE.md         # Engineering blueprint (PAD, ADRs, schemas)
+├── 📄 Project_Requirements_Document.md  # Project Requirements
+└── 📄 Project_Architecture_Document.md  # Engineering blueprint (PAD, ADRs, schemas)
 ```
 
 ---
