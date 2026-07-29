@@ -87,7 +87,7 @@ export function Philosophy() {
                 fontWeight: 400,
               }}
             >
-              care
+              {' care '}
             </em>
             , materials that age{' '}
             <em
@@ -97,7 +97,7 @@ export function Philosophy() {
                 fontWeight: 400,
               }}
             >
-              gracefully
+              {' gracefully '}
             </em>
             , spaces that invite pause.
           </h2>

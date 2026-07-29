@@ -28,7 +28,9 @@ import { getSessionCookie } from 'better-auth/cookies';
 
 // Routes that require ANY authenticated session (cookie existence check only).
 // RBAC role checks happen in layout.tsx, NOT here.
-const AUTH_REQUIRED_ROUTES = ['/account', '/admin', '/checkout'];
+// NOTE: /checkout is NOT in this list — guest checkout is supported per PRD §6.5.
+// The checkout page handles its own cart-empty redirect client-side.
+const AUTH_REQUIRED_ROUTES = ['/account', '/admin'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

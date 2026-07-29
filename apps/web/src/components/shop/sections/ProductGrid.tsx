@@ -92,7 +92,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                   fontWeight: 400,
                 }}
               >
-                live with
+                {' live with '}
               </em>
               .
             </h2>

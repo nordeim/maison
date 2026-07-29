@@ -76,7 +76,7 @@ export function HyggeEdit() {
                 fontWeight: 300,
               }}
             >
-              feeling
+              {' feeling '}
             </em>
             .
           </h2>

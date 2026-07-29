@@ -88,7 +88,7 @@ export function JournalSection() {
                   fontWeight: 400,
                 }}
               >
-                slow living
+                {' slow living '}
               </em>
               .
             </h2>

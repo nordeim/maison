@@ -378,7 +378,7 @@ export function Header() {
       <style>{`
         @media (max-width: 768px) {
           .menu-btn { display: flex !important; }
-          header nav[aria-label="Primary"] { display: none; }
+          header nav[aria-label="Primary"] { display: none !important; }
         }
       `}</style>
 

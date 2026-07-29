@@ -103,8 +103,8 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
                   fontWeight: 400,
                 }}
               >
-                quiet
-              </em>{' '}
+                {' quiet '}
+              </em>
               corner.
             </h2>
           </div>

@@ -72,7 +72,7 @@ export function Testimonials() {
                   fontWeight: 400,
                 }}
               >
-                2,400+
+                {' 2,400+ '}
               </em>{' '}
               homes.
             </h2>

@@ -85,7 +85,7 @@ export function Materials() {
                 fontWeight: 400,
               }}
             >
-              trust
+              {' trust '}
             </em>
             .
           </h2>

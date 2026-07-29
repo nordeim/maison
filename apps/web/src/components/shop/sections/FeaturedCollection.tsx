@@ -90,7 +90,7 @@ export function FeaturedCollection() {
                 fontStyle: 'italic',
               }}
             >
-              casts warmth
+              {' casts warmth '}
             </em>
             .
           </h2>

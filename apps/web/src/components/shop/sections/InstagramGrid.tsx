@@ -57,7 +57,7 @@ export function InstagramGrid() {
                 fontWeight: 400,
               }}
             >
-              living
+              {' living'}
             </em>
           </h2>
           <p
