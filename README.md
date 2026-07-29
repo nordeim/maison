@@ -19,7 +19,7 @@
 
 ## Overview
 
-Maison is a premium DTC e-commerce platform selling curated Scandinavian-inspired home objects. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) using a Turborepo monorepo architecture with Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The unified PRD (`docs/PRD_unified.md`), canonical design mockup (`docs/landing_page_unified.html`), and engineering documentation (`PROJECT-ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md`) are the source of truth for the codebase design.
+Maison is a premium DTC e-commerce platform selling curated Scandinavian-inspired home objects. The codebase is fully scaffolded and Phase 3 complete (Foundation → MVP → Growth → Optimisation) using a Turborepo monorepo architecture with Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe. The unified PRD (`Project_Requirements_Document.md`), canonical design mockup (`docs/landing_page_unified.html` and `docs/MAISON_Design_Guide.md`), and engineering documentation (`Project_Architecture_Document.md`, `AGENTS.md`, `CLAUDE.md`) are the source of truth for the codebase design.
 
 The brand embodies "considered living" — offering handcrafted objects that prioritise material integrity, artisan craftsmanship, and timeless design over mass production. Every product carries a maker's story, and every transaction supports independent Nordic craftspeople. The aesthetic is editorial-luxury: Cormorant Garamond serif display paired with Inter body, warm cream backgrounds, terracotta accents, and zero generic SaaS UI patterns.
 
