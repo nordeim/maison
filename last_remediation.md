@@ -383,3 +383,123 @@ No page sources, no server.ts, no schema, no deps, no routing-strategy change. T
   references RUNTIME-6 ✓; line count 5452 (was 5200). 
 ``` 
 
+---
+
+Executive Summary 
+ 
+I meticulously reviewed AGENTS.md, CLAUDE.md, last_remediation.md, the nextjs-typescript_SKILL.md, the Stillwater reference (/home/project/stillwater/ + its SKILL.md), and error.txt against the live codebase. I then ran the full 
+8-gate verification suite and E2E browser tests against http://localhost:3000/. 
+ 
+The headline finding: the codebase is healthy. The "error" in error.txt is not a failure — it is the documented, expected, by-design behavior, and every gate is green. 
+ 
+ANALYZE — Root Cause of error.txt 
+ 
+error.txt contains two issues, neither is a build failure: 
+ 
+### Issue 1 (Non-fatal, expected): DYNAMIC_SERVER_USAGE warnings 
+ 
+``` 
+  [account orders] Route /account/orders couldn't be rendered statically because it used `headers` 
+  [admin dashboard] Route /admin couldn't be rendered statically because it used `headers` 
+  ... (12 warnings, all /account/* + /admin/*) 
+``` 
+ 
+Root cause (validated, by design): The (account) and (admin) route group layouts call auth.api.getSession({ headers: await headers() }) — the Layer 2 security boundary (per PROJECT-ARCHITECTURE.md §6.3 + proxy.ts doc). Touching 
+next/headers makes next/headers hit the static pre-render probe, Next.js catches it, marks the route ƒ (Dynamic), and emits the warning. The build completes: Tasks: 10 successful, 10 total → exit 0, 37/37 pages. 
+ 
+This is explicitly documented in AGENTS.md → "Things that look wrong but aren't" and CLAUDE.md → tRPC v11 / "api() vs apiPublic()": "Do NOT add export const dynamic = 'force-dynamic' to silence them — incompatible with 
+cacheComponents: true." The regression contract test (rendering-strategy.contract.test.ts, 20 tests) locks this invariant. 
+ 
+### Issue 2 (Fatal — already FIXED in prior remediation): useRef SSR crash 
+ 
+error.txt itself does not show this (it's from the pre-fix state captured in last_remediation.md): runtime HTTP 500 Cannot read properties of null (reading 'useRef'). Cause: WishlistButton/ReviewsSection call Better Auth's 
+useSession() → useRef() via nanostores; Turbopack selected React's null-hook react-server export for that chunk. Fixed via ClientOnly boundary (mirrors Stillwater Lesson 89 / L4330: "never invoke useSession during SSR"). 
+ 
+PLAN → VALIDATE → VERIFY against the Stillwater reference 
+ 
+I cross-validated Maison's architecture against the Stillwater production reference (the skill's canonical example, 651 tests / 11 ADRs): 
+ 
+┌────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────┬────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┐ 
+│ Component                                                          │ Maison                                                │ Stillwater                                     │ Status                                                   │ 
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤ 
+│ proxy.ts (Next.js 16, not middleware.ts)                           │ ✅ present, 2-layer auth, cookie-only edge check      │ ✅ identical pattern                           │ Aligned                                                  │ 
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤ 
+│ tRPC split: api() (dynamic) vs apiPublic() (static)                │ ✅ implemented in lib/trpc/server.ts with thorough    │ ✅ apiCaller() for protected; direct-DB for    │ Aligned (Maison improved on Stillwater by reusing one    │ 
+│                                                                    │ docs                                                  │ static marketing                               │ appRouter for both)                                      │ 
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤ 
+│ next.config.ts (CSP, security headers, transpilePackages,          │ ✅ full CSP + OWASP headers                           │ ✅ identical shape                             │ Aligned                                                  │ 
+│ serverExternalPackages)                                            │                                                       │                                                │                                                          │ 
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┤ 
+│ Tailwind v4 CSS-first @theme (no tailwind.config.js)               │ ✅ in globals.css, tokens mapped from                 │ ✅                                             │ Aligned                                                  │ 
+│                                                                    │ landing_page_unified.html                             │                                                │                                                          │ 
+└────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────┴────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘ 
+ 
+There is no remaining "scaffolding gap" in the architecture that error.txt points to. Both the useRef runtime crash and the public-route DYNAMIC_SERVER_USAGE warning (which was a real empty-grid bug) are resolved. The residual 
+warnings are the documented expected residue. 
+ 
+VERIFY — Full 8-gate + E2E results (all green) 
+ 
+### Code gates (background-run) 
+ 
+┌────────────────────────────────┬────────────────────────────────────────────────────────┐ 
+│ Gate                           │ Result                                                 │ 
+├────────────────────────────────┼────────────────────────────────────────────────────────┤ 
+│ pnpm check-types (monorepo)    │ ✅ 10/10 packages, exit 0                              │ 
+├────────────────────────────────┼────────────────────────────────────────────────────────┤ 
+│ pnpm --filter=@maison/web lint │ ✅ 0 errors                                            │ 
+├────────────────────────────────┼────────────────────────────────────────────────────────┤ 
+│ pnpm format:check (repo-wide)  │ ✅ All files conformant (no .prettierrignore silencer) │ 
+├────────────────────────────────┼────────────────────────────────────────────────────────┤ 
+│ Contract test                  │ ✅ 20/20 passed (1.16s)                                │ 
+├────────────────────────────────┼────────────────────────────────────────────────────────┤ 
+│ pnpm build (from error.txt)    │ ✅ exit 0, 37/37 pages — confirmed                     │ 
+└────────────────────────────────┴────────────────────────────────────────────────────────┘ 
+ 
+### E2E browser verification (agent_browser / agent-browser) 
+ 
+┌────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐ 
+│ Journey                                                │ Result                                                                                                                 │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Homepage /                                             │ ✅ 200, "Maison — Objects of Quiet Beauty", full product grid populated (121 interactive refs) — apiPublic() working   │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Public routes /collections, /products, /search         │ ✅ All 200, correct titles — static-prerenderable split intact                                                         │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ PDP /products/harvest-dining-table                     │ ✅ 200, H1 + Add to Bag + wishlist button hydrated + reviews section hydrated — ClientOnly boundary working end-to-end │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ /cart, /journal, /gift-cards, /contact, /about, /trade │ ✅ All 200, correct titles                                                                                             │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Auth-guarded /account, /admin                          │ ✅ Both correctly redirect to /auth/sign-in?callbackUrl=... (proxy.ts Layer 1 working; no crash, no 500)               │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ /auth/sign-in                                          │ ✅ 200, "Sign In — Maison"                                                                                             │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Homepage runtime errors                                │ ✅ errors → "No page errors." / console --level error → "No console messages." (after full networkidle)                │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Core Web Vitals /                                      │ ✅ LCP 200ms, FCP 200ms, TTFB 3ms, CLS 0 — far exceeds Lighthouse 90                                                   │ 
+├────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤ 
+│ Core Web Vitals /auth/sign-in                          │ ✅ LCP 64ms, FCP 64ms, TTFB 2ms, CLS 0                                                                                 │ 
+└────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ 
+ 
+DELIVER — Conclusion 
+ 
+There is no optimal fix to apply. The codebase is in a verified-healthy state: 
+ 
+1. The error.txt build succeeds (exit 0, 37/37). The 12 DYNAMIC_SERVER_USAGE warnings are the documented, expected, by-design residue of the Layer 2 auth security boundary — silencing them would violate the architectural invariant 
+   (incompatible with future cacheComponents: true). 
+ 
+2. The fatal runtime useRef crash is already fixed by the ClientOnly boundary (mirroring Stillwater Lesson 89). E2E confirms the homepage and PDP now reach networkidle with zero page errors and zero console errors, and the 
+   useSession-backed wishlist/reviews components hydrate correctly on the client pass. 
+ 
+3. The public-route static/dynamic split (api() vs apiPublic()) is verified at both the contract-test level (20/20) and the route-table level (/ and /collections are ○ Static, auth routes are ƒ Dynamic). 
+ 
+### Surgical Changes made 
+ 
+None. Per the Surgical Change Discipline and AGENTS.md "Leave the codebase better than you found it" guidance, I made no code edits — the requested remediation was already in place and verified functional. Making changes for change's  
+sake would violate the explicit instruction not to introduce unrequested modifications. 
+ 
+### Follow-ups (documented, explicitly NOT applied — flagged per "leave it better") 
+ 
+1. Optional AGENTS.md guardrail: A one-line note — "Better Auth React hooks (useSession / authClient.useX()): wrap in <ClientOnly> on any SSR-rendered route" — would prevent the next agent from reintroducing the useRef crash. Previous 
+   remediations flagged this twice; still sound, still uncommitted. Want me to add it now? 
+2. Minor: apps/web/next.config.ts lacks reactCompiler: false and allowedDevOrigins that Stillwater carries (Stillwater disabled React Compiler due to a nested-Suspense streaming bug — V16-2 / V16-3). Maison does not currently hit that 
+   bug (its pages await Promise.all before rendering), so this is informational, not a defect.
+
