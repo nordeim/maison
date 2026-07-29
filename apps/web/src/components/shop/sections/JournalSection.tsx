@@ -80,7 +80,7 @@ export function JournalSection() {
                 fontWeight: 500,
               }}
             >
-              Notes on{' '}
+              Notes on
               <em
                 style={{
                   color: 'var(--clay)',

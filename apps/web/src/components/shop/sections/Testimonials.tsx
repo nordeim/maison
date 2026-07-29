@@ -64,7 +64,7 @@ export function Testimonials() {
                 fontWeight: 500,
               }}
             >
-              Loved by{' '}
+              Loved by
               <em
                 style={{
                   color: 'var(--clay)',
@@ -73,7 +73,7 @@ export function Testimonials() {
                 }}
               >
                 {' 2,400+ '}
-              </em>{' '}
+              </em>
               homes.
             </h2>
           </div>

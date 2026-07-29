@@ -77,7 +77,7 @@ export function Materials() {
               fontWeight: 500,
             }}
           >
-            Materials we{' '}
+            Materials we
             <em
               style={{
                 color: 'var(--clay)',

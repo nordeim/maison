@@ -79,7 +79,7 @@ export function Philosophy() {
               maxWidth: '22ch',
             }}
           >
-            Objects made with{' '}
+            Objects made with
             <em
               style={{
                 color: 'var(--clay)',
@@ -89,7 +89,7 @@ export function Philosophy() {
             >
               {' care '}
             </em>
-            , materials that age{' '}
+            , materials that age
             <em
               style={{
                 color: 'var(--clay)',

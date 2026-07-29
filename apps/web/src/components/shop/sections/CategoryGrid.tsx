@@ -95,7 +95,7 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
                 fontWeight: 500,
               }}
             >
-              For every{' '}
+              For every
               <em
                 style={{
                   color: 'var(--clay)',

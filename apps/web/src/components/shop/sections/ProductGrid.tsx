@@ -84,7 +84,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                 fontWeight: 500,
               }}
             >
-              Pieces we&apos;d{' '}
+              Pieces we&apos;d
               <em
                 style={{
                   color: 'var(--clay)',
