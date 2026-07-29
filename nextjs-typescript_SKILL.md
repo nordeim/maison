@@ -1,17 +1,17 @@
 ---
 name: nextjs-typescript-patterns
 description: Monorepo web projects using pnpm, Turborepo, TypeScript, Next.js, React, ESLint, Prettier, Drizzle ORM, Postgres, and third-party SDKs (tRPC, Trigger.dev, Stripe, Better Auth, Sanity, React Email, Vitest). v1.2 — canonical troubleshooting handbook with 40+ case-indexed anti-patterns across install, type-check, lint, format, test, build, migration, and pre-commit-hook gates. Covers pnpm 10+ native-build approval (allowBuilds, onlyBuiltDependencies), strict workspace isolation, tsconfig path aliases and inherited baseUrl, Drizzle migration journal drift and silent spinner-masked failures, exactOptionalPropertyTypes, noUncheckedIndexedAccess, React 19 SubmitEvent migration, ESLint flat-config FlatCompat, Prettier ignore-path semantics, SDK drift (subpath exports, hardcoded API versions, callback payload shapes), and the Surgical Change Discipline. Use when debugging failing gates, reproducing mysterious install/type/lint/format/hook failures, remediating monorepo tooling debt across Next.js + TypeScript + Drizzle + tRPC + Better Auth, or hardening a fresh monorepo against repeated mistakes — symptoms like ERR_PNPM_NO_MATCHING_VERSION, TS2307/TS2339, __esModule config errors, passWithNoTests, or silent DATABASE_URL/Drizzle migration failures.
-version: 1.2
+version: 1.3
 ---
 
 # Consolidated Agent Briefing Document and Programming Handbook
 
 ## Agent Programming and Troubleshooting Handbook
 
-Version: 1.2  
+Version: 1.3  
 Scope: Monorepo web projects using pnpm, Turborepo, TypeScript, Next.js, React, ESLint, Prettier, Drizzle, Postgres, and third-party SDKs.  
 Purpose: Prevent repeated mistakes and provide a reusable troubleshooting methodology.  
-Reconciliation note: v1.2 absorbs the genuine deltas from `update.md` (parser-error line attribution + `cat -A`; `psql -f` fallback for spinner-masked silent Drizzle failures; the named "Surgical Change Discipline" and the Stillwater reference-copy caveat). The remainder of `update.md` was already present here in expanded form.
+Reconciliation note: v1.3 adds: (1) Playbook 16 Scenario B — auth-guarded route `DYNAMIC_SERVER_USAGE` warnings are expected + the `force-dynamic`/`cacheComponents` trap; (2) §5.9 Testing Patterns — source contract tests for architectural invariants + meta-guard pattern for caller modules; (3) §4.10 Mistake 7 — `.gitignore` `lib/` bleed in Python+JS monorepos; (4) §12 Lesson 14 — distinguishing public-route from auth-route warnings; (5) §4.8 Server/Client Boundary note — the `api()`/`apiPublic()` split is a Server Component concern. v1.2 absorbed the genuine deltas from `update.md` (parser-error line attribution + `cat -A`; `psql -f` fallback for spinner-masked silent Drizzle failures; the named "Surgical Change Discipline" and the Stillwater reference-copy caveat).
 
 ---
 
@@ -2851,6 +2851,107 @@ Lesson:
 
 ---
 
+### Mistake 3: Routing public data through session-aware server caller forces routes dynamic
+
+Symptom:
+
+- `pnpm build` emits `DYNAMIC_SERVER_USAGE` warnings for public routes (`/`, `/collections`, `/products`).
+- The affected routes render as `ƒ` (Dynamic) instead of `○` (Static) in the build route table.
+- During the static-generation probe, the page's `try/catch` swallows the `DYNAMIC_SERVER_USAGE` error and renders an **empty shell** (e.g. an empty product grid on the homepage).
+- Prior handoff documents may misdiagnose these as "cosmetic" or "expected" — the build log explicitly names the failing route.
+
+Root cause:
+
+- The server-side tRPC caller (`api()`) unconditionally calls `headers()` from `next/headers` to build the request context.
+- In Next.js 16, any route whose render path touches `headers()`, `cookies()`, or `searchParams` is **forced dynamic** (`ƒ`) — the static-generation pass cannot prerender it.
+- If a **public, cacheable** page (homepage, collections, product listings) routes through this session-aware caller, it loses all static rendering benefits: no ISR, no PPR, no edge caching, and an empty shell during the static probe.
+- This is a **scaffolding gap** — the architectural boundary between public and auth-required data fetching is missing.
+
+Why it matters for DTC e-commerce:
+
+- The homepage is the highest-traffic route. An empty product grid in the prerender is a visible brand defect.
+- Static routes are edge-cacheable and return complete HTML on first paint. Dynamic routes require a server round-trip on every request.
+
+Fix — introduce a session-free public caller (`apiPublic`):
+
+```typescript
+// apps/web/src/lib/trpc/server.ts
+import { appRouter, createContext } from '@maison/api';
+
+const TRPC_ENDPOINT = 'http://localhost:3000/api/trpc';
+
+/** Session-aware caller — uses next/headers → forces route dynamic. */
+export async function api() {
+  const heads = new Headers(await headers());
+  const req = new Request(TRPC_ENDPOINT, { headers: heads });
+  const ctx = await createContext({ req });
+  return appRouter.createCaller(ctx);
+}
+
+/** Session-free caller — no next/headers → route can be static. */
+export async function apiPublic() {
+  const req = new Request(TRPC_ENDPOINT);
+  const ctx = await createContext({ req });
+  return appRouter.createCaller(ctx);
+}
+```
+
+Then switch the public page:
+
+```typescript
+// Before (forces dynamic):
+import { api } from '@/lib/trpc/server';
+const caller = await api();
+
+// After (can be static):
+import { apiPublic } from '@/lib/trpc/server';
+const caller = await apiPublic();
+```
+
+Why this works:
+
+- `apiPublic()` builds context with an empty `Request` — no `headers()` call, no `next/headers` import.
+- `createContext` runs `getSessionWithTimeout(req.headers)` against empty headers → returns `null` session.
+- `publicProcedure` never reads `ctx.session` — a null session is exactly correct.
+- Both callers reuse the **same `appRouter`** — zero duplicated query/shaping logic. Only the transport context differs.
+- The route is now `○ Static` in the build table; the `DYNAMIC_SERVER_USAGE` warning is eliminated.
+
+When to use each caller:
+
+| Caller | Use when | Route type |
+|---|---|---|
+| `api()` | Page needs a session (account, admin, cart, checkout) | `ƒ Dynamic` (by design) |
+| `apiPublic()` | Page only calls `publicProcedure`s (browse, search, collections) | `○ Static` (prerendered) |
+
+When to use `apiPublic()`:
+
+- Homepage product/collection grids
+- Collection listing pages
+- Product listing pages (PLP) — even though `searchParams` may still force dynamic, the caller should not add `headers()` on top
+- Search results pages
+- Any page that only calls `publicProcedure` and does not need auth context
+
+When `apiPublic()` is NOT sufficient:
+
+- Pages that call `protectedProcedure` or `adminProcedure` — these throw `UNAUTHORIZED` with a null session
+- Pages that need the user's session for personalized content (wishlist, loyalty points)
+- Pages that read cookies or headers directly
+
+Related `DYNAMIC_SERVER_USAGE` behavior:
+
+- `searchParams` access also forces a route dynamic (correct for filter/search pages that need URL state)
+- The `DYNAMIC_SERVER_USAGE` warning is non-fatal — the build completes — but it means the route is server-rendered on every request
+- For guarded routes (`/account/*`, `/admin/*`), `DYNAMIC_SERVER_USAGE` is expected and correct — those routes need `headers()` for session verification
+- For public routes, `DYNAMIC_SERVER_USAGE` is a **real bug** — it means an empty prerender or a lost static-rendering opportunity
+
+Pattern source: Stillwater ADR V16-1 ("No apiCaller() → no headers() → no streaming → complete HTML returned") and Stillwater's `index-routes-no-apiCaller.test.ts` regression tests.
+
+Lesson:
+
+> The server-side tRPC caller is the single architectural chokepoint for static vs dynamic rendering in Next.js 16. If a public page calls `api()`, it becomes dynamic — not because the page needs a session, but because the caller unconditionally imports `next/headers`. Split the caller into session-aware (`api()`) and session-free (`apiPublic()`) variants. Use `apiPublic()` for all public, cacheable content. This is the single highest-impact fix for Core Web Vitals on DTC storefronts.
+
+---
+
 ## Vitest Lessons
 
 ### Mistake: Config imports a plugin not declared
@@ -2884,6 +2985,7 @@ When an SDK import or type fails:
 9. Verify with type-check and package tests.
 10. Record latent issues hidden by tsconfig include.
 11. For tRPC routers: verify procedure names are not JavaScript reserved words (`apply`, `call`, `bind`, etc.) — this error only surfaces at `pnpm build`, not `pnpm check-types`.
+12. For public pages: verify the server caller does not call `next/headers` unless the route genuinely needs a session — `headers()` forces the route dynamic, breaking static generation. Use a session-free caller (`apiPublic()`) for `publicProcedure`-only pages.
 
 ---
 
@@ -3148,6 +3250,56 @@ Lesson:
 
 > Any Client Component calling Better Auth React hooks (`useSession`, `authClient.useX()`) must be wrapped in a `ClientOnly` boundary at the call site. Do NOT use `next/dynamic({ ssr: false })` in Server Components — it is forbidden by Next.js 16.
 
+### Note: The `api()`/`apiPublic()` contract is a Server Component concern
+
+The rendering-strategy split (`api()` for session-aware pages, `apiPublic()` for session-free public pages) applies to **Server Components** that call the server-side tRPC caller. Client Components (`'use client'`) use the **client-side** tRPC caller (`trpc` from `@/lib/trpc/client`) with React Query — they never call `api()` or `apiPublic()`. When auditing rendering strategy, check whether the page is a Server Component or Client Component before asserting the caller contract. See Playbook 16 Scenario B for the full analysis.
+
+---
+
+## Next.js 16 Static/Dynamic Route Boundary
+
+In Next.js 16, routes are either **static** (`○`) or **dynamic** (`ƒ`). Static routes are prerendered at build time and served from edge/CDN. Dynamic routes are server-rendered on every request. The following APIs force a route dynamic:
+
+| API | Import | Effect |
+|---|---|---|
+| `headers()` | `next/headers` | Reads request headers → forces dynamic |
+| `cookies()` | `next/headers` | Reads request cookies → forces dynamic |
+| `searchParams` | Page prop `Promise<...>` | Reads URL query params → forces dynamic |
+| `useSearchParams()` | `next/navigation` | Client-side search params → forces dynamic |
+
+When a route is forced dynamic during the static-generation probe, Next.js emits:
+
+```text
+[route-name] Failed to fetch data: Error: Dynamic server usage: Route /path couldn't be rendered statically because it used `headers`.
+```
+
+### This warning is NOT always cosmetic
+
+A common misdiagnosis is to treat `DYNAMIC_SERVER_USAGE` warnings as "expected" or "cosmetic" for all routes. This is wrong when:
+
+- The affected route is **public and cacheable** (homepage, collections, product listings) — an empty prerender means a visible brand defect (e.g. empty product grid)
+- The route loses ISR/PPR/edge-caching benefits — every request hits the server
+- The route's data does not actually need request context (session, headers) — the dynamic forcing is caused by the server caller, not the page's own logic
+
+The warning IS expected and correct when:
+- The route is auth-guarded (`/account/*`, `/admin/*`) and needs `headers()` for session verification
+- The route reads `searchParams` for URL-driven state (filter/search pages)
+
+### Diagnosis
+
+To determine whether a `DYNAMIC_SERVER_USAGE` warning is a bug or expected:
+
+1. Check the route table in `pnpm build` output — is the route `○` or `ƒ`?
+2. If `ƒ`, check whether the page imports `api()` (session-aware caller) — if so, the caller's `headers()` call is the cause
+3. Check whether the page actually needs a session — if it only calls `publicProcedure`s, it should use `apiPublic()` instead
+4. Check whether the page reads `searchParams` — if so, `ƒ` is correct for that route
+
+### Prevention
+
+- Use `apiPublic()` for all public, cacheable pages (see §4.7 Mistake 3)
+- Use `api()` only for pages that genuinely need a session
+- Do not import the session-aware caller in pages that only browse public content
+
 ---
 
 ## React/Next.js Checklist
@@ -3365,11 +3517,40 @@ Rule:
 
 ## Mistake 6: Declaring completion before verification
 
-A batch can be “applied” but not “verified.”
+A batch can be "applied" but not "verified."
 
 Rule:
 
 > Do not report success until the relevant gate passes.
+
+---
+
+## Mistake 7: `.gitignore` `lib/` pattern hides Next.js `apps/*/src/lib/` in Python+JS monorepos
+
+Symptom: A newly created test file in `apps/web/src/lib/__tests__/` does not appear in `git status` as untracked, even though the file exists on disk. `git check-ignore -v` shows the Python `lib/` pattern is matching it.
+
+Root cause: The `.gitignore` has a `lib/` entry (for Python `lib/` directories — `.eggs/`, `dist/`, `sdist/`, etc.) that also matches `apps/web/src/lib/`. This is a common bleed in monorepos that mix Python tooling with JavaScript/TypeScript applications.
+
+Fix: Add negation rules immediately after the `lib/` entry:
+
+```gitignore
+lib/
+!apps/web/src/lib/
+!apps/web/src/lib/**
+```
+
+Why this happens: Git's `.gitignore` treats `lib/` as a directory pattern that matches any directory named `lib` at any depth. The negation `!apps/web/src/lib/` un-ignores the specific directory, and `!apps/web/src/lib/**` un-ignores its contents.
+
+Rule:
+
+> In mixed-language monorepos, audit `.gitignore` for patterns that bleed across ecosystems. Python's `lib/`, `dist/`, `build/`, `*.egg-info/` can hide JavaScript source files. Add negations for application source directories.
+
+Diagnostic:
+
+```bash
+git check-ignore -v apps/web/src/lib/__tests__/your-file.ts
+# If the output shows a Python-era pattern (lib/, dist/, build/), add negation
+```
 
 ---
 
@@ -3513,6 +3694,29 @@ Why:
 - Makes the tRPC procedure path self-documenting in network logs and error messages.
 - Prevents ambiguity when multiple routers have similar operations.
 
+### Pattern: Session-free public caller for cacheable routes
+
+Public pages that only call `publicProcedure`s should use a session-free server caller (`apiPublic()`) instead of the session-aware `api()`. This preserves static rendering (`○`) and avoids `DYNAMIC_SERVER_USAGE` warnings.
+
+```typescript
+// Good — public page uses session-free caller:
+import { apiPublic } from '@/lib/trpc/server';
+const caller = await apiPublic();
+const products = await caller.products.list({ limit: 8 });
+
+// Bad — public page uses session-aware caller:
+import { api } from '@/lib/trpc/server';
+const caller = await api();  // calls next/headers → forces route dynamic
+const products = await caller.products.list({ limit: 8 });
+```
+
+When to use each:
+
+- `api()` — page needs a session (account, admin, cart, checkout)
+- `apiPublic()` — page only calls `publicProcedure`s (browse, search, collections, homepage)
+
+See §4.7 Mistake 3 for the full pattern and rationale.
+
 ---
 
 ## 5.4 ESLint Patterns
@@ -3629,6 +3833,84 @@ Wrap Client Components that call hooks illegal during SSR (e.g. Better Auth's `u
 
 Do NOT use `next/dynamic({ ssr: false })` in Server Components (forbidden by Next.js 16). Use `ClientOnly` everywhere for consistency.
 
+### Pattern: Format every new file before committing
+
+When creating a new file (not just editing an existing one), run Prettier on it before staging. The pre-commit hook checks **all** staged files, including newly created ones. A new file that was never formatted will fail the Prettier gate even if no editing tool touched its formatting.
+
+```bash
+pnpm --filter=@scope/pkg exec prettier --write src/components/new-file.tsx
+```
+
+This applies even when the file was written by a tool that produces "clean" output — Prettier's formatting rules (print width, trailing commas, semicolons, class sorting) may differ from the writer's defaults.
+
+---
+
+## 5.9 Testing Patterns
+
+### Pattern: Source contract tests for architectural invariants
+
+When an architectural rule (e.g. "public pages must use `apiPublic`, auth pages must use `api`") is enforced by convention rather than by the type system, write a **source contract test** that reads the page source and asserts the import contract.
+
+This is:
+- **Deterministic** — no build invocation, no mocks, no network, no React rendering
+- **Fast** — runs in <2s under Vitest
+- **Hermetic** — fails immediately if an agent migrates a page to the wrong caller
+- **Self-documenting** — the test file IS the specification of the architectural invariant
+
+```ts
+// apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts
+const PUBLIC_TRPC_PAGES = ['(shop)/page.tsx', '(shop)/products/page.tsx', /* ... */];
+
+for (const rel of PUBLIC_TRPC_PAGES) {
+  it(`${rel} imports apiPublic (not api)`, async () => {
+    const src = await read(rel);
+    expect(src).toMatch(/import\s+\{\s*apiPublic\s*\}/);
+    // Strip comment lines before checking — api() in JSDoc is benign
+    const codeOnly = src.split('\n')
+      .filter((l) => !l.trimStart().startsWith('//') && !l.trimStart().startsWith('*'))
+      .join('\n');
+    expect(codeOnly).not.toMatch(/\bapi\(\s*\)/);
+  });
+}
+```
+
+Key design decisions:
+- Use `node:fs` `readFile` (not React rendering) — no mock harness needed
+- Strip comment lines before asserting `api()` absence — JSDoc mentions are benign
+- The test file lives alongside the module it tests (`lib/__tests__/` for `lib/trpc/server.ts`)
+- Use `// @vitest-environment node` per-file annotation if the test doesn't need DOM
+
+When to use this pattern:
+- The invariant is architectural (import contract), not behavioral (rendering output)
+- The invariant can't be enforced by TypeScript (both `api()` and `apiPublic()` have compatible types)
+- The invariant is high-stakes (a violation causes runtime `UNAUTHORIZED` or lost static rendering)
+
+Lesson:
+
+> When the type system can't enforce an architectural rule, a source contract test can. Read the source, assert the import, fail the build. This is faster and more reliable than build-output tests that parse the route table.
+
+### Pattern: Meta-guard for caller modules
+
+When a module exports split variants (e.g. `api()` and `apiPublic()`), add a test that asserts the module itself maintains its contract:
+
+```ts
+it('lib/trpc/server.ts maintains the api/apiPublic contract', async () => {
+  const src = await readFile(join(HERE, '..', 'trpc', 'server.ts'), 'utf8');
+  expect(src).toContain('export async function api()');
+  expect(src).toContain('export async function apiPublic()');
+  // api() must read headers()
+  expect(src).toMatch(/import\s+\{\s*headers\s*\}/);
+  // apiPublic() must NOT call headers() in its body
+  const apiPublicBody = src.slice(
+    src.indexOf('export async function apiPublic()'),
+    src.indexOf('export async function apiPublic()') + 400,
+  );
+  expect(apiPublicBody).not.toMatch(/\bheaders\(\)/);
+});
+```
+
+This catches the case where someone "simplifies" `apiPublic()` by reusing `api()` internally, or removes the `headers()` import from `api()`. The meta-guard is the last line of defense before the split-caller architecture collapses.
+
 ---
 
 # 6. Anti-Pattern Catalog
@@ -3710,6 +3992,7 @@ This catalog names recurring mistakes so future agents can recognize them early.
 | Blanket formatting | Huge diff churn | Scope or get approval |
 | Staged unformatted files | Hook fails | Format before commit |
 | Parse error as formatting | Syntax fault remains | Fix syntax first |
+| New file never formatted | Prettier gate fails on newly created file | Run Prettier on every new file before staging |
 
 ---
 
@@ -3738,6 +4021,8 @@ This catalog names recurring mistakes so future agents can recognize them early.
 | Hardcoded version | Type literal mismatch | Remove/update |
 | Explicit undefined | Strict optional failure | Conditional spread |
 | Hidden latent import | File excluded from type-check | Audit tsconfig include |
+| Routing public data through session-aware caller | `api()` calls `next/headers` → public route forced dynamic → empty prerender | Use `apiPublic()` for `publicProcedure`-only pages |
+| DYNAMIC_SERVER_USAGE misdiagnosed as cosmetic | Prior handoff says "expected, out of scope" when public route is empty | Verify against build log route table; check if route actually needs `headers()` |
 
 ---
 
@@ -3754,6 +4039,7 @@ This catalog names recurring mistakes so future agents can recognize them early.
 | Console.log | Logging hygiene | Use warn/error/logger |
 | Better Auth React hooks during SSR | `useSession`/`authClient.useX()` calls `useRef` in SSR chunk → `null.useRef()` | Wrap in `ClientOnly` boundary |
 | `next/dynamic({ ssr: false })` in Server Component | Next.js 16 forbids — build fails | Use `ClientOnly` wrapper instead |
+| Public route forced dynamic by server caller | `api()` calls `headers()` → public page loses static rendering → empty prerender | Use `apiPublic()` for session-free public data |
 
 ---
 
@@ -4421,6 +4707,148 @@ Confirm no `useRef` error in the server log.
 
 ---
 
+## Playbook 16: DYNAMIC_SERVER_USAGE warnings during build
+
+This playbook covers `DYNAMIC_SERVER_USAGE` warnings that appear when `next build` runs a static pre-render probe on each route. The probe tries to render every page statically; if the page calls a dynamic API (`headers()`, `cookies()`, `searchParams`), the probe throws `DYNAMIC_SERVER_USAGE`. **Whether this is a bug or expected depends on the route type.** This playbook covers both scenarios.
+
+### Symptoms
+
+- `pnpm build` succeeds but emits warnings:
+
+```text
+[route-name] Failed to fetch data: Error: Dynamic server usage: Route /path couldn't be rendered statically because it used `headers`.
+```
+
+- The affected route renders as `ƒ` (Dynamic) instead of `○` (Static) in the build route table.
+- Prior handoff documents may dismiss these as "cosmetic" or "expected" — verify against the actual build log.
+- During the static-generation probe, the page's `try/catch` may swallow the error and render an **empty shell** (e.g. empty product grid on homepage).
+
+### Likely Causes
+
+- The page imports the session-aware server caller (`api()`), which unconditionally calls `next/headers`.
+- In Next.js 16, `headers()`, `cookies()`, and `searchParams` access force a route dynamic.
+- The page only calls `publicProcedure`s — it does not need a session — but the caller's `headers()` call forces dynamic anyway.
+
+### Why This Is NOT Cosmetic
+
+- **Empty prerender**: The static probe tries to render the page, hits `DYNAMIC_SERVER_USAGE`, the `try/catch` swallows it, and the page renders with empty data. For e-commerce, this means an empty product grid — a visible brand defect.
+- **Lost static benefits**: The route loses ISR, PPR, edge caching, and CDN serving. Every request hits the server.
+- **Performance regression**: The homepage (highest-traffic route) becomes server-rendered on every request instead of being served from edge.
+
+### Diagnostic Steps
+
+1. Check the route table in `pnpm build` output — is the route `○` or `ƒ`?
+2. Search the build log for the route name:
+
+```bash
+grep "\[route-name]\" /tmp/build.log
+grep "DYNAMIC_SERVER_USAGE" /tmp/build.log | grep "Route /path"
+```
+
+3. Check whether the page imports `api()` (session-aware caller):
+
+```bash
+grep -n "from '@/lib/trpc/server'" apps/web/src/app/(shop)/path/page.tsx
+```
+
+4. Check whether the page only calls `publicProcedure`s — if so, it should use `apiPublic()` instead.
+5. Check whether the page reads `searchParams` — if so, `ƒ` is correct for that route (search/filter pages need URL state).
+
+### Fix
+
+Switch the page from `api()` to `apiPublic()`:
+
+```diff
+- import { api } from '@/lib/trpc/server';
++ import { apiPublic } from '@/lib/trpc/server';
+ 
+- const caller = await api();
++ const caller = await apiPublic();
+```
+
+### Verification
+
+```bash
+pnpm check-types          # Gate 1
+pnpm lint                 # Gate 2
+pnpm build                # Gate 5 — verify route table
+```
+
+Check the route table:
+
+```bash
+grep "○ /path" /tmp/build.log   # Should show static marker
+grep "\[route-name]\" /tmp/build.log   # Should show no warning
+grep "DYNAMIC_SERVER_USAGE" /tmp/build.log | grep "Route /path"  # Should be absent
+```
+
+### Prevention
+
+- Use `apiPublic()` for all public, cacheable pages (homepage, collections, product listings, search).
+- Use `api()` only for pages that genuinely need a session (account, admin, cart, checkout).
+- Do not import the session-aware caller in pages that only browse public content.
+- Document the caller choice in the page's JSDoc comment.
+
+### Pattern Source
+
+Stillwater ADR V16-1: "No apiCaller() → no headers() → no streaming → complete HTML returned." Stillwater's `index-routes-no-apiCaller.test.ts` regression tests assert that public marketing pages do NOT call `apiCaller()`.
+
+---
+
+### Scenario B: Auth-guarded routes — warnings are expected and correct
+
+The same `DYNAMIC_SERVER_USAGE` warnings on `/account/*` and `/admin/*` routes are **NOT a bug**. They are the correct and intended behavior.
+
+#### Why these routes are dynamic by design
+
+1. The `(account)/layout.tsx` and `(admin)/layout.tsx` call `auth.api.getSession({ headers: await headers() })` — the Layer 2 security boundary (per `PROJECT-ARCHITECTURE.md §6.3`). This is the *real* auth check; `proxy.ts` is only the cookie-existence optimistic gate.
+2. Each page under those groups calls `api()` (the headers-bound tRPC caller) to run `protectedProcedure` or `adminProcedure` — which require a session.
+3. `next/headers` is a dynamic API. When the static probe hits it, Next.js catches the `DYNAMIC_SERVER_USAGE` throw, opts the route into dynamic rendering, and the build completes.
+
+This is identical to the Stillwater pattern: Stillwater's `(admin)/layout.tsx` → `requireRole()` → `getSession()` → `headers()` — the same architecture.
+
+#### The `force-dynamic` trap
+
+The obvious "fix" to silence these warnings is `export const dynamic = 'force-dynamic'` on each page. **Do NOT do this.**
+
+- `force-dynamic` is **incompatible with `cacheComponents: true`** — a documented Next.js 16 *build error*, not a warning (Stillwater SKILL §6.10 Gotcha 7).
+- Maison does not enable `cacheComponents` today, but `next.config.ts` is structured to adopt it in a later phase.
+- Adding `force-dynamic` now creates a **time bomb**: the build breaks the day `cacheComponents` is turned on.
+- Stillwater's own remediation saga (C3 / V16-1) removed `force-dynamic` from routes for exactly this reason.
+
+The correct approach is to **let the dynamic API force the route dynamic naturally** — which Next.js does automatically. The warnings are informational, not actionable.
+
+#### When to add the guardrail note
+
+Document this in `AGENTS.md` under "Things that look wrong but aren't" so future agents don't re-chase the warnings:
+
+```markdown
+- **`DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*`** — These routes are `ƒ (Dynamic)` by design: the layouts call `auth.api.getSession({ headers: await headers() })`, which makes `next/headers` hit the static pre-render probe. Next.js catches the probe, marks the route dynamic, and emits a warning. The build completes. Do NOT add `export const dynamic = 'force-dynamic'` to silence them — that is incompatible with `cacheComponents: true`.
+```
+
+#### Regression test: source contract tests
+
+The architectural invariant (public routes use `apiPublic`, auth routes use `api`) can be locked with a source contract test that reads page source and asserts the import contract. This is:
+- **Deterministic** — no build invocation, no mocks, no network
+- **Fast** — runs in <2s under Vitest
+- **Hermetic** — fails if an agent migrates a public route to `api()` (forcing it dynamic) or an auth route to `apiPublic()` (nulling the session)
+
+See `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts` for the implementation. The test covers:
+1. Public TRPC pages import `apiPublic` (not `api`)
+2. Auth layouts call `auth.api.getSession({ headers })`
+3. Auth leaf pages import `api` (not `apiPublic`)
+4. Meta-guard: `lib/trpc/server.ts` maintains the `api`/`apiPublic` contract
+
+#### Client Components are exempt from the server-caller contract
+
+Some auth-guarded leaf pages (`account/addresses`, `account/loyalty`, `account/settings`, `admin/products/new`) are pure `'use client'` and use the **client-side** tRPC caller (`trpc` from `@/lib/trpc/client`), not the server-side `api()`. They don't import `api()` at all — and that's correct. They are still forced dynamic by the layout's `headers()` call, but they don't need to be in the source contract test's `AUTH_LEAF_PAGES` array because the server-import contract doesn't apply to them.
+
+Lesson:
+
+> The `api()`/`apiPublic()` split is a **Server Component concern**. Client Components use the client-side `trpc` caller with React Query — they never call `api()` or `apiPublic()`. When auditing rendering strategy, check whether the page is a Server Component or Client Component before asserting the caller contract.
+
+---
+
 # 8. Verification Matrices
 
 Verification is not optional. A fix is only real if proven.
@@ -4443,6 +4871,7 @@ Verification is not optional. A fix is only real if proven.
 | Runtime fix | dev/build/manual flow |
 | tRPC router change | check-types, lint, **build** (router constructor runs at build, not type-check) |
 | tRPC procedure rename | check-types, lint, build, grep callers for stale references |
+| Server caller change (api → apiPublic) | check-types, lint, **build** (verify route table: migrated routes should show `○` not `ƒ`), grep for remaining DYNAMIC_SERVER_USAGE on migrated routes |
 
 ---
 
@@ -4589,6 +5018,10 @@ This index summarizes the major incidents and their distilled lessons.
 | HOOK-2 | Hook advances to lint | Format fixed, lint remains | Report next blocker | Simulate full hook |
 | TRPC-1 | Build fails with reserved word | `apply` as tRPC procedure name | Rename to `submitApplication` | tRPC v11 rejects JS reserved words at constructor time; only caught at build, not type-check |
 | TRPC-2 | Generic procedure names | `get`/`create`/`update`/`delete` — ambiguous | Self-documenting verb-noun pairs | Procedure paths visible in logs; generic names hinder debugging |
+| RUNTIME-2 | Homepage empty prerender | `api()` called `next/headers` → `/` forced dynamic → static probe swallowed error → empty product grid | `apiPublic()` (session-free caller) | `next/headers` is the architectural chokepoint for static vs dynamic in Next.js 16 |
+| RUNTIME-3 | DYNAMIC_SERVER_USAGE misdiagnosed as cosmetic | Prior handoff said "/ renders fine" when build log explicitly named `[home]` | Verify claims against actual error log | Prior diagnosis documents can be wrong — reproduce, don't trust the summary |
+| RUNTIME-4 | New file not formatted before commit | Prior remediation created ClientOnly.tsx but never ran Prettier | Format every new file before staging | New files are checked by pre-commit hook just like edited files |
+| RUNTIME-5 | apiPublic() migration of 5 public pages | Switched api() → apiPublic() on /, /collections, /products, /products/[slug], /search | `/` and `/collections` flipped from `ƒ` to `○`; warnings eliminated | Session-free caller reuses same appRouter — zero duplicated query logic |
 
 ---
 
@@ -4692,6 +5125,23 @@ Some errors (like tRPC reserved word procedure names) only surface at `pnpm buil
 
 `check-types` passes. `lint` passes. `build` succeeds. The page still returns HTTP 500 at runtime. The `react-server` export condition in React 19 causes Better Auth React hooks (`useSession`) to call null-stub hooks (`useRef`) during SSR — a runtime-only failure that no static gate catches. Always verify with `pnpm start` + `curl` against the live server, not just the build output.
 
+## 13. Verify prior diagnoses against the actual error log
+
+A prior remediation document (`last_remediation.md`, a handoff from a previous session) may contain confidently stated but incorrect conclusions. In the original session, the prior document claimed: "`DYNAMIC_SERVER_USAGE` warnings are non-fatal… build still completes 37/37. Expected and correct; out of scope per Surgical Changes." The build log explicitly showed `[home] Failed to fetch data: Route / couldn't be rendered statically because it used headers` — the homepage was forced dynamic and rendered an empty product grid during the static probe. The prior document was wrong about `/` being fine. This was later fixed (public routes migrated to `apiPublic()`). Lesson: always verify a prior diagnosis against the actual error log, not the summary. Treat every prior conclusion as a hypothesis until reproduced.
+
+## 14. Distinguish public-route from auth-route DYNAMIC_SERVER_USAGE warnings
+
+Not all `DYNAMIC_SERVER_USAGE` warnings are equal. The same warning message means different things depending on the route:
+
+- **Public routes** (`/`, `/collections`, `/products`, `/search`) — the warning is a **real bug**. The page doesn't need a session, but `api()` calls `headers()` anyway. The route is forced dynamic, loses static rendering, and the static probe may render an empty shell (e.g. empty product grid). Fix: migrate to `apiPublic()`.
+- **Auth-guarded routes** (`/account/*`, `/admin/*`) — the warning is **expected and correct**. The layout calls `auth.api.getSession({ headers: await headers() })` (the Layer 2 security boundary), which correctly forces the route dynamic. Fix: none. Do NOT add `export const dynamic = 'force-dynamic'` to silence them — that is incompatible with `cacheComponents: true`.
+
+The diagnostic is simple: check the route table. If the route is `ƒ` and it's an auth-guarded route, that's by design. If it's `ƒ` and it's a public route, that's a bug.
+
+Lesson:
+
+> When you see `DYNAMIC_SERVER_USAGE`, ask: "Does this route actually need a session?" If yes, the warning is correct. If no, it's a real bug. Never blanket-fix all warnings without distinguishing the two cases.
+
 ---
 
 # 13. One-Page Agent Field Card
@@ -4719,6 +5169,12 @@ Use this during live troubleshooting.
 18. Record outstanding issues.
 19. Do not claim success before verification.
 20. If `useRef`/`useState` crash in SSR: Better Auth React hooks must not run during SSR — wrap in `ClientOnly` boundary, never use `next/dynamic ssr:false` in Server Components.
+21. If public page shows empty prerender: check whether server caller calls `next/headers` — use `apiPublic()` for session-free public data.
+22. If build warns `DYNAMIC_SERVER_USAGE` on a public route: this is a real bug (empty prerender + lost static benefits), not cosmetic.
+23. Before trusting a prior remediation document: verify its claims against the actual error log.
+24. If build warns `DYNAMIC_SERVER_USAGE` on an auth-guarded route (`/account/*`, `/admin/*`): this is expected and correct — the layout calls `headers()` for session verification. Do NOT add `force-dynamic` to silence it (incompatible with `cacheComponents: true`).
+25. The `api()`/`apiPublic()` split is a Server Component concern. Client Components use `trpc` from `@/lib/trpc/client` — they never call `api()` or `apiPublic()`.
+26. Source contract tests (read source, assert import) lock architectural invariants faster and more reliably than build-output tests.
 ```
 
 ---

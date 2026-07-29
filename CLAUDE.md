@@ -105,6 +105,7 @@ When asked to implement a feature, follow this discipline:
 - **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. This calls the router directly (no HTTP round-trip).
 - **Client-side via React Query** — `apps/web/src/lib/trpc/client.tsx` exports `trpc` and `TRPCProvider`.
 - **Rate limiting middleware fails OPEN** — if Redis is down, allow the request. Log for review. Do NOT change to fail-closed.
+- **`api()` vs `apiPublic()` — the rendering-strategy split.** `api()` calls `next/headers` → forces the route dynamic (ƒ). `apiPublic()` builds context with an empty request (no `headers()`) → keeps the route static-prerenderable (○). Public shop routes (`/`, `/collections`, `/products`, `/search`) MUST use `apiPublic()`. Auth-guarded routes (`/account/*`, `/admin/*`) MUST use `api()`. Never swap them. `DYNAMIC_SERVER_USAGE` warnings for `/account/*` + `/admin/*` are **expected and correct** — do NOT add `export const dynamic = 'force-dynamic'` to silence them (incompatible with `cacheComponents: true` — see AGENTS.md §Things that look wrong). Regression test: `apps/web/src/lib/__tests__/rendering-strategy.contract.test.ts`.
 
 ### Drizzle ORM
 
