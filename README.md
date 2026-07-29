@@ -187,7 +187,7 @@ maison/
 │   ├── 📄 PRD_unified.md              # ← Unified Project Requirements Document
 │   ├── 📄 landing_page_unified.html   # ← Canonical visual reference
 │   └── 📄 ssh_git_wrapper_v3.py       # SSH push wrapper (no openssh-client)
-├── 📂 skills/                         # ClawHub skills — vendored, deleted from worktree; see ~/.pi/agent/skills/
+├── 📂 skills/                         # ClawHub skills — vendored, deleted from worktree; see `skills/`
 ├── 📂 scripts/                        # Repo scripts (db-setup.sh, pre-commit)
 ├── 📄 .env.example                    # Environment variable template
 ├── 📄 docker-compose.yml              # Local Postgres + Redis + Stripe CLI
