@@ -545,13 +545,13 @@ A browser window opens. Log in to Cloudflare and select the zone that owns your 
 
 ### Reuse an existing tunnel
 
-Your supplied skill describes an existing tunnel called `baking`; first verify whether it exists on this WSL machine:
+Your supplied skill describes an existing tunnel called `tunnel-name`; first verify whether it exists on this WSL machine:
 
 ```bash
 cloudflared tunnel list
 ```
 
-If `baking` is listed and connected, reuse it. If this is a different Windows/WSL machine, either install the existing tunnel credentials/config securely or create a separate tunnel—for example, `maison-windows`—rather than copying credentials casually between systems.
+If `tunnel-name` is listed and connected, reuse it. If this is a different Windows/WSL machine, either install the existing tunnel credentials/config securely or create a separate tunnel—for example, `maison-windows`—rather than copying credentials casually between systems.
 
 To create a new tunnel:
 
@@ -564,10 +564,10 @@ Record the generated tunnel UUID.
 
 ### Add the DNS route
 
-For an existing tunnel named `baking`:
+For an existing tunnel named `tunnel-name`:
 
 ```bash
-cloudflared tunnel route dns baking maison.jesspete.shop
+cloudflared tunnel route dns tunnel-name maison.jesspete.shop
 ```
 
 For the new tunnel:
@@ -587,7 +587,7 @@ mkdir -p ~/.cloudflared
 nano ~/.cloudflared/config.yml
 ```
 
-For the existing `baking` tunnel, use this structure:
+For the existing `tunnel-name` tunnel, use this structure:
 
 ```yaml
 tunnel: 2784ef2b-a6b5-4c29-b1e5-5beaea4b5fd2
@@ -626,7 +626,7 @@ cloudflared tunnel ingress rule https://maison.jesspete.shop
 Start it manually:
 
 ```bash
-cloudflared tunnel run baking
+cloudflared tunnel run tunnel-name
 ```
 
 Or, for a separately named tunnel:
@@ -652,7 +652,7 @@ mkdir -p ~/.config/systemd/user
 nano ~/.config/systemd/user/cloudflared-maison.service
 ```
 
-For the existing `baking` tunnel, paste:
+For the existing `tunnel-name` tunnel, paste:
 
 ```ini
 [Unit]
@@ -661,7 +661,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/cloudflared tunnel --config /home/YOUR_LINUX_USERNAME/.cloudflared/config.yml run baking
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/YOUR_LINUX_USERNAME/.cloudflared/config.yml run tunnel-name
 Restart=on-failure
 RestartSec=5
 
@@ -753,7 +753,7 @@ Use the direct, unpooled database URL for that migration operation.
 curl -I http://127.0.0.1:3000
 curl -I https://maison.jesspete.shop
 docker compose ps
-cloudflared tunnel info baking
+cloudflared tunnel info tunnel-name
 systemctl --user status cloudflared-maison.service
 ```
 
