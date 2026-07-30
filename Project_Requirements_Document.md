@@ -4,7 +4,7 @@
 **Product Name:** Maison (Scandi Haven Living)
 **Document Owner:** Product & Engineering
 **Status:** Approved for build
-**Companion Documents:** `docs/maison_landing_page_mockup_v2.zip` (visual reference, extracts to `public/landing.html`), `docs/MAISON_Design_Guide.md` (canonical design system reference — 1,336 lines, 15 top-level sections covering every visual, typographic, motion, and interaction decision), `PROJECT-ARCHITECTURE.md` (engineering blueprint), `README.md`, `AGENTS.md`, `CLAUDE.md`
+**Companion Documents:** `docs/maison_landing_page_mockup_v2.zip` (visual reference, extracts to `public/landing.html`), `docs/MAISON_Design_Guide.md` (canonical design system reference — 1,489 lines, 16 top-level sections covering every visual, typographic, motion, and interaction decision), `PROJECT-ARCHITECTURE.md` (engineering blueprint), `README.md`, `AGENTS.md`, `CLAUDE.md`
 **Architecture Skills Referenced:** `skills/nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth`, `skills/nextjs16-react19-tailwind4-better-auth-monorepo`
 
 > **v1.1 changelog:** Reconciled all design-system, color, typography, motion, component, and section-listing discrepancies against the v2 landing page mockup. Color tokens corrected (`--muted`, `--sage`, added `--sage-soft`). Motion table expanded from 8 to 24 animations. Homepage section list expanded from 15 to 17 (added Statement Ticker + Hero Spotlight Card). Strategic position anti-generic claims revised (v2 permits bento grids for categories, mesh gradients for editorial atmosphere, glassmorphism for sticky chrome). Responsive breakpoints realigned to landing v2 (1024 / 768 / 480). Initial product catalog annotated with homepage-visibility column.
@@ -153,7 +153,7 @@ The unified PRD reconciles currency conflicts (USD primary, EUR/GBP secondary), 
 
 ## 4. Brand Identity & Design System
 
-> **Source of truth:** `docs/maison_landing_page_mockup_v2.zip` (extracts to `public/landing.html`). The canonical design system reference is `docs/MAISON_Design_Guide.md` — 1,336 lines documenting every visual, typographic, motion, and interaction decision. The CSS custom properties and typography choices in `public/landing.html` are the canonical design tokens. This section documents them for the engineering build.
+> **Source of truth:** `docs/maison_landing_page_mockup_v2.zip` (extracts to `public/landing.html`). The canonical design system reference is `docs/MAISON_Design_Guide.md` — 1,489 lines documenting every visual, typographic, motion, and interaction decision. The CSS custom properties and typography choices in `public/landing.html` are the canonical design tokens. This section documents them for the engineering build.
 
 ### 4.1 Strategic Position (per `skills/avant-garde-design-v4`, refined for v2)
 
@@ -1540,6 +1540,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 - [ ] Shopping cart (DB-backed, anonymous + authenticated)
 - [ ] Checkout (Stripe Payment Intents per ADR-009, 3-step flow)
 - [ ] Order confirmation + email (Resend + React Email)
+- [ ] Contact form (functional, wired to Resend via tRPC `contact.submit` mutation — Server Component wrapper + Client Component child pattern)
 - [ ] Customer account (sign-in, sign-up, order history, wishlist)
 - [ ] Admin dashboard (overview, products CRUD, orders list, fulfillment)
 - [ ] Responsive design (all breakpoints)
@@ -1644,6 +1645,56 @@ https://maison.jesspete.shop/ (see docs/REMEDIATION_PLAN_v5.md):
 Added 3 new contract tests (25 assertions): headings.contract.test.ts,
 category-grid.contract.test.ts, page-metadata.contract.test.ts.
 Total @maison/web contract tests: 7 files, 90 tests.
+
+### v1.2.3 (July 31, 2026) — v6 Remediation (G1/G2/G3)
+
+Functional + doc-drift fixes identified by the v6 remediation audit (see
+`docs/REMEDIATION_PLAN_v6.md`). This subsection documents the requirements-relevant
+changes from v1.2.3:
+
+- **G1 — Contact form wired to tRPC + Resend (was a non-functional stub).** The
+  `/contact` page was a plain HTML `<form>` with no `onSubmit` handler, no tRPC
+  call, and the `contact.submit` mutation only `console.log`-ed the payload (no
+  email was ever sent). Fixed by:
+  - Creating `apps/web/src/components/shop/ContactForm.tsx` (Client Component
+    with `'use client'` + `trpc.contact.submit.useMutation()`).
+  - Rewriting `apps/web/src/app/(shop)/contact/page.tsx` as a Server Component
+    wrapper that exports `metadata` (page title "Contact — Maison") and renders
+    `<ContactForm />`. This applies the v1.2.2 F4 Server/Client page-split
+    pattern to `/contact`.
+  - Updating `packages/api/src/routers/contact.ts` to actually send email via
+    `sendEmail` from `@maison/email` (was `console.log` only). The notification
+    is sent to `hello@maison-living.com`.
+  - Creating `packages/email/src/templates/ContactNotification.tsx` (new email
+    template) and exporting `ContactNotificationEmail` from
+    `packages/email/src/index.ts`.
+  - Adding `@maison/email` as a `workspace:*` dependency of `@maison/api`
+    (`packages/api/package.json`).
+  PRD §10.1 already documented `contact.submit` as "sends email via Resend" —
+  v1.2.3 makes the codebase match that contract.
+
+- **G2 — Design guide v4 canonicalized.** The `docs/MAISON_Design_Guide.md` file
+  has been REPLACED with v4 content (1,489 lines, 16 sections). v4 is a strict
+  superset of the v1.2.1 baseline (see v4's Appendix C). The v4-specific file
+  (`docs/MAISON_Design_Guide_v4.md`), the rejected v3 wholesale-replacement
+  file (`docs/MAISON_design_guide_v3.md`), and `docs/design_guide_v3_changelog.md`
+  were DELETED — the canonical path `docs/MAISON_Design_Guide.md` is preserved,
+  so all 18 in-repo references remain valid without churn. The rejected v3 is
+  preserved verbatim in v4's Appendix C.
+
+- **G3 — v3 design guide + changelog archived/removed.** The v3 file and its
+  changelog were removed as part of the v4 canonicalization (G2). v3's content
+  (and the rationale for its wholesale rejection) is preserved in v4's
+  Appendix C — "This revision supersedes the rejected v3 wholesale-replacement
+  attempt. v3 was built from a pre-remediation v2 source artifact and silently
+  regressed 12 v1.2.1 corrections."
+
+- **Contract test count updates.** `apps/web/src/lib/__tests__/page-metadata.contract.test.ts`
+  was extended with `/contact` page-split assertions (now 15 tests, was 12).
+  A new `packages/api/src/routers/contact.contract.test.ts` (3 tests) asserts
+  the contact router calls `sendEmail` to `hello@maison-living.com`.
+  Total @maison/web contract tests: 7 files, 97 tests (was 90).
+  Total @maison/api tests: 3 files, 14 tests (was 11).
 
 ---
 

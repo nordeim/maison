@@ -2,7 +2,7 @@
 
 **Classification:** Internal Engineering Reference
 **Status:** DEFINITIVE, PRODUCTION-LOCKED BLUEPRINT
-**Companion Documents:** [`docs/PRD_unified.md`](./docs/PRD_unified.md), [`docs/MAISON_Design_Guide.md`](./docs/MAISON_Design_Guide.md) (canonical design system reference — 1,336 lines, 15 sections), [`docs/maison_landing_page_mockup_v2.zip`](./docs/maison_landing_page_mockup_v2.zip) (extracts to `public/landing.html`)
+**Companion Documents:** [`docs/PRD_unified.md`](./docs/PRD_unified.md), [`docs/MAISON_Design_Guide.md`](./docs/MAISON_Design_Guide.md) (canonical design system reference — 1,489 lines, 16 sections), [`docs/maison_landing_page_mockup_v2.zip`](./docs/maison_landing_page_mockup_v2.zip) (extracts to `public/landing.html`)
 **Last Updated:** 2026-07-29 (v1.2.1 — reconciled with post-remediation codebase per REMEDIATION_PLAN_v4. See REMEDIATION_HISTORY at end of document for the full list of corrections.)
 **Audience:** Senior Engineers, Tech Leads, DevOps, and Onboarding Engineers
 **Rule:** Every architectural decision in this document traces to a specific rationale. Nothing is here "because it's popular."
@@ -1031,7 +1031,7 @@ erDiagram
 
 ## 5. Design System Reference
 
-> **Canonical source:** `public/landing.html` (from `docs/maison_landing_page_mockup_v2.zip`). The canonical design system reference is `docs/MAISON_Design_Guide.md` — 1,336 lines documenting every visual, typographic, motion, and interaction decision. The CSS custom properties in `public/landing.html` are the source of truth. This section documents them for engineering reference.
+> **Canonical source:** `public/landing.html` (from `docs/maison_landing_page_mockup_v2.zip`). The canonical design system reference is `docs/MAISON_Design_Guide.md` — 1,489 lines documenting every visual, typographic, motion, and interaction decision. The CSS custom properties in `public/landing.html` are the source of truth. This section documents them for engineering reference.
 
 ### 5.1 Typographic System
 
@@ -2078,4 +2078,62 @@ subsection documents the architecture-relevant changes from v1.2.2:
 
 ---
 
-_End of Project Architecture Document v1.2.2. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+### v1.2.3 (July 31, 2026) — v6 Remediation (G1/G2/G3)
+
+Functional + doc-drift fixes identified by the v6 remediation audit (see
+`docs/REMEDIATION_PLAN_v6.md`). This subsection documents the architecture-relevant
+changes from v1.2.3:
+
+- **G1 — Contact form wired to tRPC `contact.submit` + Resend (was a non-functional
+  stub).** The `/contact` page was a plain HTML `<form>` with no `onSubmit`
+  handler, no tRPC call, and the `contact.submit` mutation in
+  `packages/api/src/routers/contact.ts` only `console.log`-ed the payload (no
+  email was ever sent). Fixed by:
+  - Creating `apps/web/src/components/shop/ContactForm.tsx` — Client Component
+    (`'use client'`) using `trpc.contact.submit.useMutation()` for form submission.
+  - Rewriting `apps/web/src/app/(shop)/contact/page.tsx` as a Server Component
+    wrapper that exports `metadata` (page title "Contact — Maison") and renders
+    `<ContactForm />`. This applies the v1.2.2 F4 Server/Client page-split
+    pattern to `/contact`, so the page no longer silently falls back to the
+    homepage's default title.
+  - Updating `packages/api/src/routers/contact.ts` to actually send email via
+    `sendEmail` from `@maison/email` (was `console.log` only). The notification
+    is sent to `hello@maison-living.com`. The router was previously listed in
+    §3.2 + §4.4 as one of the 13 tRPC routers; v1.2.3 makes its behaviour match
+    its documented contract.
+  - Creating `packages/email/src/templates/ContactNotification.tsx` (new email
+    template following the existing `OrderConfirmation` / `WelcomeMember`
+    EmailLayout-wrapped pattern) and exporting `ContactNotificationEmail` from
+    `packages/email/src/index.ts`.
+  - Adding `@maison/email` as a `workspace:*` dependency of `@maison/api` in
+    `packages/api/package.json` (precedent: `packages/payments/package.json`
+    already declares `@maison/email`).
+
+- **G2 — Design guide v4 canonicalized.** The `docs/MAISON_Design_Guide.md` file
+  has been REPLACED with v4 content (1,489 lines, 16 sections). v4 is a strict
+  superset of the v1.2.1 baseline (see v4's Appendix C). The v4-specific file
+  (`docs/MAISON_Design_Guide_v4.md`), the rejected v3 wholesale-replacement
+  file (`docs/MAISON_design_guide_v3.md`), and `docs/design_guide_v3_changelog.md`
+  were DELETED — the canonical path `docs/MAISON_Design_Guide.md` is preserved,
+  so all in-repo references remain valid without churn. The rejected v3 is
+  preserved verbatim in v4's Appendix C.
+
+- **G3 — v3 design guide + changelog archived/removed.** The v3 file and its
+  changelog were removed as part of the v4 canonicalization (G2). v3's content
+  (and the rationale for its wholesale rejection) is preserved in v4's
+  Appendix C — "This revision supersedes the rejected v3 wholesale-replacement
+  attempt. v3 was built from a pre-remediation v2 source artifact and silently
+  regressed 12 v1.2.1 corrections."
+
+- **Contract test count updates.** `apps/web/src/lib/__tests__/page-metadata.contract.test.ts`
+  was extended with `/contact` page-split assertions (now 15 tests, was 12) —
+  enforces the G1 Server/Client page split (same invariant as F4 for
+  `/gift-cards`, `/trade`, `/cart`, `/checkout`). A new
+  `packages/api/src/routers/contact.contract.test.ts` (3 tests) asserts the
+  contact router calls `sendEmail` to `hello@maison-living.com`.
+  Total @maison/web contract tests: 7 files, 97 tests (was 90).
+  Total @maison/api tests: 3 files, 14 tests (was 11).
+
+---
+
+_End of Project Architecture Document v1.2.3. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

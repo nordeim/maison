@@ -1,12 +1,22 @@
 /**
- * Maison — Contact page (stub — Phase 1)
+ * Maison — Contact page (Server Component)
+ *
+ * Server Component wrapper that exports metadata and renders the
+ * ContactForm Client Component. The form was previously a non-functional
+ * plain HTML form — now wired to the tRPC contact.submit mutation which
+ * sends a notification email via Resend.
+ *
+ * Per REMEDIATION_PLAN_v6 Task 1.1 (G1).
  */
 
 import type { Metadata } from 'next';
 
+import { ContactForm } from '@/components/shop/ContactForm';
+
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Get in touch with the Maison team.',
+  description:
+    'Get in touch with the Maison team — questions about a piece, a commission, or a trade inquiry. We read every email.',
 };
 
 export default function ContactPage() {
@@ -20,64 +30,16 @@ export default function ContactPage() {
           marginBottom: '1rem',
         }}
       >
-        Get in <em style={{ color: '#a86b4a' }}>touch</em>
+        Get in <em style={{ color: 'var(--clay)' }}>touch</em>
       </h1>
-      <p style={{ color: '#4a433b', marginBottom: '2rem' }}>
+      <p style={{ color: 'var(--ink-2)', marginBottom: '2rem' }}>
         Questions about a piece, a commission, or a trade inquiry? Write to us — we read every
         email.
       </p>
 
-      <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Your name"
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e5ddd1',
-            background: '#ffffff',
-            fontSize: 16,
-          }}
-        />
-        <input
-          type="email"
-          placeholder="Your email"
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e5ddd1',
-            background: '#ffffff',
-            fontSize: 16,
-          }}
-        />
-        <textarea
-          placeholder="Your message"
-          rows={6}
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e5ddd1',
-            background: '#ffffff',
-            fontSize: 16,
-            resize: 'vertical',
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: '0.95rem 1.75rem',
-            background: '#a86b4a',
-            color: '#faf8f5',
-            fontSize: 13,
-            fontWeight: 500,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          Send Message
-        </button>
-      </form>
+      <ContactForm />
 
-      <p style={{ marginTop: '3rem', fontSize: '0.875rem', color: '#8a8178' }}>
+      <p style={{ marginTop: '3rem', fontSize: '0.875rem', color: 'var(--muted)' }}>
         hello@maison-living.com · Stockholm &amp; Copenhagen · Mon–Fri, 9am–6pm CET
       </p>
     </main>

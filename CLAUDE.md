@@ -30,7 +30,7 @@ Read these in order:
 
 1. **`docs/MAISON_PRD_v1.2.md`** — what to build (features, pages, data models, API surface) — v1.2 aligned with 3 coding skills
 2. **`docs/MAISON_PAD_v1.2.md`** — how to build it (20 ADRs, layer model, schemas, security posture) — v1.2
-3. **`docs/MAISON_Design_Guide.md`** — canonical design system reference (1,336 lines, 15 sections)
+3. **`docs/MAISON_Design_Guide.md`** — canonical design system reference (1,489 lines, 16 sections)
 4. **`docs/landing_page_unified.html`** — how it should look (canonical design tokens: `--bg #faf8f5`, `--clay #a86b4a`, `--gold #c4a265`; Cormorant Garamond + Inter typography; 17 homepage sections)
 5. **`docs/PRD_PAD_Validation_Against_Skills.md`** — 15 findings audit against 3 coding skills (Stillwater, tRPC+Drizzle, TypeScript patterns)
 6. **`AGENTS.md`** — high-signal facts (read this before any commit)
@@ -199,7 +199,7 @@ For bug fixes: write a regression test FIRST that reproduces the bug, then fix t
 
 ### Contract tests — the architectural invariants
 
-The repo has **7 contract test files / 90 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts` and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
+The repo has **7 contract test files / 97 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
 
 - `proxy-contract.test.ts` — ADR-006/010 Layer-1 invariant (`proxy.ts` cookie-only)
 - `rendering-strategy.contract.test.ts` — ADR-006/010 `api()`/`apiPublic()` split (○ Static vs ƒ Dynamic)
@@ -207,7 +207,7 @@ The repo has **7 contract test files / 90 tests** in `apps/web/src/lib/__tests__
 - `design-tokens.contract.test.ts` — ADR-007 radius tokens resolve to concrete pixels
 - `headings.contract.test.ts` — v1.2.2 F1/F3/F5: no `<em>{' word '}</em>` stray-space pattern; About H1 has space after comma; Hero H1 has space before "Quiet"
 - `category-grid.contract.test.ts` — v1.2.2 F2: CategoryGrid `<img alt="">` (decorative) + `<a aria-label="Browse …">` (no triple-counted accessible name)
-- `page-metadata.contract.test.ts` — v1.2.2 F4: page-split pattern (see below)
+- `page-metadata.contract.test.ts` — v1.2.2 F4 + v1.2.3 G1: page-split pattern (see below)
 
 ### Client Component pages that need metadata — the split pattern
 
