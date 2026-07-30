@@ -1,10 +1,3 @@
-$ rm -rf .next apps/web/.next/
-pnpm install
-pnpm db:migrate
-pnpm db:seed
-pnpm build
-pnpm start
-
 (venv) pete@pop-os:/home/project/maison
 $ rm -rf .next apps/web/.next/
 pnpm install
@@ -13,14 +6,8 @@ pnpm db:seed
 pnpm build
 pnpm start
 Scope: all 14 workspace projects
-✓ Lockfile passes supply-chain policies (1952 entries in 8.7s)
-Lockfile is up to date, resolution step is skipped
-Packages: +1
-+
-Progress: resolved 1, reused 1, downloaded 0, added 0, done
-. prepare$ ln -sf ../../scripts/pre-commit-check.sh .git/hooks/pre-commit 2>/dev/null || true
-└─ Done in 18ms
-Done in 10.6s using pnpm v11.17.0
+Already up to date
+Done in 664ms using pnpm v11.17.0
 $ turbo db:migrate --filter=@maison/db
 • turbo 2.10.7
 
@@ -32,14 +19,14 @@ $ turbo db:migrate --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌁ auth for agents [www.vestauth.com]
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ override existing { override: true }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 
  Tasks:    1 successful, 1 total
 Cached:    0 cached, 1 total
-  Time:    1.738s 
+  Time:    1.781s 
 
 $ turbo db:seed --filter=@maison/db
 • turbo 2.10.7
@@ -52,14 +39,14 @@ $ turbo db:seed --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ enable debugging { debug: true }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 @maison/db:db:seed: cache bypass, force executing 596b88f9df1036e1
 @maison/db:db:seed: $ tsx src/seed/index.ts
-@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ suppress logs { quiet: true }
-@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
+@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ enable debugging { debug: true }
+@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
 @maison/db:db:seed: ── Maison seed ──────────────────────────────────────────
 @maison/db:db:seed: → Upserting 8 collections…
 @maison/db:db:seed: → Upserting 20 products…
@@ -71,7 +58,7 @@ $ turbo db:seed --filter=@maison/db
 
  Tasks:    2 successful, 2 total
 Cached:    0 cached, 2 total
-  Time:    3.884s 
+  Time:    3.923s 
 
 $ turbo build
 • turbo 2.10.7
@@ -80,10 +67,13 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
+@maison/config:build: cache miss, executing 1884c83fa26be26e
+@maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
+@maison/db:build: $ tsc --build
 @maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
-@maison/db:build: cache miss, executing e4e87c0ac9c77fbe
 @maison/ui:build: $ tsc --build
-@maison/email:build: cache miss, executing 9eb875cfd38176bd
+@maison/email:build: cache hit, replaying logs 9eb875cfd38176bd
+@maison/email:build: $ tsc --build
 @maison/studio:build: cache hit, replaying logs 970c922270e07228
 @maison/studio:build: $ sanity build
 @maison/studio:build: 
@@ -98,30 +88,27 @@ $ turbo build
 @maison/studio:build: 
 @maison/studio:build: 
 ✔ Clean output folder (88ms)
+@maison/auth:build: cache miss, executing 7e8a380e3bc46bdf
 ✔ Build Sanity Studio (33003ms)
 @maison/studio:build: 
-@maison/config:build: cache hit, replaying logs 77cd78f9b1d42778
-@maison/config:build: $ tsc --build
-@maison/email:build: $ tsc --build
-@maison/db:build: $ tsc --build
-@maison/auth:build: cache miss, executing b77fd49decfd291d
-@maison/auth:build: $ tsc --build
-@maison/payments:build: cache miss, executing b37f247310ec9983
-@maison/workers:build: cache miss, executing 41f58db2e4d8942c
+@maison/workers:build: cache hit, replaying logs 41f58db2e4d8942c
 @maison/workers:build: $ tsc --build
+@maison/payments:build: cache miss, executing 44185f8b84d3714c
+@maison/auth:build: $ tsc --build
 @maison/payments:build: $ tsc --build
-@maison/api:build: cache miss, executing 816065ddcc90660c
+@maison/config:build: $ tsc --build
+@maison/api:build: cache miss, executing c7fec924557cbeca
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing cab7b93f214b3bce
+@maison/web:build: cache miss, executing 82031c2e8e3f3517
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
 @maison/web:build: 
 @maison/web:build:   Creating an optimized production build ...
-@maison/web:build: ✓ Compiled successfully in 13.9s
-@maison/web:build: ✓ Finished TypeScript in 15.7s 
+@maison/web:build: ✓ Compiled successfully in 13.7s
+@maison/web:build: ✓ Finished TypeScript in 13.7s 
 ⚠ Using edge runtime on a page currently disables static generation for that page
-@maison/web:build: ✓ Collecting page data using 3 workers in 4.1s 
+@maison/web:build: ✓ Collecting page data using 3 workers in 2.3s 
 [account orders] Failed to fetch: Error: Dynamic server usage: Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1bif10t._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
@@ -230,8 +217,8 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/trade couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 1001ms
-@maison/web:build: ✓ Finalizing page optimization in 33ms 
+@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 633ms
+@maison/web:build: ✓ Finalizing page optimization in 8ms 
 @maison/web:build: 
 @maison/web:build: Route (app)
 @maison/web:build: ┌ ○ /
@@ -284,13 +271,13 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    3 cached, 10 total
-  Time:    47.412s 
+Cached:    5 cached, 10 total
+  Time:    44.753s 
 
 $ pnpm --filter=@maison/web start
 $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 190ms
+✓ Ready in 175ms
 
