@@ -476,6 +476,9 @@ importers:
 
   packages/payments:
     dependencies:
+      '@maison/config':
+        specifier: workspace:*
+        version: link:../config
       '@maison/db':
         specifier: workspace:*
         version: link:../db

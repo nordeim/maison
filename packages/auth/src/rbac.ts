@@ -4,15 +4,15 @@
  * Four roles per ADR-008 (aligned with Stillwater v3.0.0 §15.17):
  * - customer: own account, orders, wishlist, addresses
  * - staff: customer permissions + admin READ access (staffProcedure)
- * - manager: staff + admin mutations — products, orders (managerProcedure)
+ * - manager: staff permissions (no dedicated procedure tier — admin
+ *   mutations use ownerProcedure per REMEDIATION_PLAN_v8 Task 1.5)
  * - owner: full access including role management (ownerProcedure)
  *
- * tRPC procedure tiers (ADR-008):
+ * tRPC procedure tiers (ADR-008 — 4 tiers per REMEDIATION_PLAN_v8):
  *   publicProcedure    → no auth
  *   protectedProcedure → any authenticated user
  *   staffProcedure     → roles: staff, manager, owner
- *   managerProcedure   → roles: manager, owner
- *   ownerProcedure     → role: owner only
+ *   ownerProcedure     → role: owner only (admin mutations, role management)
  *
  * Checked in tRPC middleware (packages/api/src/trpc.ts),
  * NOT in proxy.ts (proxy only checks "is authenticated" via cookie-existence).

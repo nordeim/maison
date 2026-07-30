@@ -21,7 +21,7 @@ export const newsletterRouter = router({
     .mutation(async ({ input }) => {
       // Phase 2: sync to Klaviyo
       // For now, just log (in production, this would write to a subscribers table or queue)
-      console.log(`[newsletter] New subscriber from ${input.source}: ${input.email}`);
+      console.log(`[newsletter] New subscriber from ${input.source} (PII redacted)`);
 
       return { success: true };
     }),

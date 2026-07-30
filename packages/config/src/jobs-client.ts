@@ -57,9 +57,11 @@ async function createRealJobsClient(): Promise<JobsClient> {
   //   string task name we bind TTask = AnyTask, so TaskIdentifier<AnyTask> = string
   //   (the call is type-safe) and the returned RunHandle widens to { id: string }.
   const { TriggerClient } = await import('@trigger.dev/sdk');
-  const client = new TriggerClient({
-    accessToken: process.env['TRIGGER_SECRET_KEY']!,
-  });
+  const accessToken = process.env['TRIGGER_SECRET_KEY'];
+  if (!accessToken) {
+    throw new Error('TRIGGER_SECRET_KEY is not set — cannot create real Trigger.dev client');
+  }
+  const client = new TriggerClient({ accessToken });
   return {
     async trigger(task: string, payload: unknown) {
       // Bind TTask = AnyTask so TaskIdentifier<AnyTask> = string (type-safe for a

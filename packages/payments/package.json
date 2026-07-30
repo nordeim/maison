@@ -20,6 +20,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@maison/config": "workspace:*",
     "@maison/db": "workspace:*",
     "@maison/email": "workspace:*",
     "drizzle-orm": "^0.45.2",

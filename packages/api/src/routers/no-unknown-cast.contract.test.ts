@@ -38,7 +38,12 @@ function listTsFiles(dir: string, base: string, acc: string[] = []): string[] {
         continue;
       }
       listTsFiles(full, base, acc);
-    } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts') && !entry.endsWith('.d.ts')) {
+    } else if (
+      (entry.endsWith('.ts') || entry.endsWith('.tsx')) &&
+      !entry.endsWith('.test.ts') &&
+      !entry.endsWith('.test.tsx') &&
+      !entry.endsWith('.d.ts')
+    ) {
       acc.push(rel);
     }
   }

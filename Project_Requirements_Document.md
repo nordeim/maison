@@ -1867,6 +1867,61 @@ from v1.2.5:
   `types.test.ts` deleted).
   @maison/payments tests: 3 files, 18 tests (unchanged).
 
+### v1.2.6 (July 31, 2026) — v9 Remediation (V9-1 through V9-5)
+
+Skills-compliance fixes identified by the v9 remediation audit (see
+`docs/REMEDIATION_PLAN_v9.md`). All v8 fixes (N1–N8) were re-verified working;
+the codebase remains the source of truth. This subsection documents the
+requirements-relevant changes from v1.2.6:
+
+- **V9-1 — Removed PII logging from tRPC routers (HIGH, Skill 2 §13.10).**
+  Per Skill 2 §13.10, the same PII principle that bans logging Stripe webhook
+  payloads also bans logging user-supplied PII. Two routers were logging PII
+  via `console.log`:
+  - `packages/api/src/routers/contact.ts` — was logging `input.name`,
+    `input.email`, and the first 100 chars of `input.message`. Replaced with
+    `'[contact] Submission received (PII redacted)'`.
+  - `packages/api/src/routers/newsletter.ts` — was logging `input.email`.
+    Replaced with `'[newsletter] New subscriber from ${source} (PII redacted)'`.
+
+- **V9-2 — Replaced `process.env` with `env` module in `webhooks.ts` (MEDIUM,
+  Skill 2 §13.5).** Per Skill 2 §13.5, all env access must go through the
+  validated `@maison/config` `env` object (not `process.env` direct access).
+  v8 (N4) wired webhook secrets through `env` but missed
+  `packages/payments/src/webhooks.ts:178`, which read
+  `process.env['NEXT_PUBLIC_APP_URL']` directly. Replaced with
+  `env.NEXT_PUBLIC_APP_URL` from `@maison/config`; added `@maison/config`
+  dependency to `packages/payments/package.json`.
+
+- **V9-3 — Updated stale `managerProcedure` comments in `rbac.ts` (LOW).**
+  v8 (N5) removed the dead `managerProcedure` from `packages/api/src/trpc.ts`
+  but left docstring comments in `packages/auth/src/rbac.ts:7,14` still
+  referencing it as if it existed. Updated to reflect the 4 canonical
+  procedure tiers (`publicProcedure` / `protectedProcedure` / `staffProcedure`
+  / `ownerProcedure`).
+
+- **V9-4 — Removed non-null assertion in `jobs-client.ts` (LOW, Skill 3 §6.3).**
+  Per Skill 3 §6.3, non-null assertions (`!`) should be avoided.
+  `packages/config/src/jobs-client.ts:61` previously used
+  `process.env['TRIGGER_SECRET_KEY']!` when constructing `TriggerClient`.
+  Replaced with an explicit `if (!accessToken) throw new Error(...)` null
+  guard before construction.
+
+- **V9-5 — Extended `no-unknown-cast.contract.test.ts` to scan `.tsx` files
+  (LOW, Skill 3 §5.3).** The contract test (added in v1.2.5 N1) was only
+  scanning `.ts` files for `as unknown as` casts — production `.tsx` files
+  were not covered. Extended the file-list predicate to also match `.tsx`.
+  Manually verified no `.tsx` files currently contain these casts; this
+  closes the coverage gap so future regressions are caught.
+
+- **Contract test count updates.** No new contract test files; one existing
+  contract test (`packages/api/src/routers/no-unknown-cast.contract.test.ts`)
+  was extended in scope (V9-5). Test counts unchanged:
+  Total @maison/web tests: 8 files, 99 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices

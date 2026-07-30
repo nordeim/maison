@@ -12,6 +12,7 @@ import type Stripe from 'stripe';
 import { stripe } from './client';
 import { db } from '@maison/db';
 import { orders, lineItems, paymentEvents } from '@maison/db';
+import { env } from '@maison/config';
 import { eq, sql } from 'drizzle-orm';
 import { isUniqueViolation, hashStringToBigInt } from './idempotency';
 
@@ -175,7 +176,7 @@ async function handlePaymentIntentSucceeded(
         shippingCents: order.shippingCostCents,
         taxCents: order.taxCents,
         totalCents: order.totalCents,
-        orderUrl: `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://maison.jesspete.shop'}/account/orders`,
+        orderUrl: `${env.NEXT_PUBLIC_APP_URL}/account/orders`,
       }),
     });
 

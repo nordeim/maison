@@ -143,7 +143,7 @@ The design tokens from `docs/landing_page_unified.html` (CSS custom properties l
 - **Stripe Payment Intents** (not Checkout Sessions — per ADR-009 flipped in REMEDIATION_PLAN_v4). PCI SAQ-A scope (card data handled by Stripe Elements).
 - **Stripe `apiVersion` pinned** to `'2026-06-24.dahlia'` in `packages/payments/src/client.ts` (per Skill 2 §9.9, locked in v1.2.5 N6). Do NOT remove the pin — letting the SDK default drift on upgrade can silently change wire formats or webhook payloads.
 - **Webhook idempotency** via dual-defense pattern (ADR-014): `payment_events` table + `pg_advisory_xact_lock`. See `packages/payments/src/idempotency.ts` for `isUniqueViolation` + `hashStringToBigInt` helpers.
-- **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `env.STRIPE_WEBHOOK_SECRET` (imported from `@maison/config` — per Skill 2 §13.5, locked in v1.2.5 N4). Same pattern for the Sanity webhook route with `env.SANITY_WEBHOOK_SECRET`. Do NOT reach for `process.env` directly.
+- **Webhook signature verification** in `apps/web/src/app/api/webhooks/stripe/route.ts` using `env.STRIPE_WEBHOOK_SECRET` (imported from `@maison/config` — per Skill 2 §13.5, locked in v1.2.5 N4). Same pattern for the Sanity webhook route with `env.SANITY_WEBHOOK_SECRET`. The Payment Intents helper at `packages/payments/src/webhooks.ts` ALSO reads `env.NEXT_PUBLIC_APP_URL` from `@maison/config` (locked in v1.2.6 V9-2 — v8 N4 wired the secrets but missed this app URL access in the same file). All webhook routes + `webhooks.ts` now use the `env` module exclusively — do NOT reach for `process.env` directly in any webhook code.
 - **Apple Pay / Google Pay** are available via Stripe Payment Intents + Stripe Elements (paymentMethodTypes configuration).
 - **Stripe Tax** via `payment_intent_data.automatic_tax` or computed server-side.
 - Local dev: use the Stripe CLI (`docker compose --profile stripe up -d stripe`) to forward events to `localhost:3000/api/webhooks/stripe`.
@@ -193,6 +193,7 @@ If you find yourself reaching for any of these, stop and ask: "What does the bra
 - **E2E tests require a build first**: `pnpm build && pnpm test:e2e`. Playwright config at repo root `playwright.config.ts`.
 - **Mobile viewport tests**: Playwright tests run in mobile + desktop viewports. Don't skip mobile — the mobile nav drawer has historically had bugs.
 - **`@axe-core/playwright`** runs in E2E — accessibility regressions fail the build.
+- **No PII in logs (Skill 2 §13.10, locked in v1.2.6 V9-1).** Never `console.log` user-supplied PII (name, email, message body, etc.). The `contact.submit` and `newsletter.subscribe` routers previously logged this; they now emit PII-redacted messages like `'[contact] Submission received (PII redacted)'` and `'[newsletter] New subscriber from ${source} (PII redacted)'`. The same Skill 2 §13.10 rule bans logging Stripe webhook payloads — log only event IDs + types, never request bodies. If you need a structured log for debugging, redact PII fields explicitly or use a placeholder tag.
 
 ---
 

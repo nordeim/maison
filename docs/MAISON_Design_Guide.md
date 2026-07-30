@@ -1546,6 +1546,33 @@ design-system-relevant changes (those that touch `tooling/tailwind/base.ts`,
   new contract test `packages/api/src/routers/no-unknown-cast.contract.test.ts`
   (1 test). The @maison/payments test count is unchanged (3 files, 18 tests).
 
+### v1.2.6 (July 31, 2026) — v9 Remediation (V9-1 through V9-5, design-system-relevant subset)
+
+Skills-compliance fixes identified by the v9 remediation audit (see
+`docs/REMEDIATION_PLAN_v9.md`). All changes are TDD-driven; the codebase is
+the source of truth. Full per-fix detail is in the PRD + PAD REMEDIATION_HISTORY
+v1.2.6 subsections. None of the v9 fixes touch `globals.css`,
+`tooling/tailwind/base.ts`, or any visual surface, so this entry is a
+cross-reference only:
+
+- **V9-1, V9-2, V9-3, V9-4, V9-5 (cross-reference).** All five v9 fixes are
+  design-system-adjacent but do not touch `globals.css`,
+  `tooling/tailwind/base.ts`, or any visual surface, so are documented only
+  in the PRD + PAD REMEDIATION_HISTORY v1.2.6 subsections: V9-1 (removed PII
+  logging from `contact.ts` + `newsletter.ts` per Skill 2 §13.10 — same rule
+  that bans logging Stripe webhook payloads), V9-2 (replaced
+  `process.env['NEXT_PUBLIC_APP_URL']` with `env.NEXT_PUBLIC_APP_URL` in
+  `packages/payments/src/webhooks.ts` per Skill 2 §13.5 — v8 N4 wired the
+  webhook secrets but missed this app URL access in the same file), V9-3
+  (updated stale `managerProcedure` comments in `packages/auth/src/rbac.ts`
+  to reflect the 4 canonical procedure tiers), V9-4 (removed non-null
+  assertion `!` in `packages/config/src/jobs-client.ts` per Skill 3 §6.3 —
+  replaced with explicit null guard), V9-5 (extended
+  `no-unknown-cast.contract.test.ts` to scan `.tsx` files per Skill 3 §5.3 —
+  closes a coverage gap; no `.tsx` files currently contain these casts). The
+  visible rendering of every section documented in this guide is unchanged.
+  The @maison/payments test count is unchanged (3 files, 18 tests).
+
 ---
 
 ## Appendix C: Change Log (v4)
