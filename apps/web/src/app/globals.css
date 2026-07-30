@@ -15,6 +15,22 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* ── Tailwind v4 @source directives ─────────────────────────── */
+/* Tailwind v4 only scans the current directory tree by default. Explicit
+ * @source directives ensure classes used in shared packages and adjacent
+ * directories are detected. Per nextjs16-react19-tailwindv4-trpcv11-drizzle-
+ * better-auth skill §13.6 — "the #1 cause of 'Tailwind classes not applying
+ * in production'".
+ *
+ * Path math (relative to apps/web/src/app/globals.css):
+ *   ../components/**  → apps/web/src/components/
+ *   ../lib/**         → apps/web/src/lib/
+ *   ../../../../packages/ui/src/** → packages/ui/src/ (4 .. levels)
+ */
+@source '../components/**/*.{ts,tsx}';
+@source '../lib/**/*.{ts,tsx}';
+@source '../../../../packages/ui/src/**/*.{ts,tsx}';
+
 /* ── Tailwind v4 Theme Mapping ─────────────────────────────── */
 /* Maps Maison design tokens to Tailwind's theme namespace
    so utilities like bg-cream-50, font-display, duration-standard
@@ -138,52 +154,53 @@ h6 {
   color: var(--ink);
 }
 
-/* ── Utility classes (Tailwind v4 @layer utilities) ────────── */
-@layer utilities {
-  /* Eyebrow label — used above section titles */
-  .eyebrow {
-    display: inline-block;
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: var(--weight-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
-    color: var(--clay);
-    margin-bottom: 1rem;
-  }
+/* ── Utility classes (Tailwind v4 @utility directive) ───────── */
+/* Per Tailwind v4 + nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth
+ * skill §3.2: use @utility directive (not @layer utilities) for custom
+ * single-class utilities. Compound selectors (.reveal.visible) cannot use
+ * @utility and are declared as plain CSS rules below.
+ */
+@utility eyebrow {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--clay);
+  margin-bottom: 1rem;
+}
 
-  /* Container */
-  .container-maison {
-    max-width: var(--container);
-    margin-inline: auto;
-    padding-inline: var(--gutter);
-  }
+@utility container-maison {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
 
-  .container-narrow {
-    max-width: var(--container-narrow);
-    margin-inline: auto;
-    padding-inline: var(--gutter);
-  }
+@utility container-narrow {
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
 
-  /* Section padding */
-  .section-padding {
-    padding-block: var(--section-padding-y);
-  }
+@utility section-padding {
+  padding-block: var(--section-padding-y);
+}
 
-  /* Scroll reveal (initial hidden state — revealed via IntersectionObserver) */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition:
-      opacity var(--duration-slow) var(--ease-out),
-      transform var(--duration-slow) var(--ease-out);
-    will-change: opacity, transform;
-  }
+@utility reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  will-change: opacity, transform;
+}
 
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Compound selector (state modifier toggled via useScrollReveal.ts) —
+ * cannot use @utility per Tailwind v4 spec (single-class only). Plain CSS. */
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Reduced motion (accessibility — already in @maison/ui/globals, reinforced here) ── */

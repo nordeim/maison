@@ -419,9 +419,9 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 
 - **TypeScript:** Strict mode, `noUnusedLocals`, `erasableSyntaxOnly`. No `any` in production code.
 - **React 19:** No `forwardRef` (use `ref` prop directly). Use `use()` for async values.
-- **Tailwind v4:** CSS-first `@theme` config in `globals.css`. No `tailwind.config.js`.
+- **Tailwind v4:** CSS-first `@theme` config in `globals.css`. No `tailwind.config.js`. Add `@source` directives after `@import 'tailwindcss';` so monorepo sibling packages (`components/`, `lib/`, `packages/ui/src/`) are scanned (Skill 2 §13.6 — #1 cause of "Tailwind classes not applying in production"). Custom utilities use the `@utility <name> { ... }` directive, NOT the legacy `@layer utilities { ... }` (Tailwind v3 syntax).
 - **Next.js 16:** Use `proxy.ts` (not `middleware.ts`). Async params in pages. Turbopack for dev.
-- **tRPC v11:** Define input/output schemas with Zod. Use server-side caller for RSC.
+- **tRPC v11:** Define input/output schemas with Zod v4. Use `z.email()` (NOT `z.string().email()` — deprecated in Zod v4, per ADR-018). Use server-side caller for RSC.
 - **Drizzle:** One file per table in `packages/db/src/schema/`. Re-export from `index.ts`. Always use `DATABASE_URL_UNPOOLED` for migrations.
 
 ### TDD Flow

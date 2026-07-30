@@ -1448,6 +1448,65 @@ references (README L22/L187, CLAUDE.md L33, AGENTS.md, PRD L7/L156, PAD L5/L1034
 remain valid without churn. Document length is now 1,489 lines, 16 sections
 (was the v1.2.1 baseline's ~1,390 lines / 15 sections).
 
+### v1.2.4 (July 31, 2026) — v7 Remediation (H1–H6, design-system-relevant subset)
+
+Skills-compliance + a11y fixes identified by the v7 remediation audit (see
+`docs/REMEDIATION_PLAN_v7.md`). All changes are TDD-driven; the codebase is
+the source of truth. Full per-fix detail is in the PRD + PAD REMEDIATION_HISTORY
+v1.2.4 subsections. This entry documents only the design-system-relevant
+changes (those that touch `apps/web/src/app/globals.css`, PDP gallery markup,
+or the design system's surface contract):
+
+- **H2 — Tailwind v4 `@source` directives (Skill 2 §13.6).** Added three
+  `@source` directives to `apps/web/src/app/globals.css` immediately after
+  `@import 'tailwindcss';`:
+  - `@source "../components/**/*.{ts,tsx}";`
+  - `@source "../lib/**/*.{ts,tsx}";`
+  - `@source "../../../../packages/ui/src/**/*.{ts,tsx}";`
+  Tailwind v4's automatic content detection misses classes used in monorepo
+  sibling packages without explicit `@source` declarations — per Skill 2
+  §13.6, this is the #1 cause of "Tailwind classes not applying in
+  production". The third path is relative from `apps/web/src/app/` to
+  `packages/ui/src/` (the design-token host package referenced throughout
+  §3 + §5.6 of this guide). No design-token values changed; this is purely
+  a content-detection fix so the existing tokens + utilities actually emit
+  CSS in production builds.
+
+- **H3 — Tailwind v4 `@utility` directive (Skill 2).** Migrated the legacy
+  `@layer utilities { ... }` block in `globals.css` to the Tailwind v4
+  `@utility` directive. 6 design-system utilities converted (all referenced
+  in this guide): `eyebrow`, `container-maison`, `container-narrow`,
+  `section-padding`, `reveal`, plus the `.reveal.visible` state which moved
+  out of the layer to plain CSS as a compound selector (`@utility` does not
+  support state variants — the pattern per Skill 2 is a sibling
+  `.reveal.visible { ... }` rule). Per Skill 2, `@layer utilities { ... }`
+  is the Tailwind v3 syntax; the v4 equivalent is one
+  `@utility <name> { ... }` declaration per utility. The visual contract of
+  each utility (the CSS rules inside the block) is byte-identical — this is
+  a syntax migration only, not a design change.
+
+- **H4 — PDP thumbnail alt text (a11y).** Product Detail Page thumbnail
+  images at `apps/web/src/app/(shop)/products/[slug]/page.tsx:203` now have
+  `alt={img.altText ?? \`${product.name} — view ${String(i + 1)}\`}`
+  (was `alt=""`). Decorative `alt=""` is correct only when a screen reader
+  has access to the same information elsewhere; the PDP gallery thumbnails
+  are navigational (click-to-change-main-image) and need non-empty alt for
+  WCAG 2.2 AAA conformance (ADR-011, §12.5 of this guide). The visible
+  rendering of the gallery is unchanged — only the `alt` attribute value
+  changes. Locked in by a new contract test
+  `apps/web/src/lib/__tests__/pdp-thumbnail-alt.contract.test.ts` (2 tests).
+
+- **H1, H5, H6 (cross-reference).** Three further v7 fixes are
+  design-system-adjacent but do not touch `globals.css` or any visual
+  surface, so are documented only in the PRD + PAD REMEDIATION_HISTORY
+  v1.2.4 subsections: H1 (4× `z.string().email()` → `z.email()` per
+  ADR-018), H5 (removed `as unknown as Record<string, unknown>` cast in
+  `packages/payments/src/webhooks.ts`), H6 (removed 4 deprecated RBAC
+  aliases per ADR-008). All three have new contract tests:
+  `packages/api/src/routers/zod-email.contract.test.ts` (4 tests),
+  `packages/auth/src/rbac-aliases.contract.test.ts` (6 tests). The
+  @maison/payments test count is unchanged (3 files, 18 tests).
+
 ---
 
 ## Appendix C: Change Log (v4)

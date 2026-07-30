@@ -198,7 +198,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       border: i === 0 ? '2px solid var(--clay)' : '1px solid var(--line)',
                     }}
                   >
-                    <Image src={img.url} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
+                    <Image
+                      src={img.url}
+                      alt={img.altText ?? `${product.name} — view ${String(i + 1)}`}
+                      fill
+                      sizes="72px"
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                 ))}
               </div>

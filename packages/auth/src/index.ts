@@ -16,11 +16,6 @@ export {
   canAccessStaff,
   canAccessOwner,
   isValidRole,
-  // Deprecated aliases (backward compat — ADR-008)
-  ADMIN_ROLES,
-  ADMIN_WRITE_ROLES,
-  canReadAdmin,
-  canWriteAdmin,
 } from './rbac';
 export type { UserRole, SessionUser } from './types';
 export { isAdmin, isStaffOrAdmin } from './types';

@@ -70,7 +70,7 @@ export const giftCardsRouter = router({
     .input(
       z.object({
         amountCents: z.number().int().min(2500).max(100000), // $25–$1000
-        recipientEmail: z.string().email(),
+        recipientEmail: z.email(),
         recipientName: z.string().min(1).max(100).optional(),
         message: z.string().max(500).optional(),
       }),

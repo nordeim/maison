@@ -2136,4 +2136,94 @@ changes from v1.2.3:
 
 ---
 
-_End of Project Architecture Document v1.2.3. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+### v1.2.4 (July 31, 2026) — v7 Remediation (H1–H6)
+
+Skills-compliance + a11y fixes identified by the v7 remediation audit (see
+`docs/REMEDIATION_PLAN_v7.md`). All changes are TDD-driven (contract tests
+written first); the codebase remains the source of truth. This subsection
+documents the architecture-relevant changes from v1.2.4:
+
+- **H1 — Zod v4 `z.email()` top-level string format (ADR-018).** Replaced 4
+  instances of the deprecated `z.string().email()` chaining form with the
+  Zod v4 top-level string format `z.email()`:
+  - `packages/api/src/routers/contact.ts:24`
+  - `packages/api/src/routers/newsletter.ts:17`
+  - `packages/api/src/routers/gift-cards.ts:73`
+  - `packages/config/src/env.ts:86` (`EMAIL_FROM` env var)
+  ADR-018 already mandated `z.email()` for new code; v1.2.4 makes the
+  remaining legacy call-sites match. Locked in by a new contract test
+  `packages/api/src/routers/zod-email.contract.test.ts` (4 tests).
+
+- **H2 — Tailwind v4 `@source` directives (Skill 2 §13.6).** Added three
+  `@source` directives to `apps/web/src/app/globals.css` immediately after
+  `@import 'tailwindcss';`:
+  - `@source "../components/**/*.{ts,tsx}";`
+  - `@source "../lib/**/*.{ts,tsx}";`
+  - `@source "../../../../packages/ui/src/**/*.{ts,tsx}";`
+  Tailwind v4's automatic content detection misses classes used in monorepo
+  sibling packages without explicit `@source` declarations — per Skill 2
+  §13.6, this is the #1 cause of "Tailwind classes not applying in
+  production". The third path is relative from `apps/web/src/app/` to
+  `packages/ui/src/`.
+
+- **H3 — Tailwind v4 `@utility` directive (Skill 2).** Migrated the legacy
+  `@layer utilities { ... }` block in `globals.css` to the Tailwind v4
+  `@utility` directive. 6 utilities converted: `eyebrow`,
+  `container-maison`, `container-narrow`, `section-padding`, `reveal`, plus
+  the `.reveal.visible` state which moved out of the layer to plain CSS as
+  a compound selector (`@utility` does not support state variants — the
+  pattern per Skill 2 is a sibling `.reveal.visible { ... }` rule). Per
+  Skill 2, `@layer utilities { ... }` is the Tailwind v3 syntax; the v4
+  equivalent is one `@utility <name> { ... }` declaration per utility.
+
+- **H4 — PDP thumbnail alt text (a11y).** Product Detail Page thumbnail
+  images at `apps/web/src/app/(shop)/products/[slug]/page.tsx:203` now have
+  `alt={img.altText ?? \`${product.name} — view ${String(i + 1)}\`}`
+  (was `alt=""`). Decorative `alt=""` is correct only when a screen reader
+  has access to the same information elsewhere; the PDP gallery thumbnails
+  are navigational (click-to-change-main-image) and need non-empty alt for
+  WCAG 2.2 AAA conformance (ADR-011). Locked in by a new contract test
+  `apps/web/src/lib/__tests__/pdp-thumbnail-alt.contract.test.ts` (2 tests).
+
+- **H5 — Removed `as unknown as Record<string, unknown>` cast (Skill 2).**
+  `packages/payments/src/webhooks.ts:86` previously cast the `Stripe.Event`
+  payload to `Record<string, unknown>` before persisting to the
+  `payment_events` table. The cast is removed; the column is declared
+  `jsonb().notNull()` (per ADR-014) whose Drizzle inference is `unknown`,
+  and `Stripe.Event` is assignable to `unknown`. The webhook idempotency
+  dual-defense pattern (ADR-014: `payment_events` UNIQUE INDEX +
+  `pg_advisory_xact_lock`) is unchanged.
+
+- **H6 — Removed 4 deprecated RBAC aliases (ADR-008).** Per ADR-008, the
+  RBAC API exposes 5 canonical procedure tiers
+  (`publicProcedure` / `protectedProcedure` / `staffProcedure` /
+  `managerProcedure` / `ownerProcedure`) and canonical role constants
+  (`STAFF_ROLES`, `MANAGER_ROLES`, `OWNER_ROLES`). The following 4 deprecated
+  aliases (kept around since v1.2 for backwards compatibility) were removed
+  from `packages/auth/src/rbac.ts`, from `packages/auth/src/index.ts`
+  re-exports, and from the 2 deprecated `describe` blocks in
+  `packages/auth/src/rbac.test.ts`:
+  - `canReadAdmin` (was alias for `canAccessStaff`)
+  - `canWriteAdmin` (was alias for `canAccessOwner`)
+  - `ADMIN_ROLES` (was alias for `STAFF_ROLES`)
+  - `ADMIN_WRITE_ROLES` (was alias for `OWNER_ROLES`)
+  Locked in by a new contract test
+  `packages/auth/src/rbac-aliases.contract.test.ts` (6 tests). §6.2/§6.3
+  already use the canonical `canAccessStaff()` / `canAccessOwner()` names
+  throughout — no architectural text needed updating.
+
+- **Contract test count updates.** New contract tests:
+  - `packages/api/src/routers/zod-email.contract.test.ts` (H1 — 4 tests)
+  - `apps/web/src/lib/__tests__/pdp-thumbnail-alt.contract.test.ts`
+    (H4 — 2 tests)
+  - `packages/auth/src/rbac-aliases.contract.test.ts` (H6 — 6 tests)
+  Updated: `packages/auth/src/rbac.test.ts` lost 2 deprecated describe
+  blocks (`canReadAdmin`, `canWriteAdmin`) — now 29 tests (was 31).
+  Total @maison/web tests: 8 files, 99 tests (was 7 files, 97 tests).
+  Total @maison/api tests: 5 files, 22 tests (was 4 files, 18 tests).
+  Total @maison/auth tests: 3 files, 45 tests (was 3 files, 41 tests).
+  @maison/payments tests: 3 files, 18 tests (unchanged).
+
+---
+
+_End of Project Architecture Document v1.2.4. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

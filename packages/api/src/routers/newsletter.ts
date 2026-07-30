@@ -14,7 +14,7 @@ export const newsletterRouter = router({
   subscribe: rateLimited
     .input(
       z.object({
-        email: z.string().email(),
+        email: z.email(),
         source: z.enum(['footer', 'newsletter_section', 'popup']).default('footer'),
       }),
     )

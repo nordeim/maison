@@ -61,19 +61,7 @@ export function isValidRole(role: unknown): role is UserRole {
   return typeof role === 'string' && (ROLES as readonly string[]).includes(role);
 }
 
-// ── Deprecated aliases (backward compat — will be removed in v2.0) ─────────
-// canReadAdmin == canAccessStaff (staff-tier grants admin read)
-// canWriteAdmin == canAccessOwner (owner-tier grants admin write/mutations)
-// Kept to avoid breaking existing router imports during the ADR-008 migration.
-
-/** @deprecated Use canAccessStaff instead (ADR-008). */
-export const canReadAdmin = canAccessStaff;
-
-/** @deprecated Use canAccessOwner instead (ADR-008). */
-export const canWriteAdmin = canAccessOwner;
-
-/** @deprecated Use STAFF_ROLES instead (ADR-008). */
-export const ADMIN_ROLES = STAFF_ROLES;
-
-/** @deprecated Use OWNER_ROLES instead (ADR-008). */
-export const ADMIN_WRITE_ROLES = OWNER_ROLES;
+// NOTE: ADR-008 — deprecated aliases `canReadAdmin`, `canWriteAdmin`,
+// `ADMIN_ROLES`, and `ADMIN_WRITE_ROLES` were removed in REMEDIATION_PLAN_v7
+// Task 1.6. Use the canonical helpers: `canAccessStaff`, `canAccessOwner`,
+// `STAFF_ROLES`, `OWNER_ROLES`.

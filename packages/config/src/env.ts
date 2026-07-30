@@ -83,7 +83,7 @@ const serverSchema = {
 
   // Email
   RESEND_API_KEY: z.string().startsWith('re_'),
-  EMAIL_FROM: z.string().email(),
+  EMAIL_FROM: z.email(),
 
   // Background jobs
   TRIGGER_SECRET_KEY: z.string().startsWith('tr_'),

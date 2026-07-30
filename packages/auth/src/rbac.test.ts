@@ -6,8 +6,6 @@ import {
   OWNER_ROLES,
   canAccessStaff,
   canAccessOwner,
-  canReadAdmin,
-  canWriteAdmin,
   isValidRole,
 } from './rbac';
 import type { UserRole } from '@maison/db';
@@ -62,24 +60,9 @@ describe('canAccessOwner (ownerProcedure tier — ADR-008)', () => {
   });
 });
 
-// Deprecated aliases (backward compat — canReadAdmin == canAccessStaff, canWriteAdmin == canAccessOwner)
-describe('canReadAdmin (deprecated alias for canAccessStaff)', () => {
-  it('matches canAccessStaff behavior', () => {
-    expect(canReadAdmin('staff')).toBe(true);
-    expect(canReadAdmin('manager')).toBe(true);
-    expect(canReadAdmin('owner')).toBe(true);
-    expect(canReadAdmin('customer')).toBe(false);
-  });
-});
-
-describe('canWriteAdmin (deprecated alias for canAccessOwner)', () => {
-  it('matches canAccessOwner behavior', () => {
-    expect(canWriteAdmin('owner')).toBe(true);
-    expect(canWriteAdmin('manager')).toBe(false);
-    expect(canWriteAdmin('staff')).toBe(false);
-    expect(canWriteAdmin('customer')).toBe(false);
-  });
-});
+// Deprecated aliases (canReadAdmin, canWriteAdmin) were removed in
+// REMEDIATION_PLAN_v7 Task 1.6. See rbac-aliases.contract.test.ts for the
+// invariant that they are NOT exported.
 
 describe('isValidRole', () => {
   it.each(['customer', 'staff', 'manager', 'owner'])('accepts %s as a valid role', (role) => {

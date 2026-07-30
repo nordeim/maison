@@ -98,7 +98,8 @@ When asked to implement a feature, follow this discipline:
 
 - **No `tailwind.config.js` or `tailwind.config.ts`.** Tokens live in `apps/web/src/app/globals.css` under `@theme { ... }`.
 - **Use `@tailwindcss/postcss`** in `postcss.config.mjs`. Do NOT add `autoprefixer` (Tailwind v4 handles it).
-- **Custom utilities** in `@layer utilities { ... }` within `globals.css`.
+- **Add `@source` directives** in `globals.css` after `@import 'tailwindcss';` so Tailwind v4 scans monorepo sibling packages. Maison has three (per v1.2.4 H2, Skill 2 §13.6 — "the #1 cause of Tailwind classes not applying in production"): `@source "../components/**/*.{ts,tsx}";`, `@source "../lib/**/*.{ts,tsx}";`, `@source "../../../../packages/ui/src/**/*.{ts,tsx}";`. Without these, classes used inside `apps/web/src/components/`, `apps/web/src/lib/`, or `packages/ui/src/` get tree-shaken out of the production CSS bundle.
+- **Custom utilities use the `@utility <name> { ... }` directive** in `globals.css` (one per utility). NOT `@layer utilities { ... }` — that is the legacy Tailwind v3 syntax (per Skill 2, migrated in v1.2.4 H3). State variants like `.reveal.visible` go in plain CSS as a compound selector (sibling rule), because `@utility` does not support them.
 - **The `prettier-plugin-tailwindcss`** auto-sorts classes on format — don't fight it.
 
 ### tRPC v11 (ADR-008 — 5 procedure tiers)
@@ -110,7 +111,7 @@ When asked to implement a feature, follow this discipline:
   - `managerProcedure` — manager or owner role (admin mutations)
   - `ownerProcedure` — owner role only (role management, store settings)
   - **NOTE**: `managerProcedure` is defined per ADR-008 but not yet wired into routers — admin mutations currently use `ownerProcedure`. See `docs/REMEDIATION_PLAN_v4.md` §Deferred Items.
-- **Every procedure has a Zod v4 input parser** (ADR-018). Use `z.email()` (NOT `z.string().email()` — deprecated). Never accept untyped input.
+- **Every procedure has a Zod v4 input parser** (ADR-018). Use `z.email()` (NOT `z.string().email()` — deprecated in Zod v4). Never accept untyped input. Locked in by `packages/api/src/routers/zod-email.contract.test.ts` (4 tests, added in v1.2.4 H1) — the contract test asserts that none of the 4 email-validating source files (`packages/api/src/routers/contact.ts`, `packages/api/src/routers/newsletter.ts`, `packages/api/src/routers/gift-cards.ts`, `packages/config/src/env.ts`) contain the legacy `z.string().email()` pattern.
 - **Server-side caller for RSC** — import from `apps/web/src/lib/trpc/server.ts`. Use `api()` for auth-guarded routes (forces dynamic) or `apiPublic()` for public routes (allows static prerender).
 - **Client-side via React Query** — `apps/web/src/lib/trpc/client.tsx` exports `trpc` and `TRPCProvider`.
 - **Rate limiting middleware fails OPEN** — if Redis is down, allow the request. Log for review. Do NOT change to fail-closed.
@@ -199,7 +200,7 @@ For bug fixes: write a regression test FIRST that reproduces the bug, then fix t
 
 ### Contract tests — the architectural invariants
 
-The repo has **7 contract test files / 97 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
+The repo has **8 contract test files / 99 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, `packages/api/src/routers/zod-email.contract.test.ts`, `packages/auth/src/rbac-aliases.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
 
 - `proxy-contract.test.ts` — ADR-006/010 Layer-1 invariant (`proxy.ts` cookie-only)
 - `rendering-strategy.contract.test.ts` — ADR-006/010 `api()`/`apiPublic()` split (○ Static vs ƒ Dynamic)
@@ -208,6 +209,17 @@ The repo has **7 contract test files / 97 tests** in `apps/web/src/lib/__tests__
 - `headings.contract.test.ts` — v1.2.2 F1/F3/F5: no `<em>{' word '}</em>` stray-space pattern; About H1 has space after comma; Hero H1 has space before "Quiet"
 - `category-grid.contract.test.ts` — v1.2.2 F2: CategoryGrid `<img alt="">` (decorative) + `<a aria-label="Browse …">` (no triple-counted accessible name)
 - `page-metadata.contract.test.ts` — v1.2.2 F4 + v1.2.3 G1: page-split pattern (see below)
+- `pdp-thumbnail-alt.contract.test.ts` — v1.2.4 H4: PDP gallery thumbnail `<img>` has non-empty `alt` AND falls back to `img.altText` (was `alt=""`)
+
+Cross-package contract tests (not in `apps/web/`):
+
+- `packages/api/src/routers/contact.contract.test.ts` — v1.2.3 G1: `contact.submit` calls `sendEmail` to `hello@maison-living.com`
+- `packages/api/src/routers/zod-email.contract.test.ts` — v1.2.4 H1, ADR-018: no `z.string().email()` remains in the 4 email-validating source files (4 tests)
+- `packages/auth/src/rbac-aliases.contract.test.ts` — v1.2.4 H6, ADR-008: the 4 deprecated RBAC aliases (`canReadAdmin`, `canWriteAdmin`, `ADMIN_ROLES`, `ADMIN_WRITE_ROLES`) are NOT exported (6 tests)
+- `packages/payments/src/webhooks.contract.test.ts` — ADR-009 Payment Intents + ADR-014 idempotency
+- `services/workers/trigger.config.test.ts` — ADR-016 Trigger.dev config
+
+Total test counts (post-v1.2.4): @maison/web 8 files / 99 tests, @maison/api 5 files / 22 tests, @maison/auth 3 files / 45 tests, @maison/payments 3 files / 18 tests.
 
 ### Client Component pages that need metadata — the split pattern
 

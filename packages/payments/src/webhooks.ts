@@ -75,11 +75,15 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
       await processEventByType(event, tx);
 
       // Insert payment_events record (marks as processed)
+      // The `payload` column is `jsonb().notNull()` with no `.$type<>()`, so
+      // Drizzle infers the insert type as `unknown` — `event` (Stripe.Event)
+      // is assignable to `unknown` without a cast. Per Skill 2 §9 (no
+      // `as unknown as` casts).
       await tx.insert(paymentEvents).values({
         stripeEventId: event.id,
         stripeEventType: event.type,
         orderId: null, // Set by specific handlers if applicable
-        payload: event as unknown as Record<string, unknown>,
+        payload: event,
       });
     });
   } catch (err) {
