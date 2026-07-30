@@ -477,5 +477,212 @@ Validated against:
 
 ---
 
+I'll ensure everything is committed first, then proceed with the new comprehensive E2E + skills-compliance cycle.
+Local clean, but remote is ahead again (`4ef205a` vs local `fa356cd`). Let me pull:
+Pulled. Updated pnpm_log.txt + session_log.md. Let me read the new pnpm_log:
+Build log shows expected `DYNAMIC_SERVER_USAGE` warnings on `/account/*` and `/admin/*` (per ADR-010 — locked by 2 contract tests). Build succeeded 10/10, 37/37 routes. The `/contact` route is `○ (Static)` confirming G1 fix is deployed. Let me verify the live site:
+Live site confirmed healthy. All v5+v6+v7 fixes deployed. Now let me launch the skills-compliance validation subagent in parallel while I do agent-browser E2E:
+Excellent — comprehensive skills re-validation complete with 5 NEW non-compliances + 3 lower-severity items identified. Now let me run agent-browser E2E in parallel:
+Homepage clean — no console errors, no a11y issues. Let me test PDP (H4 fix verification) + contact form (G1) + other key flows:
+**H4 fix confirmed live** — PDP thumbnail alts are now "Arc Pendant Light — view 1", "Arc Pendant Light — view 2" (was empty `alt=""`). Let me test the contact form (G1) + add-to-cart flow:
+The `find role` selectors didn't match (label format includes `*`). Let me use refs directly:
+**G1 fix confirmed live** — contact form submitted successfully, shows "Thank you for writing" success message. Let me test add-to-cart + a few more flows:
+Add-to-cart works (0→1). Let me check mobile + close browser:
+All E2E tests pass — no new issues found on the live site. The remaining work is the 8 skills-compliance items (N1-N8) from the validation. Let me consolidate findings and create the v8 remediation plan:
+Now let me re-validate the plan against the codebase:
+Excellent validation. 3 adjustments needed:
+1. Task 1.1: db/index.ts:88 cast — keep as-is (not fixable with `.$type<>()`)
+2. Task 1.7: Drop entirely (codebase already complies)
+3. Tasks 1.2 + 1.5: Must explicitly update `types.test.ts` + `trpc.test.ts:112`
+
+Let me apply these adjustments and begin TDD execution:
+**Task 1.1 — RED step**: Write contract test for `as unknown as` pattern. Let me first read the actual files to understand the casts:
+These two are truly duplicate Resend stubs. Let me create a shared helper and write the contract test:
+Wait — `packages/auth` and `packages/email` are separate packages. The shared helper needs to live in `packages/email` (which `packages/auth` can depend on) OR in a new shared location. Let me check the dependency direction:
+`packages/auth` does NOT depend on `@maison/email`. To share the stub, I'd need to either: (a) add `@maison/email` as a dep of `@maison/auth`, or (b) duplicate the helper. The cleaner approach: put the stub helper in `packages/auth/src/resend-client.ts` itself (it's already there) and have `packages/email/src/send.ts` use its own local stub but without the `as unknown as` cast by using a proper type union. Let me revise — the simplest fix that avoids cross-package dependency issues:
+The cleanest fix: in each file, define a proper `ResendStub` interface and use a type union `Resend | ResendStub` instead of `as unknown as Resend`. Let me write the contract test first:
+RED confirmed. Let me see which violations were found:
+7 violations found (the 2 db/index.ts casts are correctly in the ALLOWED list). Now GREEN — fix each. Let me start with the Resend stubs (N9):
+Now fix `packages/email/src/send.ts`:
+Now fix the Drizzle raw query casts in reviews.ts and admin.ts. Let me read them:
+These are raw SQL queries. The cleanest fix: replace with Drizzle's typed query builder. Let me fix reviews.ts:
+I need to import `customers` and `users` from `@maison/db` to use the typed query builder. Let me check what's exported:
+Now replace the raw SQL queries with typed Drizzle queries:
+Now fix admin.ts (3 raw query casts). Let me read them:
+These are complex aggregations (GROUP BY, SUM, DATE_TRUNC) that are hard to express with the typed query builder. The cleaner approach: define a proper return type and use a typed alias instead of `as unknown as Array<Record<string, unknown>>`. Let me use `as Array<...>` with a proper interface:
+Wait — `as unknown as RevenueRow[]` still has `as unknown as`! The contract test will still fail. The issue is that Drizzle's `db.execute()` returns a `QueryResult` type that doesn't directly match a typed array. Let me reconsider — the cleanest approach is to use a single `as` cast through `unknown` is still needed because Drizzle's execute returns a complex type. But the contract test bans `as unknown as`. 
+
+Let me think about this differently: the real fix is to NOT use raw SQL for these aggregations, OR to use a helper function that does the cast internally (isolating it). Let me use a typed helper:
+Now fix the third admin.ts cast (analyticsCohorts):
+Now run tests to verify GREEN:
+Tests pass but email check-types fails. Let me check:
+The `ResendClient` union (Resend | ResendStub) causes issues because the stub's `send` returns `{ id: string }` while real Resend returns `{ data, error }`. I need to align the stub's return type with Resend's. Let me check the real Resend return type:
+The real Resend `send` returns `Promise<CreateEmailResponse>` which is `Response<CreateEmailResponseSuccess>` = `{ data: CreateEmailResponseSuccess; error: null } | { data: null; error: ResponseError }`. The stub returns `{ id: string }`. These don't align. The cleanest fix: make the stub return the same shape as Resend:
+Now fix the auth resend-client.ts the same way (it's used by Better Auth which may destructure differently):
+Auth's config.ts uses `resend.emails.send({ from, to, subject, html })` without destructuring the return — so it just needs the method to exist. Let me align the auth stub to the same shape:
+API tests pass but email check-types still fails. Let me check:
+Auth is now clean. Email has one remaining error — the `as Parameters<typeof client.emails.send>[0]` cast doesn't work with the union type. Let me fix send.ts:
+The Drizzle `db.execute()` returns `NeonHttpQueryResult<Record<string, unknown>>` which is NOT directly assignable to `RevenueRow[]`. TS suggests converting through `unknown` first — which is exactly the `as unknown as` pattern I'm trying to avoid. The issue is structural: Drizzle's execute returns a single result object, not an array.
+
+Let me check the actual Drizzle execute return type more carefully:
+The Drizzle `execute()` return type for neon-http is `NeonHttpQueryResult<Record<string, unknown>>` which is `{ rows: Record<string, unknown>[] }`. So I need to access `.rows` not cast the result directly. Let me fix:
+Now fix the other two:
+Now fix reviews.ts the same way (it used raw execute too — wait, I already converted those to typed Drizzle queries). Let me verify:
+The `Record<string, unknown>[]` to `RevenueRow[]` cast fails because TS sees them as non-overlapping. The cleanest fix that avoids `as unknown as`: use a type guard / mapping function that validates the shape. But that's overkill for internal analytics queries. The pragmatic fix: cast each row individually via a mapping function:
+Now remove the unused interface declarations and apply the same pattern to the other two:
+Now fix the other two (analyticsTopProducts + analyticsCohorts) the same way:
+All check-types pass + all tests pass. Task 1.1 (N1/N9) complete. Now let me proceed with the remaining tasks. Let me do Tasks 1.2-1.6 + 1.8 efficiently:
+**Task 1.2 — Remove isAdmin + isStaffOrAdmin + delete types.test.ts**:
+No production consumers. Let me remove them + delete types.test.ts + update index.ts:
+Now delete types.test.ts (it only tests isAdmin + isStaffOrAdmin):
+The test file imports `isAdmin` and `isStaffOrAdmin` which no longer exist. Delete it:
+Task 1.2 complete. Now Task 1.3 — replace `require('node:crypto')`:
+Task 1.3 complete. Now Task 1.4 — wire webhook secrets through env module:
+I see the old function is still there — my edit didn't fully replace. Let me check:
+There's a duplicate. Let me rewrite the whole file cleanly:
+Now fix the sanity webhook:
+Task 1.4 complete. Now Task 1.5 — remove `managerProcedure` + update trpc.test.ts:
+Now update the header comment + index.ts + trpc.test.ts:
+Now update index.ts + trpc.test.ts:
+Now update trpc.test.ts — the test at L107-114 checks for 5 tiers including managerProcedure:
+All gates GREEN. Now Tasks 1.6 + 1.8 — pin Stripe apiVersion + trim tailwind base.ts:
+Now Task 1.8 — trim tooling/tailwind/base.ts:
+Per Skill 2 §9.5/§13.6, Tailwind v4 is CSS-first. The canonical tokens are in `globals.css` `@theme`. This file duplicates them. Let me trim it heavily — keep only `fontFamilies` (useful as JS reference) and empty the rest:
+Lint + format issues. Let me fix:
+All gates GREEN. Now let me update the documentation in parallel:
+Docs updated. Let me run final verification and commit:
+All gates GREEN. Let me commit and push:
+Commit `8adbabf` succeeded. Now push:
+**Push succeeded** — `4ef205a..8adbabf  main -> main`. Let me verify and finalize:
+Remote `main` confirmed at `8adbabf`. Let me update todos and provide final summary:
+## Summary
+
+**v8 skills-compliance remediation complete** — committed as `8adbabf` on `main` and pushed to GitHub. All v5+v6+v7 fixes confirmed working in production; 7 skills-compliance + dead-code fixes (N1–N8) applied.
+
+### Pre-flight verification
+- Local was at `fa356cd`, remote was ahead at `4ef205a` — pulled to refresh (updated pnpm_log.txt + session_log.md)
+- pnpm_log.txt review: build succeeded 10/10 packages, 37/37 routes; `/contact` shows `○ (Static)` confirming G1 fix deployed; DYNAMIC_SERVER_USAGE warnings still present on /account/* + /admin/* (expected per ADR-010)
+- curl: all 11 page titles correct, homepage 200 OK (223KB)
+
+### E2E testing (agent-browser)
+- **No new live-site issues found** — all v5+v6+v7 fixes re-verified working
+- G1 (contact form): filled + submitted → "Thank you for writing" success message confirmed live
+- H4 (PDP thumbnail alt): "Arc Pendant Light — view 1", "view 2" confirmed live (was empty `alt=""`)
+- Add-to-cart: works (0→1)
+- Mobile: no horizontal scroll, no stray headings, H1 correct
+- No console errors
+
+### Skills-compliance re-validation (3 skills)
+Re-validated against all 3 skills after v7. Found 8 NEW non-compliances (N1–N8). v7 fixes (H1–H6) all confirmed still in place + locked by contract tests.
+
+### Fixes applied (TDD-driven)
+- **N1/N9**: Removed 7 of 9 `as unknown as` casts — Resend stubs consolidated via `ResendClient = Resend | ResendStub` type union; Drizzle raw queries in reviews.ts converted to typed query builder; admin.ts raw queries use typed row mappers. 2 remaining casts in db/index.ts are structurally required (documented exceptions).
+- **N2**: Removed `isAdmin` + `isStaffOrAdmin` dead code from types.ts + deleted types.test.ts (10 tests)
+- **N3**: Replaced `require('node:crypto')` with ESM `import { randomBytes }` (verbatimModuleSyntax compliance)
+- **N4**: Wired Stripe + Sanity webhook secrets through `@maison/config/env` (was `process.env` direct access)
+- **N5**: Removed `managerProcedure` dead code — codebase now has 4 canonical procedure tiers (was 5)
+- **N6**: Pinned Stripe `apiVersion: '2026-06-24.dahlia'` (was SDK default)
+- **N8**: Trimmed `tooling/tailwind/base.ts` from 152→30 lines (CSS-first `@theme` is canonical)
+
+### New contract test
+- `packages/api/src/routers/no-unknown-cast.contract.test.ts` (1 test — N1, asserts no `as unknown as` except documented exceptions)
+
+### Total test counts
+- `@maison/web`: 8 files, 99 tests (unchanged)
+- `@maison/api`: 6 files, 20 tests (was 5/22)
+- `@maison/auth`: 2 files, 35 tests (was 3/45 — deleted types.test.ts)
+- `@maison/payments`: 3 files, 18 tests (unchanged)
+
+### Documentation updates
+- v1.2.5 REMEDIATION_HISTORY appended to PRD, PAD, Design Guide
+- AGENTS.md + CLAUDE.md: procedure tier count 5→4, `as unknown as` ban documented, Stripe apiVersion + env wiring noted, Tailwind base.ts trim noted, contract-test enumerations + counts updated
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass
+- `pnpm format:check` → all files clean
+- Pre-commit hook → passed
+- `git push origin main` → `4ef205a..8adbabf  main -> main` ✓
+
+### Suggested next steps
+- **Redeploy** `https://maison.jesspete.shop/` to reflect v8 fixes live (N4 webhook env wiring is the most operationally relevant)
+- Consider enabling `noUnusedLocals`/`noUnusedParameters` (still deferred — v8 removed the dead code that would have surfaced)
+- Consider enabling React Compiler (5 `useCallback` instances remain — requires config change)
+- Consider implementing Trigger.dev v4 jobs (still Phase 0 stubs)
+
+---
+
+I'll ensure everything is committed first, then proceed with the new comprehensive E2E + skills-compliance cycle.
+The workspace was reset. Let me re-clone and restore the patched SSH wrapper:
+Workspace wiped. Let me re-clone the repo via HTTPS (public) first, then restore the SSH push infrastructure:
+Good — cloned at `f3001ea` (remote has a new "update pnpm log" commit beyond our v8). Now let me set up the SSH push infrastructure + install pnpm:
+Now let me set up the SSH push infrastructure — create the patched wrapper script + SSH key:
+Now let me create the patched SSH wrapper script (same pattern as previous sessions — in-memory key header restoration):
+Now update the `ssh.connect()` call to pass `pkey`:
+Now switch the git remote to SSH and verify the push infrastructure works:
+SSH push infrastructure working. Local is already at latest `f3001ea`. Now let me proceed with the full cycle — read pnpm_log, curl the site, and launch skills validation in parallel:
+Build succeeded 10/10. The 38 error/warning lines are expected `DYNAMIC_SERVER_USAGE` on auth-guarded routes (ADR-010). Let me curl the live site + launch skills validation in parallel:
+Live site confirmed healthy — all 11 page titles correct. Now let me launch the skills validation subagent + agent-browser E2E in parallel:
+Excellent — 5 new non-compliances found (1 HIGH, 1 MEDIUM, 3 LOW). Let me do quick agent-browser E2E to check for any live-site issues:
+E2E clean — no new live-site issues. All v5-v8 fixes confirmed working. Now let me create + execute the v9 remediation plan for the 5 skills-compliance items:
+Let me read the files that need fixing and apply all 5 fixes efficiently. First, V9-1 (PII logging):
+V9-1 done. Now V9-2 (process.env in webhooks.ts):
+V9-2 done. Now V9-3 (stale managerProcedure comments in rbac.ts):
+V9-3 done. Now V9-4 (non-null assertion in jobs-client.ts):
+V9-4 done. Now V9-5 (extend no-unknown-cast contract test to scan .tsx files):
+All 5 fixes applied. Let me install deps + run full verification:
+All gates cached + GREEN. Let me verify the changes actually went through by running the affected tests without cache:
+All 20 tests pass + check-types clean for all affected packages. Now let me update docs + commit:
+Now let me update the canonical docs with v1.2.6 REMEDIATION_HISTORY entries:
+Docs updated. Let me run final format check + commit + push:
+Commit `4eff062` succeeded. Now push:
+**Push succeeded** — `f3001ea..4eff062  main -> main`. Let me verify:
+## Summary
+
+**v9 skills-compliance remediation complete** — committed as `4eff062` on `main` and pushed to GitHub. All v5-v8 fixes confirmed working in production; 5 new skills-compliance fixes (V9-1 through V9-5) applied.
+
+### Pre-flight verification
+- Workspace was reset — re-cloned repo via HTTPS, restored SSH push infrastructure (patched wrapper script + paramiko)
+- Repo at `f3001ea` (latest remote)
+- pnpm_log.txt: build succeeded 10/10 packages, 37/37 routes; DYNAMIC_SERVER_USAGE warnings expected per ADR-010
+- curl: all 11 page titles correct, homepage 200 OK (224KB)
+
+### E2E testing (agent-browser)
+- **No new live-site issues found** — all v5-v8 fixes re-verified working
+- H4 (PDP thumbnail alt): "Arc Pendant Light — view 1/2" confirmed live
+- Contact form: 3 fields, title correct
+- No console errors, 0 stray headings, no horizontal scroll on mobile
+
+### Skills-compliance re-validation (3 skills)
+Re-validated against all 3 skills after v8. Found 5 NEW non-compliances (1 HIGH, 1 MEDIUM, 3 LOW). All v8 fixes (N1-N9) confirmed still in place.
+
+### Fixes applied
+- **V9-1 (HIGH)**: Removed PII logging in `contact.ts` + `newsletter.ts` — `console.log` was writing name+email+message. Replaced with PII-safe messages.
+- **V9-2 (MEDIUM)**: Replaced `process.env['NEXT_PUBLIC_APP_URL']` in `webhooks.ts` with `env.NEXT_PUBLIC_APP_URL` from `@maison/config` (v8 missed this one).
+- **V9-3 (LOW)**: Fixed stale `managerProcedure` comments in `rbac.ts` docstring (v8 removed code but left references).
+- **V9-4 (LOW)**: Removed non-null assertion `!` in `jobs-client.ts` — replaced with explicit null guard.
+- **V9-5 (LOW)**: Extended `no-unknown-cast.contract.test.ts` to scan `.tsx` files (was only `.ts`).
+
+### Documentation updates
+- v1.2.6 REMEDIATION_HISTORY appended to PRD, PAD, Design Guide
+- AGENTS.md + CLAUDE.md: PII logging ban + webhook env module usage documented
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass (20 API tests including extended no-unknown-cast)
+- `pnpm format:check` → all files clean
+- `git push origin main` → `f3001ea..4eff062  main -> main` ✓
+
+### Still deferred (unchanged from v8)
+- `noUnusedLocals`/`noUnusedParameters` (would require cleanup pass)
+- React Compiler (7 `useCallback` instances — requires config change)
+- ~22 non-null assertions in tRPC routers (mostly safe Drizzle patterns)
+- Trigger.dev stubs (Phase 0, documented)
+- 4 `'use client'` page components (deliberate, locked by contract test)
+
+---
+
 https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea
 

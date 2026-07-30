@@ -1,21 +1,23 @@
-$ docker compose -f docker-compose.yml up -d postgres redis
-WARN[0000] The "STRIPE_SECRET_KEY" variable is not set. Defaulting to a blank string. 
-[+] Running 5/5
- ✔ Network maison_maison_net    Created                                                                                                                                                                                                0.2s 
- ✔ Volume maison_postgres_data  Created                                                                                                                                                                                                0.1s 
- ✔ Volume maison_redis_data     Created                                                                                                                                                                                                0.1s 
- ✔ Container maison_redis       Started                                                                                                                                                                                                3.1s 
- ✔ Container maison_postgres    Started                                                                                                                                                                                                2.8s 
-(venv) pete@pop-os:/home/project/maison
-$ pnpm db:setup
-$ bash scripts/db-setup.sh
-── Maison DB Setup ──────────────────────────────────────
-→ Starting Postgres + Redis via docker compose…
-WARN[0000] The "STRIPE_SECRET_KEY" variable is not set. Defaulting to a blank string. 
-[+] Running 2/2
- ✔ Container maison_redis     Running                                                                                                                                                                                                  0.0s 
- ✔ Container maison_postgres  Running                                                                                                                                                                                                  0.0s 
-→ Applying migrations…
+$ rm -rf .next apps/web/.next/
+pnpm install
+pnpm db:migrate
+pnpm db:seed
+pnpm build
+pnpm start
+
+Scope: all 14 workspace projects
+✓ Lockfile passes supply-chain policies (1952 entries in 1m 35.7s)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+[WARN] Request took 14969ms: https://registry.npmjs.org/@typescript-eslint%2Fproject-service
+[WARN] Request took 26402ms: https://registry.npmjs.org/devtools-protocol
+[WARN] Request took 47447ms: https://registry.npmjs.org/@sanity%2Fdiff
+[WARN] Request took 38176ms: https://registry.npmjs.org/@typescript-eslint%2Futils
+[WARN] Request took 24283ms: https://registry.npmjs.org/groq
+[WARN] 13 other warnings
+. prepare$ ln -sf ../../scripts/pre-commit-check.sh .git/hooks/pre-commit 2>/dev/null || true
+└─ Done in 30ms
+Done in 1m 42.3s using pnpm v11.17.0
 $ turbo db:migrate --filter=@maison/db
 • turbo 2.10.7
 
@@ -27,16 +29,15 @@ $ turbo db:migrate --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ suppress logs { quiet: true }
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ◈ encrypted .env [www.dotenvx.com]
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 
  Tasks:    1 successful, 1 total
 Cached:    0 cached, 1 total
-  Time:    7.435s 
+  Time:    1.827s 
 
-→ Seeding initial catalog…
 $ turbo db:seed --filter=@maison/db
 • turbo 2.10.7
 
@@ -48,14 +49,14 @@ $ turbo db:seed --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ◈ secrets for agents [www.dotenvx.com]
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ enable debugging { debug: true }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 @maison/db:db:seed: cache bypass, force executing 596b88f9df1036e1
 @maison/db:db:seed: $ tsx src/seed/index.ts
-@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌁ auth for agents [www.vestauth.com]
-@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
+@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ◈ secrets for agents [www.dotenvx.com]
 @maison/db:db:seed: ── Maison seed ──────────────────────────────────────────
 @maison/db:db:seed: → Upserting 8 collections…
 @maison/db:db:seed: → Upserting 20 products…
@@ -67,21 +68,8 @@ $ turbo db:seed --filter=@maison/db
 
  Tasks:    2 successful, 2 total
 Cached:    0 cached, 2 total
-  Time:    6.498s 
+  Time:    3.958s 
 
-── ✓ Database ready ──────────────────────────────────────
-  Postgres: localhost:5432 (maison_dev)
-  Adminer:  http://localhost:8080 (profile: tools)
-  Drizzle Studio: pnpm db:studio
-(venv) pete@pop-os:/home/project/maison
-$ pnpm install
-Scope: all 14 workspace projects
-Already up to date
-Done in 642ms using pnpm v11.17.0
-(venv) pete@pop-os:/home/project/maison
-$ rm -rf .next apps/web/.next/
-(venv) pete@pop-os:/home/project/maison
-$ pnpm build
 $ turbo build
 • turbo 2.10.7
 
@@ -89,14 +77,7 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
-@maison/email:build: cache miss, executing 9adc1569500546b7
-@maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
-@maison/config:build: cache hit, replaying logs 1884c83fa26be26e
-@maison/db:build: $ tsc --build
-@maison/auth:build: cache miss, executing 1c4d993cd2eb5a59
-@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
-@maison/config:build: $ tsc --build
-@maison/ui:build: $ tsc --build
+@maison/config:build: cache miss, executing 43bcc38b2aef396f
 @maison/studio:build: cache hit, replaying logs 970c922270e07228
 @maison/studio:build: $ sanity build
 @maison/studio:build: 
@@ -113,24 +94,31 @@ $ turbo build
 ✔ Clean output folder (88ms)
 ✔ Build Sanity Studio (33003ms)
 @maison/studio:build: 
+@maison/email:build: cache hit, replaying logs 9adc1569500546b7
 @maison/email:build: $ tsc --build
-@maison/auth:build: $ tsc --build
-@maison/workers:build: cache miss, executing d8e339f954ed3756
-@maison/payments:build: cache miss, executing 51412f591b0ffec6
-@maison/payments:build: $ tsc --build
+@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
+@maison/ui:build: $ tsc --build
+@maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
+@maison/db:build: $ tsc --build
+@maison/workers:build: cache hit, replaying logs d8e339f954ed3756
 @maison/workers:build: $ tsc --build
-@maison/api:build: cache miss, executing 0c7f7c65b17a2909
+@maison/auth:build: cache miss, executing 33d01238edb6d5fc
+@maison/config:build: $ tsc --build
+@maison/auth:build: $ tsc --build
+@maison/payments:build: cache miss, executing ef6153422e91eed9
+@maison/payments:build: $ tsc --build
+@maison/api:build: cache miss, executing 7a98219883ff9dcf
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing 13f2d6b639d85c8f
+@maison/web:build: cache miss, executing c9dd1873db86d778
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
 @maison/web:build: 
 @maison/web:build:   Creating an optimized production build ...
-@maison/web:build: ✓ Compiled successfully in 70s
-@maison/web:build: ✓ Finished TypeScript in 41s 
+@maison/web:build: ✓ Compiled successfully in 14.0s
+@maison/web:build: ✓ Finished TypeScript in 14.2s 
 ⚠ Using edge runtime on a page currently disables static generation for that page
-@maison/web:build: ✓ Collecting page data using 3 workers in 2.9s 
+@maison/web:build: ✓ Collecting page data using 3 workers in 2.6s 
 [account orders] Failed to fetch: Error: Dynamic server usage: Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1ubtsml._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
@@ -176,6 +164,15 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/customers couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
+@maison/web:build: [admin discounts] Failed to fetch: Error: Dynamic server usage: Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+@maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1ubtsml._.js:1:12426)
+@maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
+@maison/web:build:     at i (.next/server/chunks/ssr/_1smg1o5._.js:488:4675)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0dvc018._.js:1:11225)
+@maison/web:build:     at stringify (<anonymous>) {
+@maison/web:build:   description: "Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+@maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
+@maison/web:build: }
 @maison/web:build: [admin inventory] Failed to fetch: Error: Dynamic server usage: Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1ubtsml._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
@@ -201,15 +198,6 @@ $ turbo build
 @maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0t8nzve._.js:1:10781)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
-@maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
-@maison/web:build: }
-@maison/web:build: [admin discounts] Failed to fetch: Error: Dynamic server usage: Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
-@maison/web:build:     at y (.next/server/chunks/ssr/1hgn_next_dist_1ubtsml._.js:1:12426)
-@maison/web:build:     at m (.next/server/chunks/ssr/_01s0yd5._.js:1:15867)
-@maison/web:build:     at i (.next/server/chunks/ssr/_1smg1o5._.js:488:4675)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0dvc018._.js:1:11225)
-@maison/web:build:     at stringify (<anonymous>) {
-@maison/web:build:   description: "Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
 @maison/web:build: [admin products] Failed to fetch: Error: Dynamic server usage: Route /admin/products couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
@@ -239,8 +227,8 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/trade couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 816ms
-@maison/web:build: ✓ Finalizing page optimization in 23ms 
+@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 796ms
+@maison/web:build: ✓ Finalizing page optimization in 25ms 
 @maison/web:build: 
 @maison/web:build: Route (app)
 @maison/web:build: ┌ ○ /
@@ -293,15 +281,13 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    4 cached, 10 total
-  Time:    2m46.454s 
+Cached:    5 cached, 10 total
+  Time:    51.568s 
 
-(venv) pete@pop-os:/home/project/maison
-$ pnpm start
 $ pnpm --filter=@maison/web start
 $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 578ms
+✓ Ready in 184ms
 
