@@ -4,22 +4,18 @@ pnpm db:migrate
 pnpm db:seed
 pnpm build
 pnpm start
-On branch main
-Your branch is up to date with 'origin/main'.
-
-Changes not staged for commit:
-  (use "git add/rm <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        modified:   docs/session_log.md
-        deleted:    pnpm_log.txt
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-
-no changes added to commit (use "git add" and/or "git commit -a")
 Scope: all 14 workspace projects
 Already up to date
-Done in 672ms using pnpm v11.17.0
+
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 11.17.0 → 11.18.0.   │
+   │   Changelog: https://pnpm.io/v/11.18.0   │
+   │     To update, run: pnpm add -g pnpm     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+Done in 770ms using pnpm v11.17.0
 $ turbo db:migrate --filter=@maison/db
 • turbo 2.10.7
 
@@ -31,14 +27,14 @@ $ turbo db:migrate --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ enable debugging { debug: true }
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 
  Tasks:    1 successful, 1 total
 Cached:    0 cached, 1 total
-  Time:    1.796s 
+  Time:    2.179s 
 
 $ turbo db:seed --filter=@maison/db
 • turbo 2.10.7
@@ -51,14 +47,14 @@ $ turbo db:seed --filter=@maison/db
 @maison/db:db:migrate: $ drizzle-kit migrate
 @maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
 @maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ◈ secrets for agents [www.dotenvx.com]
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ suppress logs { quiet: true }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
 @maison/db:db:migrate: Using 'pg' driver for database querying
 [✓] migrations applied successfully!
 @maison/db:db:seed: cache bypass, force executing 596b88f9df1036e1
 @maison/db:db:seed: $ tsx src/seed/index.ts
-@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ override existing { override: true }
-@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 @maison/db:db:seed: ── Maison seed ──────────────────────────────────────────
 @maison/db:db:seed: → Upserting 8 collections…
 @maison/db:db:seed: → Upserting 20 products…
@@ -70,7 +66,7 @@ $ turbo db:seed --filter=@maison/db
 
  Tasks:    2 successful, 2 total
 Cached:    0 cached, 2 total
-  Time:    3.913s 
+  Time:    4.391s 
 
 $ turbo build
 • turbo 2.10.7
@@ -79,15 +75,23 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
-@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
-@maison/email:build: cache miss, executing 99cc0c6aac383be6
-@maison/ui:build: $ tsc --build
 @maison/config:build: cache hit, replaying logs 43bcc38b2aef396f
+@maison/config:build: $ tsc --build
+@maison/email:build: cache hit, replaying logs 99cc0c6aac383be6
+@maison/email:build: $ tsc --build
 @maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
 @maison/db:build: $ tsc --build
-@maison/config:build: $ tsc --build
+@maison/payments:build: cache hit, replaying logs 3742622f2ff3e57e
+@maison/payments:build: $ tsc --build
+@maison/workers:build: cache hit, replaying logs 4831aeb92fdc7ed0
+@maison/workers:build: $ tsc --build
+@maison/auth:build: cache hit, replaying logs 157d3a6d5851a19f
+@maison/auth:build: $ tsc --build
+@maison/api:build: cache hit, replaying logs 7672a76161a9cb6f
+@maison/api:build: $ tsc --build
+@maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
 @maison/studio:build: cache hit, replaying logs 970c922270e07228
-@maison/auth:build: cache miss, executing 157d3a6d5851a19f
+@maison/ui:build: $ tsc --build
 @maison/studio:build: $ sanity build
 @maison/studio:build: 
 @maison/studio:build: 
@@ -103,15 +107,7 @@ $ turbo build
 ✔ Clean output folder (88ms)
 ✔ Build Sanity Studio (33003ms)
 @maison/studio:build: 
-@maison/auth:build: $ tsc --build
-@maison/email:build: $ tsc --build
-@maison/workers:build: cache miss, executing 4831aeb92fdc7ed0
-@maison/payments:build: cache miss, executing 3742622f2ff3e57e
-@maison/payments:build: $ tsc --build
-@maison/workers:build: $ tsc --build
-@maison/api:build: cache miss, executing 7672a76161a9cb6f
-@maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing 9a85519e0da50190
+@maison/web:build: cache hit, replaying logs 9a85519e0da50190
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
@@ -283,13 +279,13 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    4 cached, 10 total
-  Time:    41.421s 
+Cached:    10 cached, 10 total
+  Time:    435ms >>> FULL TURBO
 
 $ pnpm --filter=@maison/web start
 $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 184ms
+✓ Ready in 188ms
 
