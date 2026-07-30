@@ -684,5 +684,66 @@ Re-validated against all 3 skills after v8. Found 5 NEW non-compliances (1 HIGH,
 
 ---
 
+I'll ensure everything is committed first, then proceed with the new comprehensive cycle.
+Local at `4eff062`, remote ahead at `9f87e71`. Let me pull to refresh:
+Build succeeded 10/10. Only warnings are: slow npm registry responses (transient) + expected DYNAMIC_SERVER_USAGE on auth-guarded routes (ADR-010). No real errors. Let me curl the live site:
+Live site confirmed healthy. Now let me launch the skills validation subagent + agent-browser E2E in parallel:
+Excellent — 2 NEW PII-logging issues found. Let me do quick agent-browser E2E, then fix them:
+E2E clean — no new live-site issues. Now let me apply the 2 PII-logging fixes (V10-1 + V10-2):
+V10-1 done. Now V10-2 — fix stub-mode email payload logging in send.ts + resend-client.ts:
+Now let me install deps, verify all gates, and commit:
+All gates GREEN. Let me verify the affected tests pass without cache:
+All tests pass. Now let me update docs + commit + push:
+Docs updated. Let me run final format check + commit + push:
+**Push succeeded** — `9f87e71..9854a08  main -> main`. Let me verify:
+## Summary
+
+**v10 skills-compliance remediation complete** — committed as `9854a08` on `main` and pushed to GitHub. All v5-v9 fixes confirmed working; 2 remaining PII-logging issues fixed.
+
+### Pre-flight verification
+- Local at `4eff062`, remote ahead at `9f87e71` — pulled (updated pnpm_log.txt + session_log.md)
+- pnpm_log.txt: build succeeded 10/10 packages, 37/37 routes; 42 warning lines all expected (slow npm registry + DYNAMIC_SERVER_USAGE on auth-guarded routes per ADR-010)
+- curl: all 11 page titles correct, homepage 200 OK (224KB)
+
+### E2E testing (agent-browser)
+- **No new live-site issues found** — homepage clean (H1 correct, 0 stray headings, no console errors)
+
+### Skills-compliance re-validation (3 skills)
+Re-validated against all 3 skills after v9. Found 2 NEW PII-logging issues that v9 missed (both in files adjacent to v9 fixes):
+- **V10-1 (HIGH)**: `webhooks.ts:183` logged customer email (`order.email`) — v9 V9-2 fixed the `process.env` access 4 lines above but missed the PII log
+- **V10-2 (LOW)**: Stub-mode email senders in `send.ts` + `resend-client.ts` logged full payload including `to` (customer email) and `react` (email body)
+
+### Fixes applied
+- **V10-1**: Replaced `email sent to ${order.email}` with `email sent (PII redacted)` in `webhooks.ts:183`
+- **V10-2**: Replaced `console.log('[email] (stub) Would send:', payload)` with metadata-only log (`subject="${meta.subject}"`) in both `send.ts:35` + `resend-client.ts:41`
+
+### Documentation updates
+- v1.2.7 REMEDIATION_HISTORY appended to PRD, PAD (footer bumped v1.2.6→v1.2.7), Design Guide
+- AGENTS.md + CLAUDE.md: PII ban note updated to cover webhooks.ts + stub-mode senders
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass (53 payments tests, 35 auth tests, 20 api tests, 99 web tests)
+- `pnpm format:check` → all files clean
+- `git push origin main` → `9f87e71..9854a08  main -> main` ✓
+
+### PII logging now fully redacted across the codebase
+All `console.log` calls that previously wrote customer PII (name, email, message, order details) are now PII-safe:
+- `contact.ts` — `(PII redacted)` (v9 V9-1)
+- `newsletter.ts` — `(PII redacted)` (v9 V9-1)
+- `webhooks.ts` — `(PII redacted)` (v10 V10-1)
+- `send.ts` stub — subject only (v10 V10-2)
+- `resend-client.ts` stub — subject only (v10 V10-2)
+
+### Still deferred (unchanged)
+- `noUnusedLocals`/`noUnusedParameters` (would require cleanup pass)
+- React Compiler (5 `useCallback` instances — requires config change)
+- ~22 non-null assertions in tRPC routers (mostly safe Drizzle patterns)
+- Trigger.dev stubs (Phase 0, documented)
+- 4 `'use client'` page components (deliberate, locked by contract test)
+
+---
+
 https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea
 
