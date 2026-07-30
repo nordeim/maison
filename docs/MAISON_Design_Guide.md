@@ -1573,6 +1573,28 @@ cross-reference only:
   visible rendering of every section documented in this guide is unchanged.
   The @maison/payments test count is unchanged (3 files, 18 tests).
 
+### v1.2.7 (July 31, 2026) — v10 Remediation (V10-1 + V10-2, design-system-relevant subset)
+
+Skills-compliance fixes identified by the v10 remediation audit (re-validation
+pass that caught two PII-logging issues v9 missed in adjacent files). All changes
+are TDD-driven; the codebase is the source of truth. Full per-fix detail is in
+the PRD + PAD REMEDIATION_HISTORY v1.2.7 subsections. Neither v10 fix touches
+`globals.css`, `tooling/tailwind/base.ts`, or any visual surface, so this entry
+is a cross-reference only:
+
+- **V10-1, V10-2 (cross-reference).** Both v10 fixes are design-system-adjacent
+  but do not touch `globals.css`, `tooling/tailwind/base.ts`, or any visual
+  surface, so are documented only in the PRD + PAD REMEDIATION_HISTORY v1.2.7
+  subsections: V10-1 (removed PII logging — `order.email` — from
+  `packages/payments/src/webhooks.ts:183` per Skill 2 §13.10; v9's V9-2 fixed the
+  env access four lines above but missed the PII log on line 183 in the same
+  file), V10-2 (redacted stub-mode email payload logging in
+  `packages/email/src/send.ts:35` + `packages/auth/src/resend-client.ts:41` — was
+  logging full `payload` including `to` (customer PII) and `react` (email body);
+  replaced with metadata-only subject log per Skill 2 §13.10). The visible
+  rendering of every section documented in this guide is unchanged. The
+  @maison/payments test count is unchanged (3 files, 18 tests).
+
 ---
 
 ## Appendix C: Change Log (v4)

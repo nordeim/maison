@@ -180,7 +180,7 @@ async function handlePaymentIntentSucceeded(
       }),
     });
 
-    console.log(`[stripe] Order ${order.orderNumber} confirmed + email sent to ${order.email}`);
+    console.log(`[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)`);
   } catch (err) {
     console.error(
       `[stripe] Failed to send confirmation email for order ${order.orderNumber}:`,

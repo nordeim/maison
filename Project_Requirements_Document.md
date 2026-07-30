@@ -1922,6 +1922,46 @@ requirements-relevant changes from v1.2.6:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.2.7 (July 31, 2026) — v10 Remediation (V10-1 + V10-2)
+
+Skills-compliance fixes identified by the v10 remediation audit (re-validation
+pass that caught two PII-logging issues v9 missed in adjacent files). All v9
+fixes (V9-1..V9-5) were re-verified working; the codebase remains the source of
+truth. This subsection documents the requirements-relevant changes from v1.2.7:
+
+- **V10-1 — Removed PII logging from `webhooks.ts` (HIGH, Skill 2 §13.10).**
+  Per Skill 2 §13.10, the same PII principle that bans logging Stripe webhook
+  payloads also bans logging customer PII. `packages/payments/src/webhooks.ts:183`
+  was logging `order.email` via
+  `console.log('[stripe] Order ${order.orderNumber} confirmed + email sent to ${order.email}')`
+  in the production webhook handler (fired on every successful Stripe Payment
+  Intent confirmation). Replaced with
+  `'[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)'` —
+  same redaction pattern V9-1 applied to `contact.ts` + `newsletter.ts`. v9's V9-2
+  fixed the `process.env['NEXT_PUBLIC_APP_URL']` access four lines above (line
+  179) but missed the PII log on line 183 in the same file.
+
+- **V10-2 — Redacted stub-mode email payload logging (LOW, Skill 2 §13.10).**
+  Per Skill 2 §13.10, never log full email payloads. Two stub-mode senders were
+  logging the full `payload` object (which includes `to` (recipient email =
+  customer PII) and `react` (email body, may contain contact-form PII)) via
+  `console.log('[email] (stub) Would send:', payload)`:
+  - `packages/email/src/send.ts:35` — stub branch of the `sendEmail` helper.
+  - `packages/auth/src/resend-client.ts:41` — stub branch of the auth email
+    client (verification + password-reset emails).
+  Both replaced with metadata-only logs:
+  `console.log('[email] (stub) Would send email: subject="${meta.subject ?? '(unknown)'}"')`
+  — logs only the subject, never `to` or `react`. Stub-mode only fires when
+  `RESEND_API_KEY` is unset (dev/test/preview envs), so severity is LOW, but the
+  same V9-1 PII principle applies.
+
+- **Contract test count updates.** No new contract test files; no existing
+  contract tests extended in scope. Test counts unchanged:
+  Total @maison/web tests: 8 files, 99 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices

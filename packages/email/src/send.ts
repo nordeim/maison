@@ -32,7 +32,10 @@ function getClient(): ResendClient {
     cachedClient = {
       emails: {
         send: async (payload: unknown) => {
-          console.log('[email] (stub) Would send:', payload);
+          // Log metadata only — never `to` or `react` (PII). The payload
+          // shape is { from, to, subject, react }; we log subject only.
+          const meta = payload as { subject?: string };
+          console.log(`[email] (stub) Would send email: subject="${meta.subject ?? '(unknown)'}"`);
           return { data: { id: 'stub-email-id' }, error: null };
         },
       },
