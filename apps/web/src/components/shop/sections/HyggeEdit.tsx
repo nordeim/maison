@@ -68,7 +68,7 @@ export function HyggeEdit() {
               lineHeight: 1.05,
             }}
           >
-            A room is a
+            A room is a{' '}
             <em
               style={{
                 color: 'var(--gold)',
@@ -76,7 +76,7 @@ export function HyggeEdit() {
                 fontWeight: 300,
               }}
             >
-              {' feeling '}
+              feeling
             </em>
             .
           </h2>

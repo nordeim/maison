@@ -30,20 +30,20 @@ The brand embodies "considered living" — offering handcrafted objects that pri
 
 ## Key Features
 
-| ✨  | Feature                       | Description                                                                                             |
-| --- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 🎨  | **Editorial commerce design** | Cormorant Garamond + Inter, warm cream/terracotta palette, no generic SaaS patterns                     |
-| 🛋️  | **Curated catalog**           | 8 collections, 13 initial SKUs across Lighting, Ceramics, Furniture, Textiles, Objects, Seasonal, Gifts |
-| 🛒  | **Full checkout flow**        | Stripe Payment Intents, Apple Pay + Google Pay, idempotent order creation, 3-step UX                    |
-| 👤  | **Customer accounts**         | Better Auth (email/password + OAuth), order history, wishlist, saved addresses                          |
-| 🛠️  | **Admin back-office**         | RBAC-gated (`staff`/`manager`/`owner`), product CRUD, order fulfillment, inventory, audit log           |
-| 📝  | **Headless CMS**              | Sanity Studio for product content, journal, maker stories, homepage sections                            |
-| 🔍  | **Type-safe API**             | tRPC v11 end-to-end types, no codegen, server-side caller for RSC                                       |
-| 🗄️  | **Type-safe ORM**             | Drizzle ORM 0.45 with PostgreSQL 17, version-controlled migrations                                      |
-| ⚡  | **Next.js 16 RSC**            | Server Components by default, `proxy.ts` auth, Turbopack, ISR                                           |
-| 🎭  | **Anti-generic UI**           | Per `avant-garde-design-v4` skill: no bento grids, no mesh gradients, no glassmorphism                  |
-| 📊  | **Analytics + observability** | PostHog product analytics, Sentry errors, Axiom logs, structured audit trail                            |
-| 🔒  | **OWASP 2025 hardened**       | CSP, rate limiting, signed webhooks, supply-chain guardrails (`minimumReleaseAge`)                      |
+| ✨  | Feature                       | Description                                                                                                                         |
+| --- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 🎨  | **Editorial commerce design** | Cormorant Garamond + Inter, warm cream/terracotta palette, no generic SaaS patterns                                                 |
+| 🛋️  | **Curated catalog**           | 8 collections, 20 products (13 original + 7 UAT additions) across Lighting, Ceramics, Furniture, Textiles, Objects, Seasonal, Gifts |
+| 🛒  | **Full checkout flow**        | Stripe Payment Intents, Apple Pay + Google Pay, idempotent order creation, 3-step UX                                                |
+| 👤  | **Customer accounts**         | Better Auth (email/password + OAuth), order history, wishlist, saved addresses                                                      |
+| 🛠️  | **Admin back-office**         | RBAC-gated (`staff`/`manager`/`owner`), product CRUD, order fulfillment, inventory, audit log                                       |
+| 📝  | **Headless CMS**              | Sanity Studio for product content, journal, maker stories, homepage sections                                                        |
+| 🔍  | **Type-safe API**             | tRPC v11 end-to-end types, no codegen, server-side caller for RSC                                                                   |
+| 🗄️  | **Type-safe ORM**             | Drizzle ORM 0.45 with PostgreSQL 17, version-controlled migrations                                                                  |
+| ⚡  | **Next.js 16 RSC**            | Server Components by default, `proxy.ts` auth, Turbopack, ISR                                                                       |
+| 🎭  | **Anti-generic UI**           | Per `avant-garde-design-v4` skill: no bento grids, no mesh gradients, no glassmorphism                                              |
+| 📊  | **Analytics + observability** | PostHog product analytics, Sentry errors, Axiom logs, structured audit trail                                                        |
+| 🔒  | **OWASP 2025 hardened**       | CSP, rate limiting, signed webhooks, supply-chain guardrails (`minimumReleaseAge`)                                                  |
 
 ---
 
@@ -244,7 +244,7 @@ docker compose up -d postgres redis
 ### 4. Set up database
 
 ```bash
-pnpm db:setup   # generates migrations, applies them, seeds 8 collections + 13 products
+pnpm db:setup   # generates migrations, applies them, seeds 8 collections + 20 products
 ```
 
 ### 5. Run the dev server
@@ -259,7 +259,7 @@ pnpm dev
 ```bash
 # Health checks
 curl http://localhost:3000                    # → Homepage renders (hero + seeded products)
-curl http://localhost:3000/products           # → PLP shows 13 seeded products
+curl http://localhost:3000/products           # → PLP shows 20 seeded products
 docker compose ps                             # → postgres + redis running
 pnpm check-types                              # → no errors
 pnpm test                                     # → all unit tests pass
@@ -438,7 +438,7 @@ REFACTOR → Clean up the code while keeping the test green
 
 | Phase                  | Status      | Key Deliverables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (24 tables) + migration, seed (8 collections + 13 products), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (13), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                                                           |
+| Phase 0 — Foundation   | ✅ Complete | Turborepo monorepo scaffolded (apps/web, apps/studio, 7 packages, services/workers, tooling), Drizzle schema (24 tables) + migration, seed (8 collections + 20 products — 13 original + 7 UAT additions), Better Auth config, design tokens (CSS + Tailwind v4), tRPC routers (13), Stripe client, React Email templates, Trigger.dev job stubs, Playwright E2E config, GitHub Actions CI, `.env.example`, `docker-compose.yml`                                                                                                                                                                                                                                                                                                                                           |
 | Phase 1 — MVP          | ✅ Complete | Full 15-section homepage (Hero, Marquee, Featured, Categories, Products, Philosophy, Materials, Hygge Edit, Testimonials, Journal, Instagram, Newsletter), PLP with filter/sort, PDP with gallery + related products + JSON-LD, cart drawer + cart page with quantity controls + free-shipping bar, multi-step checkout (shipping → payment → review → confirmation) with Stripe Payment Intents + idempotent order creation, customer account (dashboard, order history, wishlist, addresses, settings), admin back-office (dashboard with KPIs, product table, order fulfillment with status updates, customer directory, inventory management), Stripe webhook handler (updates order status + sends confirmation email), 16 E2E smoke tests covering all public flows |
 | Phase 2 — Growth       | ✅ Complete | Wishlist persistence (DB-backed for auth, localStorage for anon, WishlistButton on ProductCard + PDP), promo codes (discounts router + checkout promo field + admin discount management), product search (SearchModal with "/" shortcut + search results page), address book CRUD (full create/edit/delete with default flags), account settings (profile edit, newsletter toggle, GDPR deletion stub), full About page (hero, narrative, 4 values, founder profile, sustainability, CTA), admin product create form, admin discount management (create/deactivate codes with audit_log), 20 E2E tests (added search + about editorial content)                                                                                                                           |
 | Phase 3 — Optimisation | ✅ Complete | Product reviews (schema + router + PDP review section + review form + admin moderation), gift cards (purchase page + code generation + validation + redemption), trade program (application form + admin approval/rejection + auto-discount), multi-currency display (5 currencies + selector + conversion), loyalty program (points + 4 tiers + history + account widget), admin analytics dashboard (revenue chart + top products + conversion funnel + customer cohorts), admin reviews moderation, admin trade applications, 30 E2E tests (22 smoke + 8 accessibility). Trigger.dev workers remain Phase 0 stubs pending implementation.                                                                                                                              |

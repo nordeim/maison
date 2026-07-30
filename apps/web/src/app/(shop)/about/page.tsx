@@ -92,7 +92,7 @@ export default function AboutPage() {
               >
                 care
               </em>
-              ,<br />
+              , <br />
               materials that age{' '}
               <em
                 style={{

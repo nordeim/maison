@@ -81,7 +81,7 @@ export function FeaturedCollection() {
               lineHeight: 1.05,
             }}
           >
-            Lighting that
+            {'Lighting that '}
             <br />
             <em
               style={{
@@ -90,7 +90,7 @@ export function FeaturedCollection() {
                 fontStyle: 'italic',
               }}
             >
-              {' casts warmth '}
+              casts warmth
             </em>
             .
           </h2>

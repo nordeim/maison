@@ -99,7 +99,7 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
                 fontWeight: 500,
               }}
             >
-              For every
+              For every{' '}
               <em
                 style={{
                   color: 'var(--clay)',
@@ -107,8 +107,8 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
                   fontWeight: 400,
                 }}
               >
-                {' quiet '}
-              </em>
+                quiet
+              </em>{' '}
               corner.
             </h2>
           </div>
@@ -138,6 +138,7 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
             <a
               key={cat.slug}
               href={`/products?collection=${cat.slug}`}
+              aria-label={`Browse ${cat.name} collection`}
               style={{
                 position: 'relative',
                 aspectRatio: '3 / 4',
@@ -147,7 +148,7 @@ export function CategoryGrid({ collections }: CategoryGridProps) {
             >
               <Image
                 src={cat.image}
-                alt={cat.name}
+                alt=""
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 style={{

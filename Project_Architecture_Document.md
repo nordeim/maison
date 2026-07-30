@@ -258,14 +258,14 @@ This PAD is the **single source of truth** for the Maison platform's engineering
 
 - **Context:** The v1.1 PRD/PAD claimed "Postgres FTS for Phase 1 search" with `pg_trgm` extension and GIN indexes. Validation against both skills revealed FTS is not documented — Stillwater uses Drizzle `ilike` + `or` (Lesson 80).
 - **Decision:** Use Drizzle `ilike` + `or` for Phase 1 search. No `tsvector` columns, no GIN indexes, no `pg_trgm` extension. Algolia remains the Phase 2 escalation path if `ilike` performance degrades at scale (> 1,000 products).
-- **Rationale:** (1) 13 SKUs doesn't justify FTS infrastructure. (2) `ilike` is simpler to implement, debug, and maintain. (3) FTS shines at 1,000+ documents with relevance ranking — we're 2 orders of magnitude below that. (4) Aligns with Stillwater Lesson 80.
+- **Rationale:** (1) 13 v1 SKUs (now 20) doesn't justify FTS infrastructure. (2) `ilike` is simpler to implement, debug, and maintain. (3) FTS shines at 1,000+ documents with relevance ranking — we're 2 orders of magnitude below that. (4) Aligns with Stillwater Lesson 80.
 - **Consequences:**
   - ✅ Simpler implementation (no generated columns, no query language)
   - ✅ Easier to debug and maintain
   - ❌ No relevance ranking or stemming in Phase 1 (mitigated by sort options: Featured, Newest, Price)
   - ❌ May need migration to Algolia/Meilisearch in Phase 2 if catalog grows
 - **Alternatives Rejected:**
-  - _Postgres FTS (tsvector + GIN)_ — over-engineered for 13 SKUs; not in reference skills
+  - _Postgres FTS (tsvector + GIN)_ — over-engineered for 13 v1 SKUs (now 20); not in reference skills
   - _Algolia from day one_ — premature optimization; adds vendor dependency
 
 #### ADR-013: Email/password enabled (hybrid auth — diverges from Stillwater passwordless)
@@ -608,7 +608,7 @@ maison/
 │   │   │   │   ├── relations.ts             # Drizzle relations (for query API)
 │   │   │   │   └── index.ts                 # Re-exports all schemas
 │   │   │   ├── seed/                        # Seed scripts + fixtures
-│   │   │   │   ├── index.ts                 # Main seed (8 collections, 13 products)
+│   │   │   │   ├── index.ts                 # Main seed (8 collections, 20 products)
 │   │   │   │   ├── e2e.ts                   # E2E test seed
 │   │   │   │   └── fixtures/                # Static seed data (products, collections)
 │   │   │   ├── scripts/
@@ -1829,7 +1829,7 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | `pnpm db:generate`                             | repo root | Generate Drizzle migrations from schema changes   |
 | `pnpm db:migrate`                              | repo root | Apply pending migrations                          |
 | `pnpm db:push`                                 | repo root | Push schema directly to DB (**DEV ONLY — NEVER use in production**; irreversible schema overwrite. Use `db:migrate` for production per ADR-014) |
-| `pnpm db:seed`                                 | repo root | Seed initial catalog (8 collections, 13 products) |
+| `pnpm db:seed`                                 | repo root | Seed initial catalog (8 collections, 20 products) |
 | `pnpm db:studio`                               | repo root | Open Drizzle Studio GUI                           |
 | `pnpm db:reset`                                | repo root | ⚠️ Drop all tables + re-seed (dev only)           |
 | `pnpm jobs:dev`                                | repo root | Start Trigger.dev workers in dev mode             |
@@ -1926,7 +1926,7 @@ docker exec -it maison_stripe stripe listen --forward-to localhost:3000/api/webh
 | `packages/db/src/index.ts`                           | ~90    | Drizzle client (Neon + node-postgres auto-detect)                          |
 | `packages/db/src/schema/index.ts`                    | ~60    | Schema barrel (re-exports all 24 tables + enums + relations)               |
 | `packages/db/drizzle/migrations/0000_initial.sql`    | ~190   | Initial migration (all tables + enums + indexes)                           |
-| `packages/db/src/seed/index.ts`                      | ~100   | Seed script (8 collections + 13 products, idempotent)                      |
+| `packages/db/src/seed/index.ts`                      | ~100   | Seed script (8 collections + 20 products, idempotent)                      |
 | `packages/db/drizzle.config.ts`                      | ~45    | Drizzle Kit config (uses DATABASE_URL_UNPOOLED)                            |
 | `packages/auth/src/config.ts`                        | ~130   | Better Auth config (email/password + magic link + Google OAuth per ADR-013, `customSession` plugin, rate limiting) |
 | `packages/auth/src/rbac.ts`                          | ~50    | RBAC roles (customer/staff/manager/owner per ADR-008) + `canAccessStaff()` / `canAccessOwner()` helpers |
@@ -2032,6 +2032,50 @@ This section summarises the v1.2.1 reconciliation between this PAD and the post-
 
 17. **"8-gate pipeline" clarified.** §12 Key Files Reference now documents that CI runs 4 jobs (`quality-gates`, `e2e`, `deploy-preview`, `deploy-production`); the `quality-gates` job enforces 8 gates internally (check-types, lint, test, audit, build, lighthouse, bundle-size, plus smoke+E2E tests in the `e2e` job).
 
+### v1.2.2 (July 30, 2026) — E2E Remediation
+
+Bug fixes identified via agent-browser E2E testing of the live site
+https://maison.jesspete.shop/ (see docs/REMEDIATION_PLAN_v5.md). This
+subsection documents the architecture-relevant changes from v1.2.2:
+
+- **F4 — Server/Client Component page split pattern.** Four pages that were
+  Client Components (`'use client'` with interactive forms) could not export
+  `metadata` (Next.js 16 forbids `metadata` export from Client Components),
+  so they silently fell back to the homepage's default title. Each was split
+  into a Server Component `page.tsx` (which exports `metadata`) that renders
+  a Client Component child containing the interactive form:
+  - `/gift-cards` → `apps/web/src/app/(shop)/gift-cards/page.tsx` (Server) +
+    `apps/web/src/components/shop/GiftCardsForm.tsx` (Client)
+  - `/trade` → `apps/web/src/app/(shop)/trade/page.tsx` (Server) +
+    `apps/web/src/components/shop/TradeForm.tsx` (Client)
+  - `/cart` → `apps/web/src/app/(shop)/cart/page.tsx` (Server) +
+    `apps/web/src/components/shop/CartView.tsx` (Client)
+  - `/checkout` → `apps/web/src/app/(shop)/checkout/page.tsx` (Server) +
+    `apps/web/src/components/shop/CheckoutFlow.tsx` (Client)
+  Page titles now correctly show "Gift Cards — Maison" / "Trade Program —
+  Maison" / "Shopping Bag — Maison" / "Checkout — Maison" instead of the
+  homepage default. This pattern should be used for any future Client
+  Component page that needs SEO metadata.
+
+- **New contract tests (3 files, 25 assertions).** The @maison/web contract
+  test suite grew from 4 files / 65 tests to 7 files / 90 tests:
+  - `apps/web/src/lib/__tests__/headings.contract.test.ts` (10 tests — F1
+    stray-space-in-em pattern, F3 About H1 space, F5 Hero H1 space)
+  - `apps/web/src/lib/__tests__/category-grid.contract.test.ts` (3 tests —
+    F2 CategoryGrid accessible name + img alt + anchor aria-label)
+  - `apps/web/src/lib/__tests__/page-metadata.contract.test.ts` (12 tests —
+    F4 page splits: no `'use client'` directive + `metadata` export for each
+    of the 4 pages + child Client Component exists)
+
+- **Other v1.2.2 fixes (not architecture-relevant, listed for completeness).**
+  F1 (stray-space-before-punctuation in 8 italicized heading sites across 7
+  section components), F2 (CategoryGrid accessible name triple-counting),
+  F3 (About page H1 missing space), F5 (Hero H1 missing space), F6 (Sanity
+  Studio `styled-components` ^6.1.13 → ^6.1.15 to resolve peer dep warning),
+  F7 (docs updated from "13 products" → "20 products (13 original + 7 UAT
+  additions)"). Full per-fix detail in `docs/REMEDIATION_PLAN_v5.md` and the
+  PRD's REMEDIATION_HISTORY v1.2.2 subsection.
+
 ---
 
-_End of Project Architecture Document v1.2.1. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+_End of Project Architecture Document v1.2.2. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

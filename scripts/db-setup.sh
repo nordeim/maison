@@ -35,7 +35,7 @@ fi
 echo "→ Applying migrations…"
 pnpm db:migrate
 
-# 3. Seed initial data (8 collections, 13 products)
+# 3. Seed initial data (8 collections, 20 products)
 echo "→ Seeding initial catalog…"
 pnpm db:seed
 

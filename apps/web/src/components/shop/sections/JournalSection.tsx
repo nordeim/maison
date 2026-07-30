@@ -83,7 +83,7 @@ export function JournalSection() {
                 fontWeight: 500,
               }}
             >
-              Notes on
+              Notes on{' '}
               <em
                 style={{
                   color: 'var(--clay)',
@@ -91,7 +91,7 @@ export function JournalSection() {
                   fontWeight: 400,
                 }}
               >
-                {' slow living '}
+                slow living
               </em>
               .
             </h2>

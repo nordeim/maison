@@ -79,7 +79,7 @@ export function Philosophy() {
               maxWidth: '22ch',
             }}
           >
-            Objects made with
+            Objects made with{' '}
             <em
               style={{
                 color: 'var(--clay)',
@@ -87,9 +87,9 @@ export function Philosophy() {
                 fontWeight: 400,
               }}
             >
-              {' care '}
+              care
             </em>
-            , materials that age
+            , materials that age{' '}
             <em
               style={{
                 color: 'var(--clay)',
@@ -97,7 +97,7 @@ export function Philosophy() {
                 fontWeight: 400,
               }}
             >
-              {' gracefully '}
+              gracefully
             </em>
             , spaces that invite pause.
           </h2>

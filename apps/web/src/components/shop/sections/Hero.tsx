@@ -88,8 +88,7 @@ export function Hero() {
             maxWidth: '14ch',
           }}
         >
-          Objects of
-          <br />
+          Objects of <br />
           <em
             style={{
               fontStyle: 'italic',

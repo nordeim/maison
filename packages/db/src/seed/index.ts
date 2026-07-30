@@ -3,7 +3,7 @@
  *
  * Seeds the database with:
  *  - 8 collections
- *  - 13 products (with images and default variants)
+ *  - 20 products (13 original + 7 UAT additions, with images and default variants)
  *
  * Idempotent: safe to re-run. Existing rows are updated, not duplicated.
  *

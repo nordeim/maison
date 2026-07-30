@@ -197,6 +197,36 @@ REFACTOR → Clean up the code while keeping the test green
 
 For bug fixes: write a regression test FIRST that reproduces the bug, then fix the code. The test prevents the bug from returning.
 
+### Contract tests — the architectural invariants
+
+The repo has **7 contract test files / 90 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts` and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
+
+- `proxy-contract.test.ts` — ADR-006/010 Layer-1 invariant (`proxy.ts` cookie-only)
+- `rendering-strategy.contract.test.ts` — ADR-006/010 `api()`/`apiPublic()` split (○ Static vs ƒ Dynamic)
+- `coverage-thresholds.contract.test.ts` — ADR-019 vitest coverage thresholds
+- `design-tokens.contract.test.ts` — ADR-007 radius tokens resolve to concrete pixels
+- `headings.contract.test.ts` — v1.2.2 F1/F3/F5: no `<em>{' word '}</em>` stray-space pattern; About H1 has space after comma; Hero H1 has space before "Quiet"
+- `category-grid.contract.test.ts` — v1.2.2 F2: CategoryGrid `<img alt="">` (decorative) + `<a aria-label="Browse …">` (no triple-counted accessible name)
+- `page-metadata.contract.test.ts` — v1.2.2 F4: page-split pattern (see below)
+
+### Client Component pages that need metadata — the split pattern
+
+If a page needs both (a) interactive client state AND (b) SEO metadata (title/description), you **cannot** put `'use client'` and `export const metadata` in the same file — Next.js 16 forbids it. Split into:
+
+- `page.tsx` (Server Component) — exports `metadata` (or `generateMetadata`), renders the child
+- `components/shop/<Feature>.tsx` (Client Component) — has `'use client'`, owns the form/state
+
+Pattern is locked in for 4 pages (see `docs/REMEDIATION_PLAN_v5.md` F4 + PAD REMEDIATION_HISTORY v1.2.2):
+
+| Route         | Server `page.tsx`                             | Client child                        |
+| ------------- | --------------------------------------------- | ----------------------------------- |
+| `/gift-cards` | `apps/web/src/app/(shop)/gift-cards/page.tsx` | `components/shop/GiftCardsForm.tsx` |
+| `/trade`      | `apps/web/src/app/(shop)/trade/page.tsx`      | `components/shop/TradeForm.tsx`     |
+| `/cart`       | `apps/web/src/app/(shop)/cart/page.tsx`       | `components/shop/CartView.tsx`      |
+| `/checkout`   | `apps/web/src/app/(shop)/checkout/page.tsx`   | `components/shop/CheckoutFlow.tsx`  |
+
+`page-metadata.contract.test.ts` enforces the invariant: each `page.tsx` lacks `'use client'` AND exports `metadata`, AND the Client child file exists. Don't "consolidate" the child back into the page — the page title (e.g., "Gift Cards — Maison") depends on the split.
+
 ---
 
 ## Git Workflow

@@ -1419,3 +1419,46 @@ This changelog records the targeted edits made to bring `MAISON_Design_Guide.md`
 | 12 | Contrast ratios (§12.5) | 5 entries | 5 entries (verified) | No change — existing ratios (`#1f1b17`/`#faf8f5` ~17:1 AAA; `#786f66`/`#faf8f5` ~5.5:1 AA; `#faf8f5`/`#1f1b17` ~17:1 AAA; `#c4a265`/`#1f1b17` ~7.5:1 AAA; `#a86b4a`/`#faf8f5` ~4.6:1 AA) confirmed accurate against the validation report |
 
 **Net change:** +1 top-level section (§16 Performance Budgets), +1 subsection (§5.6 Border Radius Tokens), +1 row in Appendix A, +1 REMEDIATION_HISTORY appendix. Document length grew from ~1,336 lines to ~1,390 lines.
+
+### v1.2.2 (July 30, 2026) — E2E Remediation
+
+Bug fixes identified via agent-browser E2E testing of the live site
+https://maison.jesspete.shop/ (see docs/REMEDIATION_PLAN_v5.md). This
+subsection documents the design-system-relevant fixes from v1.2.2 — all
+a11y/typography corrections, no visual design changes:
+
+- **F1 — Stray-space-before-punctuation in italicized headings (8 sites).**
+  The JSX pattern `<base><em>{' word '}</em>.` placed literal leading/trailing
+  spaces INSIDE `<em>` with the punctuation OUTSIDE. Browsers rendered the
+  literal spaces, producing visible "word ." with a space before the period
+  in 8 italicized heading sites across 7 section components
+  (`FeaturedCollection.tsx`, `ProductGrid.tsx`, `Philosophy.tsx` ×2,
+  `Materials.tsx`, `HyggeEdit.tsx`, `JournalSection.tsx`, `CategoryGrid.tsx`).
+  Fixed by removing the literal spaces inside `<em>` and using `{' '}` outside.
+  Typography now renders correctly without stray pre-punctuation spaces.
+
+- **F2 — Category card accessible name triple-counting.** `CategoryGrid.tsx`
+  wrapped `<img alt={cat.name}>`, `<h3>{cat.name}</h3>`, and a count line
+  inside a single `<a>`, producing accessible names like
+  "Lighting Lighting LIGHTING PIECES". Fixed by setting `<img alt="">`
+  (decorative image — the `<h3>` already provides the name) and adding
+  `aria-label={\`Browse ${cat.name} collection\`}` to the `<a>`. Visual
+  appearance is unchanged; only the screen-reader name is corrected.
+
+- **F3 — About page H1 missing space ("care,materials").** The About hero
+  H1 used `<em>care</em>,<br/>materials` — `<br/>` produces no whitespace in
+  textContent, so screen readers read "care,materials" (no space after the
+  comma). Fixed by adding `{' '}` between `</em>,` and `<br/>` so textContent
+  reads "care, materials" with the intended space.
+
+- **F5 — Hero H1 missing space ("Objects ofQuiet Beauty").** Same root cause
+  as F3: `<br/>` produces no whitespace, so textContent was "Objects ofQuiet
+  Beauty". Fixed by adding `{' '}` before `<br/>` so textContent reads
+  "Objects of Quiet Beauty" with the intended space.
+
+These fixes are enforced by the new contract test
+`apps/web/src/lib/__tests__/headings.contract.test.ts` (10 assertions)
+plus `apps/web/src/lib/__tests__/category-grid.contract.test.ts` (3
+assertions). No design tokens, colors, typography scale, or component
+visuals changed in v1.2.2 — only whitespace/accessible-name correctness
+in existing components.

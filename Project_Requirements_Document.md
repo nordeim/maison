@@ -776,7 +776,7 @@ maison/
 | ADR-009 | Stripe Payment Intents (chosen implementation) | Supports Stripe Elements, server-side confirmation, Apple Pay/Google Pay via `paymentMethodTypes`. Checkout Sessions rejected because the codebase needs granular control over the payment flow for the 3-step Maison checkout UX. PCI SAQ-A scope retained (card data never touches our servers). |
 | ADR-010 | 2-layer auth pattern (cookie-only proxy + DB-backed layouts) | Performance (no DB query per request in proxy); aligns with Stillwater ADR-009 |
 | ADR-011 | WCAG 2.2 AAA target (stricter than ADA Title II AA) | Aligns with Stillwater §8; 7:1 contrast, 44×44px targets, 3px focus rings |
-| ADR-012 | Phase 1 search via Drizzle `ilike` (not FTS) | 13 SKUs doesn't justify FTS; aligns with Stillwater Lesson 80 |
+| ADR-012 | Phase 1 search via Drizzle `ilike` (not FTS) | 13 v1 SKUs (now 20) doesn't justify FTS; aligns with Stillwater Lesson 80 |
 | ADR-013 | Email/password enabled (hybrid auth) | E-commerce conversion research; diverges from Stillwater passwordless — documented tradeoff |
 | ADR-014 | Webhook idempotency via UNIQUE INDEX + `pg_advisory_xact_lock` | Dual-defense pattern; aligns with Stillwater ADR-004 |
 | ADR-015 | Source resolution via `transpilePackages` + `@maison/source` | No `tsc --build` before `next build`; aligns with Stillwater ADR-011 |
@@ -1383,7 +1383,7 @@ Enforced via `next.config.ts` headers + verified by CI test (per Stillwater patt
 | New Arrivals        | `new-arrivals` | The latest additions to our collection        | 15            |
 | Curated Gifts       | `gifts`        | Thoughtfully selected pieces for giving       | 22            |
 
-### 15.2 Initial Products (13 SKUs, seeding data)
+### 15.2 Initial Products (20 products: 13 original + 7 UAT additions, seeding data)
 
 | Product                  | Collection | Price  | Materials                                | Badges     | On Homepage |
 | ------------------------ | ---------- | ------ | ---------------------------------------- | ---------- | ----------- |
@@ -1524,7 +1524,7 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 ### Phase 0 — Foundation (Weeks 1–2)
 
 - [ ] Turborepo monorepo scaffold (apps/web, apps/studio, packages/_, services/workers, tooling/_)
-- [ ] `packages/db` — Drizzle schema, migrations, seed (8 collections, 13 products)
+- [ ] `packages/db` — Drizzle schema, migrations, seed (8 collections, 20 products — 13 original + 7 UAT additions)
 - [ ] `packages/auth` — Better Auth config (email/password + Magic Link + Google OAuth per ADR-013, sessions, RBAC with 5 procedure tiers per ADR-008)
 - [ ] `packages/ui` — Design tokens (colors.css, typography.css), self-hosted fonts
 - [ ] `apps/web` — Next.js 16 scaffold, `proxy.ts`, `globals.css` with Tailwind v4 `@theme`
@@ -1620,6 +1620,30 @@ Per `nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth` skill §"8-gate CI
 8. **Misc counts corrected.** Animations: 24 → 27 (per `MAISON_Design_Guide.md` Appendix B). Color tokens: explicit count of 16 (was implicit). pnpm version: 11.9.0 → 11.17.0 (matches actual `package.json`). E2E test count: "10 critical scenarios" → "30 E2E tests (22 smoke + 8 accessibility) covering the 10 critical scenarios". v1.2 changelog: "7 MED-severity fixes" → "8 MED-severity fixes (ADR-013 through ADR-020)".
 
 9. **Sitemap cleanup.** `/checkout/success` and `/checkout/cancel` removed from §6.5 — these were Checkout Sessions routes; Payment Intents uses client-side confirmation (no Stripe-hosted redirect).
+
+### v1.2.2 (July 30, 2026) — E2E Remediation
+
+Bug fixes identified via agent-browser E2E testing of the live site
+https://maison.jesspete.shop/ (see docs/REMEDIATION_PLAN_v5.md):
+
+- F1: Removed stray-space-before-punctuation in 8 italicized heading sites
+  across 7 section components (FeaturedCollection, ProductGrid, Philosophy
+  ×2, Materials, HyggeEdit, JournalSection, CategoryGrid).
+- F2: Fixed CategoryGrid accessible name triple-counting (set <img alt="">
+  + added aria-label to <a>).
+- F3: Fixed About page H1 missing space ("care,materials" → "care, materials").
+- F4: Split 4 Client Component pages (/gift-cards, /trade, /cart, /checkout)
+  into Server Component wrapper + Client Component child to enable metadata
+  export. Page titles now show "Gift Cards — Maison" / "Trade Program — Maison"
+  / "Shopping Bag — Maison" / "Checkout — Maison" instead of the homepage default.
+- F5: Fixed Hero H1 missing space ("Objects ofQuiet Beauty" → "Objects of Quiet Beauty").
+- F6: Bumped styled-components ^6.1.13 → ^6.1.15 to resolve Sanity peer dep warning.
+- F7: Updated product count documentation from "13 products" → "20 products
+  (13 original + 7 UAT additions)" to match the actual seed.
+
+Added 3 new contract tests (25 assertions): headings.contract.test.ts,
+category-grid.contract.test.ts, page-metadata.contract.test.ts.
+Total @maison/web contract tests: 7 files, 90 tests.
 
 ---
 
