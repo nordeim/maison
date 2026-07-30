@@ -79,6 +79,7 @@ When asked to implement a feature, follow this discipline:
 - **No `any` in production code.** Use `unknown` + type guard, or define a proper type. `any` in tests is acceptable for mocks.
 - **No `as unknown as` in production code** (Skill 2 §9.2, locked in by `packages/api/src/routers/no-unknown-cast.contract.test.ts` — added in v1.2.5 N1, extended to `.tsx` files in v1.2.6 V9-5). It is the most dangerous TS escape hatch — it bypasses the type checker entirely. The 2 documented exceptions are in `packages/db/src/index.ts:61,88` where Drizzle's `NeonHttpDatabase | NodePgDatabase` union is non-unifiable; they are listed in the contract test's `ALLOWED_FILES` set. Use a proper type union (e.g. `ResendClient = Resend | ResendStub` + `satisfies`), a typed row mapper, or the Drizzle query builder instead.
 - **No PII in logs (Skill 2 §13.10, locked in v1.2.6 V9-1 + v1.2.7 V10-1/V10-2).** Never `console.log` user-supplied PII (name, email, message body). Use PII-redacted messages like `'[contact] Submission received (PII redacted)'`. The same Skill 2 §13.10 rule bans logging Stripe webhook payloads — log only event IDs + types, never request bodies. The `contact.submit` and `newsletter.subscribe` routers are the canonical examples (the v9 fix replaced their PII-leaking `console.log` calls). As of v1.2.7 (V10-1 + V10-2), `packages/payments/src/webhooks.ts` (was logging `order.email` on line 183) and the stub-mode email senders at `packages/email/src/send.ts` + `packages/auth/src/resend-client.ts` (were logging full `payload` including `to` + `react` body) are also PII-safe — the webhook now logs `(PII redacted)` and the stub senders log only the email subject.
+- **No raw `JSON.stringify` inside `dangerouslySetInnerHTML` (Skill 2 §9.1 + §16.3, locked in v1.2.8 V11-2).** When rendering JSON-LD (or any JSON-shaped data) into a `<script>` tag via `dangerouslySetInnerHTML`, wrap the output with `escapeForScriptContext(JSON.stringify(...))`. The helper lives in `apps/web/src/lib/utils.ts` and replaces `<` with `\u003c` (plus `>`, `&`, `"`, `'` analogously) — without it, any product field containing the literal string `</script>` would terminate the script tag early and execute attacker-controlled content in the page context (stored XSS). The PDP JSON-LD script tag at `apps/web/src/app/(shop)/products/[slug]/page.tsx:107` is the canonical call site. Never "simplify" it back to bare `JSON.stringify()`.
 - **No `// @ts-ignore`** — use `// @ts-expect-error` with a reason, or fix the type.
 - **Prefer `interface` for object shapes, `type` for unions/intersections/mapped types.**
 
@@ -203,7 +204,7 @@ For bug fixes: write a regression test FIRST that reproduces the bug, then fix t
 
 ### Contract tests — the architectural invariants
 
-The repo has **8 contract test files / 99 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, `packages/api/src/routers/zod-email.contract.test.ts`, `packages/api/src/routers/no-unknown-cast.contract.test.ts`, `packages/auth/src/rbac-aliases.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
+The repo has **9 contract test files / 102 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, `packages/api/src/routers/zod-email.contract.test.ts`, `packages/api/src/routers/no-unknown-cast.contract.test.ts`, `packages/auth/src/rbac-aliases.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
 
 - `proxy-contract.test.ts` — ADR-006/010 Layer-1 invariant (`proxy.ts` cookie-only)
 - `rendering-strategy.contract.test.ts` — ADR-006/010 `api()`/`apiPublic()` split (○ Static vs ƒ Dynamic)
@@ -213,6 +214,7 @@ The repo has **8 contract test files / 99 tests** in `apps/web/src/lib/__tests__
 - `category-grid.contract.test.ts` — v1.2.2 F2: CategoryGrid `<img alt="">` (decorative) + `<a aria-label="Browse …">` (no triple-counted accessible name)
 - `page-metadata.contract.test.ts` — v1.2.2 F4 + v1.2.3 G1: page-split pattern (see below)
 - `pdp-thumbnail-alt.contract.test.ts` — v1.2.4 H4: PDP gallery thumbnail `<img>` has non-empty `alt` AND falls back to `img.altText` (was `alt=""`)
+- `scroll-reveal-wiring.contract.test.ts` — v1.2.8 V11-1: asserts the `useScrollReveal` hook exists in `apps/web/src/hooks/useScrollReveal.ts`, the `ScrollRevealTrigger` Client Component exists in `apps/web/src/components/shop/ScrollRevealTrigger.tsx` with a `'use client'` directive, and the `(shop)` layout imports + renders it. Locks the wiring that prevents `/products` (and every PDP) from rendering as a blank screen — the `.reveal` utility sets `opacity: 0` and only the hook adds the `.visible` modifier that transitions to `opacity: 1` (3 tests)
 
 Cross-package contract tests (not in `apps/web/`):
 
@@ -223,7 +225,7 @@ Cross-package contract tests (not in `apps/web/`):
 - `packages/payments/src/webhooks.contract.test.ts` — ADR-009 Payment Intents + ADR-014 idempotency
 - `services/workers/trigger.config.test.ts` — ADR-016 Trigger.dev config
 
-Total test counts (post-v1.2.5): @maison/web 8 files / 99 tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests, @maison/payments 3 files / 18 tests.
+Total test counts (post-v1.2.8): @maison/web 9 files / 102 tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests, @maison/payments 3 files / 18 tests.
 
 ### Client Component pages that need metadata — the split pattern
 

@@ -8,11 +8,14 @@
  *  - Footer (links + socials)
  *
  * The CartProvider and CartDrawer are in the root layout (available everywhere).
+ * ScrollRevealTrigger mounts the useScrollReveal hook so .reveal elements
+ * (e.g. ProductCard) become visible when scrolled into view.
  */
 
 import { AnnouncementBar } from '@/components/shop/AnnouncementBar';
 import { Footer } from '@/components/shop/Footer';
 import { Header } from '@/components/shop/Header';
+import { ScrollRevealTrigger } from '@/components/shop/ScrollRevealTrigger';
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +24,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <Header />
       <main>{children}</main>
       <Footer />
+      <ScrollRevealTrigger />
     </>
   );
 }

@@ -1595,6 +1595,47 @@ is a cross-reference only:
   rendering of every section documented in this guide is unchanged. The
   @maison/payments test count is unchanged (3 files, 18 tests).
 
+### v1.2.8 (August 1, 2026) — v11 Remediation (V11-1 + V11-2, design-system-relevant subset)
+
+Two-part fix from the v11 remediation pass. Unlike v10, V11-1 IS design-system-
+relevant: it fixes a critical visual rendering defect (the `/products` page and
+every PDP rendering as a blank screen because the `.reveal` scroll-reveal
+utility was defined but never triggered). V11-2 is a security hardening only
+and is documented here as a cross-reference. Full per-fix detail is in the PRD
++ PAD REMEDIATION_HISTORY v1.2.8 subsections.
+
+- **V11-1 — Fixed `/products` blank-screen defect (CRITICAL, visual).** The
+  `.reveal` utility in `apps/web/src/app/globals.css` (declared alongside the
+  §6.2 scroll-reveal motion row) sets `opacity: 0` on any element with the
+  `reveal` class and transitions to `opacity: 1` only when the `.visible`
+  modifier is added. The modifier is added by the `useScrollReveal()` hook in
+  `apps/web/src/hooks/useScrollReveal.ts`, but that hook was exported and never
+  invoked by any component — so every `ProductCard` (which renders
+  `className="product-card reveal"`) stayed at `opacity: 0` and the products
+  grid appeared blank. Fix: created
+  `apps/web/src/components/shop/ScrollRevealTrigger.tsx` (a Client Component
+  whose body is just `useScrollReveal(); return null;`) and mounted it once in
+  `apps/web/src/app/(shop)/layout.tsx`. No change to `globals.css`, the
+  `.reveal` utility, the design tokens, or any keyframe — the wiring was the
+  only missing piece. The visible rendering of every section documented in
+  this guide now works as originally specified.
+
+- **V11-2 (cross-reference).** The JSON-LD XSS-hardening fix is design-system-
+  adjacent but does not touch `globals.css`, `tooling/tailwind/base.ts`, or any
+  visual surface, so is documented only in the PRD + PAD REMEDIATION_HISTORY
+  v1.2.8 subsections: added `escapeForScriptContext()` to
+  `apps/web/src/lib/utils.ts` and wrapped the PDP JSON-LD
+  `dangerouslySetInnerHTML` output with it
+  (`apps/web/src/app/(shop)/products/[slug]/page.tsx:107`) per Skill 2 §9.1 +
+  §16.3. The visible rendering of every section documented in this guide is
+  unchanged.
+
+- **Test counts.** @maison/web contract tests grew by 1 file (3 tests):
+  `apps/web/src/lib/__tests__/scroll-reveal-wiring.contract.test.ts` (V11-1
+  regression lock). New total: 9 files, 102 tests. Other package counts
+  unchanged (@maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests,
+  @maison/payments 3 files / 18 tests).
+
 ---
 
 ## Appendix C: Change Log (v4)

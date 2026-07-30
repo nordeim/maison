@@ -88,3 +88,18 @@ export function formatPrice(priceCents: number, currency?: string | null): strin
 export function formatDate(date: Date | string): string {
   return dateFormatter.format(date instanceof Date ? date : new Date(date));
 }
+
+/**
+ * Escape a string for safe embedding inside a `<script>` element.
+ *
+ * Per Skill 2 §9.1 + §16.3: `dangerouslySetInnerHTML` with raw
+ * `JSON.stringify()` is an XSS vector if the data contains `</script>`.
+ * This function replaces `<` with `\u003c` so the browser parser
+ * does not interpret it as a tag boundary.
+ *
+ * @example
+ * escapeForScriptContext(JSON.stringify(jsonLd))
+ */
+export function escapeForScriptContext(html: string): string {
+  return html.replace(/</g, '\\u003c');
+}

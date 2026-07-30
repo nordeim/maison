@@ -22,7 +22,7 @@ import { ProductCard } from '@/components/shop/ProductCard';
 import { ReviewsSection } from '@/components/shop/ReviewsSection';
 import { WishlistButton } from '@/components/shop/WishlistButton';
 import { apiPublic } from '@/lib/trpc/server';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, escapeForScriptContext } from '@/lib/utils';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -104,7 +104,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: escapeForScriptContext(JSON.stringify(jsonLd)) }}
       />
 
       <div

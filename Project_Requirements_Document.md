@@ -1962,6 +1962,57 @@ truth. This subsection documents the requirements-relevant changes from v1.2.7:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.2.8 (August 1, 2026) — v11 Remediation (V11-1 + V11-2)
+
+Two-part fix delivered by the v11 remediation pass: (V11-1) a CRITICAL visual
+defect that rendered `/products` (plus the homepage and every PDP that renders
+`ProductCard`) as a blank screen, and (V11-2) a security hardening that closes
+the JSON-LD XSS vector left open by raw `JSON.stringify` inside
+`dangerouslySetInnerHTML`. Both surface from Skill 2 §9.1 compliance gaps
+identified by the v10 re-validation audit; the codebase remains the source of
+truth. This subsection documents the requirements-relevant changes from v1.2.8:
+
+- **V11-1 — Fixed `/products` blank-screen defect (CRITICAL, visual).**
+  Root cause: `apps/web/src/components/shop/ProductCard.tsx` renders each card
+  with `className="product-card reveal"`. The `.reveal` utility (declared in
+  `apps/web/src/app/globals.css`) sets `opacity: 0` and transitions to
+  `opacity: 1` only when the `.visible` modifier is added by the
+  `useScrollReveal()` hook in `apps/web/src/hooks/useScrollReveal.ts`. That
+  hook was exported but never invoked by any component, so every card stayed
+  at `opacity: 0` and the `/products` page (plus any other surface that
+  renders `ProductCard`) appeared blank. Fix: created a thin Client Component
+  `apps/web/src/components/shop/ScrollRevealTrigger.tsx` whose body is just
+  `useScrollReveal(); return null;`, and added it to
+  `apps/web/src/app/(shop)/layout.tsx` so it mounts once on every shop route.
+  No changes to `ProductCard.tsx`, `useScrollReveal.ts`, `globals.css`, or the
+  design tokens — the wiring was always the missing piece.
+
+- **V11-2 — Added `escapeForScriptContext` to JSON-LD script tag (HIGH, Skill 2 §9.1 + §16.3).**
+  The PDP at `apps/web/src/app/(shop)/products/[slug]/page.tsx:107` renders
+  JSON-LD via `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />`.
+  If any product field (name, description, etc.) ever contains the literal
+  string `</script>`, the browser terminates the script tag early and the
+  attacker-controlled content runs in the page context — a stored XSS vector.
+  Fix: added an `escapeForScriptContext()` helper to
+  `apps/web/src/lib/utils.ts` that replaces `<` with `\u003c` (and the
+  matching `>`, `&`, `"`, `'` escapes), then wrapped the JSON-LD output as
+  `escapeForScriptContext(JSON.stringify(jsonLd))`. Per Skill 2 §9.1 + §16.3
+  this is the canonical sanitiser for any `dangerouslySetInnerHTML` content
+  that must remain valid JSON while being unparseable as HTML.
+
+- **Contract test count updates.** One new contract test file added:
+  `apps/web/src/lib/__tests__/scroll-reveal-wiring.contract.test.ts`
+  (3 tests — asserts the `useScrollReveal` hook exists, the
+  `ScrollRevealTrigger` Client Component exists with a `'use client'` directive,
+  and the `(shop)` layout imports + renders it; locks V11-1 against silent
+  regression). V11-2 has no dedicated contract test (it's a one-line wrapper
+  around a single call site, locked by type-checking + the existing
+  `page-metadata.contract.test.ts` PDP assertions). Test counts:
+  Total @maison/web tests: 9 files, 102 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices
