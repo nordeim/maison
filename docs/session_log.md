@@ -230,5 +230,145 @@ Total `@maison/web` contract tests: **7 files, 90 tests** (was 4 files, 65 tests
 
 ---
 
-https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea 
+I'll ensure everything is committed and pushed first, then proceed with the new E2E cycle.
+The remote is ahead of local! Remote `main` is at `b5133b5` but local is at `67d8e86`. Let me pull to refresh:
+Pulled. New files: 2 design guide versions, a changelog, a session log, and updated pnpm_log.txt. Let me read the new pnpm_log and check the live site:
+Excellent findings from the new pnpm_log:
+1. **Build succeeded** — 10/10 packages, 37/37 routes
+2. **styled-components warning GONE** — F6 fix confirmed (no more "Declared version of styled-components (^6.1.13) is not compatible")
+3. **`/cart`, `/checkout`, `/gift-cards`, `/trade` now show `○ (Static)`** — F4 fix confirmed (they were `ƒ (Dynamic)` before, now properly prerendered as static with metadata). `/gift-cards` and `/trade` are also static now.
+4. **`DYNAMIC_SERVER_USAGE` warnings** still present on `/account/*` and `/admin/*` — expected per ADR-010
+5. **Sanity update available** 6.6.0 → 6.7.0 (informational only)
+6. **New issue noticed**: The build log shows `/cart`, `/checkout`, `/gift-cards`, `/trade` as `○ (Static)` — but they're Client Component forms that need client-side state. Let me verify this is correct via curl + agent-browser.
+
+Now let me curl the live site to confirm deployment:
+F4 fix is live and confirmed. Let me also verify F1, F3, F5 fixes are live (stray-space + heading whitespace):
+F5 fix confirmed live — H1 is now "Objects of Quiet Beauty" (was "Objects ofQuiet Beauty"). About H1 also shows correct "Objects made with care, materials that age gracefully." (comma+space, was "care,materials").
+
+Now let me launch agent-browser E2E:
+F1 fix confirmed live — zero stray-space headings. Let me check F2 (category card accessible name) and verify all prior fixes:
+F2 fix confirmed live — accessible name is now "Browse Lighting collection" (was "Lighting Lighting LIGHTING PIECES"). All previous v5 fixes verified working in production. Now let me do thorough E2E testing across all pages and flows to find any NEW issues:
+All routes healthy. Let me now check page titles across all pages, and do deep E2E on each:
+All page titles are correct. Let me do deeper E2E testing — check PDP, search functionality, mobile viewport, accessibility issues, and look for any new issues:
+Interesting findings on PDP:
+1. `addToBagExists: false` — the button text check failed because button text is uppercase ("ADD TO BAG"), but my regex `/add to bag/i` should match... let me re-check.
+2. `price: "$150"` — but the product price should be $485 for Arc Pendant Light! This looks wrong.
+3. `images: 5` — good
+4. `relatedProducts: 2` — good
+5. `strayH: []` — F1 fix confirmed
+
+Let me investigate the price issue:
+The "$150" is the **free shipping threshold** displayed on the PDP, NOT the product price. The actual product price ($485.00) is correctly shown. The `bodyText.match(/\$[\d,.]+/)` picked up "$150" first from the free shipping message. So no actual bug — just my test regex picking up the wrong value.
+
+Let me check the actual product price display:
+So prices ARE there ($485.00 for Arc Pendant Light, $620 for Berg Floor Lamp, $295 for Orb Table Lamp). The "no price elements found" was because the price span has nested children. Let me verify the actual price display structure and find the "ADD TO BAG" button:
+Price is correctly $485.00 (no bug). Now let me test the add-to-bag button and search flow:
+Add-to-bag button exists (text "Add to Bag", type submit). Let me test it:
+Add-to-bag works — cart count went from 0 to 1. Now let me check search functionality and mobile viewport:
+Search modal IS open and has a textbox. Let me fill it and test:
+Search works — 8 results for "linen". Now let me check mobile viewport and look for accessibility issues:
+Mobile is clean — H1 correct, no stray headings, no horizontal scroll. Let me check the mobile menu and look at the new design guide docs that were pulled:
+Mobile menu works (the click via JS opened it — the snapshot shows the menu with all 5 nav links). Let me close it and check the new design guide docs for any issues:
+The session_log.md is just a transcript of the previous session — not new issues. The new design guide v3 and v4 are documentation refreshes. Let me check the README to see if it references the new v3/v4 design guides, and continue E2E:
+**Doc drift issue identified**: README and CLAUDE.md reference `docs/MAISON_Design_Guide.md` as the canonical design guide, but new versions `docs/MAISON_design_guide_v3.md` and `docs/MAISON_Design_Guide_v4.md` were just pulled. The v4 is described as "supersedes the rejected v3 wholesale-replacement attempt" and "Built as a strict superset of v1.2.1" — so v4 is the new canonical. Let me verify and continue E2E to find more issues:
+So:
+- `docs/MAISON_Design_Guide.md` = v1.2.1 (current canonical, referenced by README/AGENTS/CLAUDE)
+- `docs/MAISON_design_guide_v3.md` = v3 (rejected wholesale-replacement attempt)
+- `docs/MAISON_Design_Guide_v4.md` = v4 (strict superset of v1.2.1, the NEW canonical)
+
+The v4 should become the canonical. Let me continue E2E to gather more issues, then plan. Let me test a few more interactive flows:
+F3 fix confirmed live — About H1 is now "Objects made with care, materials that age gracefully." (was "care,materials"). All previous fixes verified working in production. Let me check for any NEW issues by testing more pages and looking at console errors:
+Contact form submitted but no visible success/error message. Let me check the contact page source to understand the expected behavior:
+**Issue identified**: Contact page is a "stub — Phase 1" per the JSDoc comment. The form has no `action`, no `onSubmit` handler, no client-side state, and no validation. Submitting it just reloads the page (default form behavior). This is a Phase 1 stub — but the README claims Phase 1 is "✅ Complete" with "20 E2E tests". The contact form not actually submitting anywhere is a gap.
+
+Let me check the contact tRPC router to see if the backend exists:
+So the backend `contact.submit` tRPC mutation exists, but the contact page form is NOT wired to it. This is a real bug — the form is non-functional. Let me continue checking other potential issues:
+Journal page says "Journal articles — Phase 2 (Sanity CMS integration)" — Phase 2 deferred item, known. Let me check newsletter signup (footer) and a few more things:
+**Issue identified**: Newsletter form on homepage has `method="get"` and `action="/"`. This means submitting the form would just reload the homepage with query params — no actual newsletter signup. Let me check the NewsletterForm component:
+NewsletterForm IS properly wired (has `onSubmit` calling tRPC `newsletter.subscribe`). The agent-browser `eval` I ran was looking at the SSR'd HTML form attributes (action/method default to GET/""), but the React `onSubmit` handler intercepts. So newsletter form is NOT a bug — it works correctly when interacted with.
+
+Let me verify by actually testing it:
+Newsletter form works correctly. Let me close the browser and consolidate findings:
+Now let me launch a parallel validation subagent to confirm the issues I found:
+Excellent validation. Now let me create the comprehensive remediation plan:
+Now let me re-validate the plan against the codebase:
+Plan validated with 3 critical adjustments. Let me apply them and begin TDD execution:
+**Task 1.1a — RED step**: Extend the existing page-metadata contract test to require contact page to be a Server Component with metadata + ContactForm client child:
+Now add the API-side contract test for sendEmail:
+RED confirmed: 1 web test fails (ContactForm.tsx doesn't exist) + 3 API tests fail (contact.ts doesn't call sendEmail). Wait — only 1 web test failed but I expected contact page to fail too (it's a Server Component without metadata). Let me check:
+The contact page already passes the "Server Component + metadata" tests because the existing contact/page.tsx IS a Server Component with metadata (it was always a Server Component — just a stub). The only failing test is ContactForm.tsx not existing. So the RED state is correct: 4 tests failing (1 web + 3 API). Now GREEN — let me create the ContactForm Client Component:
+Let me look at the existing email templates and send.ts to understand the pattern:
+Now I have the pattern. Let me create the ContactNotification email template:
+Now add `@maison/email` dependency to `packages/api`:
+Now update the contact router to actually send email:
+Now create the ContactForm Client Component:
+Now rewrite the contact page as a Server Component wrapper:
+Now install deps + run tests:
+All GREEN — 97 web tests + 14 API tests pass. Let me run check-types + lint to ensure full cleanliness:
+All gates GREEN. Task 1.1 complete. Now Task 1.2 — canonicalize design guide v4:
+Exit code 2 is just from the final `ls` not finding the deleted files (expected). The canonicalization worked:
+- `docs/MAISON_Design_Guide.md` is now 1,489 lines (v4 content)
+- v3, v4, and v3-changelog files are deleted
+
+Let me verify no references to v3/v4-specific paths remain:
+Only my own REMEDIATION_PLAN_v6.md references the deleted files (in the plan description) — that's fine, it's a historical record. No code or canonical docs reference them. Let me verify the canonical design guide header is now v4:
+Now let me run final verification and update the documentation:
+All gates GREEN. Now let me update the documentation in parallel:
+Docs updated. The subagent noted an optional follow-up: CLAUDE.md L202 has a stale contract test count. Let me fix that + run final verification:
+All gates GREEN. Now let me commit and push:
+Commit `47d3393` succeeded (pre-commit hook passed). Now push:
+**Push succeeded** — `b5133b5..47d3393  main -> main`. Let me verify:
+Remote `main` confirmed at `47d3393`. Let me update todos and provide final summary:
+## Summary
+
+**v6 E2E-driven remediation complete** — committed as `47d3393` on `main` and pushed to GitHub. All v5 fixes (F1–F6) confirmed working in production; 1 new functional bug (G1) + 2 doc-drift items (G2/G3) fixed.
+
+### Pre-flight verification
+- Local was at `67d8e86`, remote was ahead at `b5133b5` — pulled to refresh
+- pnpm_log.txt review: build succeeded 10/10 packages, 37/37 routes; styled-components warning GONE (F6 confirmed); /cart, /checkout, /gift-cards, /trade now show ○ (Static) with proper titles (F4 confirmed); DYNAMIC_SERVER_USAGE warnings still present on /account/* + /admin/* (expected per ADR-010)
+
+### E2E testing (agent-browser)
+- All v5 fixes verified live: F1 (zero stray-space headings), F2 (category card accessible name "Browse Lighting collection"), F3 (About H1 "care, materials"), F4 (4 page titles correct), F5 (Hero H1 "Objects of Quiet Beauty")
+- Add-to-bag flow works (cart count 0→1)
+- Search modal works (8 results for "linen")
+- Newsletter form works (success message appears)
+- Mobile viewport clean (no horizontal scroll, menu opens)
+
+### New bug found + fixed (TDD)
+- **G1**: Contact form was non-functional — plain HTML form, no onSubmit, backend only `console.log`'d. Fixed via:
+  - New `ContactForm.tsx` Client Component (tRPC `contact.submit` mutation + inline success/error state)
+  - `contact/page.tsx` rewritten as Server Component wrapper with metadata
+  - `contact.ts` router now calls `sendEmail` from `@maison/email` (sends to hello@maison-living.com)
+  - New `ContactNotification.tsx` email template
+  - `@maison/email` dependency added to `packages/api`
+
+### Doc drift fixed
+- **G2**: Design guide v4 canonicalized — `docs/MAISON_Design_Guide.md` replaced with v4 content (1,489 lines, 16 sections); v4/v3/v3-changelog files deleted
+- **G3**: v3 design guide + changelog removed (preserved in v4's Appendix C)
+- Stale "1,336 lines, 15 sections" references updated to "1,489 lines, 16 sections" across CLAUDE.md, PRD, PAD
+- v1.2.3 REMEDIATION_HISTORY appended to PRD, PAD, Design Guide
+
+### New contract tests
+- Extended `page-metadata.contract.test.ts` (now 15 tests — added /contact + ContactForm assertions)
+- New `packages/api/src/routers/contact.contract.test.ts` (3 tests — asserts sendEmail call to hello@maison-living.com)
+
+Total: `@maison/web` 7 files / 97 tests (was 90), `@maison/api` 3 files / 14 tests (was 11)
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass
+- `pnpm format:check` → all files clean
+- Pre-commit hook → passed
+- `git push origin main` → `b5133b5..47d3393  main -> main` ✓
+
+### Suggested next steps
+- **Redeploy** `https://maison.jesspete.shop/` to reflect G1 fix live, then re-test the contact form end-to-end (fill + submit → success message → no page reload)
+- Consider wiring `managerProcedure` into admin mutation routers (still deferred from v4)
+- Consider implementing Trigger.dev v4 jobs (still Phase 0 stubs)
+- Optional: bump Sanity `^6.6.0` → `^6.7.0` (informational, no security fixes)
+
+---
+
+https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea
 
