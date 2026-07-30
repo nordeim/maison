@@ -2224,6 +2224,104 @@ documents the architecture-relevant changes from v1.2.4:
   Total @maison/auth tests: 3 files, 45 tests (was 3 files, 41 tests).
   @maison/payments tests: 3 files, 18 tests (unchanged).
 
+### v1.2.5 (July 31, 2026) — v8 Remediation (N1–N8)
+
+Skills-compliance + dead-code-removal fixes identified by the v8 remediation
+audit (see `docs/REMEDIATION_PLAN_v8.md`). All changes are TDD-driven (the new
+`no-unknown-cast.contract.test.ts` was written first); the codebase remains the
+source of truth. This subsection documents the architecture-relevant changes
+from v1.2.5:
+
+- **N1 / N9 — Removed 7 `as unknown as` casts (Skill 2 §9.2).** Per Skill 2,
+  `as unknown as` is the most dangerous TypeScript escape hatch and is banned
+  in production code. Removed 7 of 9 instances; the 2 remaining casts in
+  `packages/db/src/index.ts:61,88` are structurally required (Drizzle's
+  `NeonHttpDatabase | NodePgDatabase` union is non-unifiable due to diverging
+  `*QueryResultHKT` type params) and are documented as exceptions in the new
+  contract test's `ALLOWED_FILES` set. Concrete fixes:
+  - `packages/auth/src/resend-client.ts` — replaced
+    `as unknown as Resend` with a `ResendClient = Resend | ResendStub` type
+    union + `satisfies ResendStub` for the test double.
+  - `packages/email/src/send.ts` — same pattern (consolidated the duplicate
+    stub into the type union).
+  - `packages/api/src/routers/reviews.ts` — replaced 2 raw SQL string casts
+    with the typed Drizzle query builder
+    (`.select().from().innerJoin().where()`).
+  - `packages/api/src/routers/admin.ts` — replaced 3 raw SQL casts with
+    typed row mappers (`(result?.rows ?? []).map((row) => ({...}))`).
+  Locked in by a new contract test
+  `packages/api/src/routers/no-unknown-cast.contract.test.ts` (1 test).
+
+- **N2 — Removed `isAdmin` + `isStaffOrAdmin` dead code (ADR-008).** Per
+  ADR-008, "admin" terminology is banned from the RBAC API in favour of the
+  canonical `canAccessStaff` / `canAccessOwner` predicates (already used in
+  §6.2/§6.3 of this document). The two deprecated helpers in
+  `packages/auth/src/types.ts` were removed. Deleted
+  `packages/auth/src/types.test.ts` (was 10 tests — only exercised the
+  removed helpers). Updated `packages/auth/src/index.ts` to remove the dead
+  re-exports. The `SessionUser` / `Session` interfaces in `types.ts` are
+  preserved (live types used by the API context).
+
+- **N3 — Replaced `require('node:crypto')` with ESM import (Skill 3).** Per
+  Skill 3, the `verbatimModuleSyntax: true` tsconfig flag (ADR-020) forbids
+  CommonJS `require()` in ESM modules. `packages/auth/src/config.ts:153`
+  previously used `require('node:crypto')` for `randomBytes` (password-reset
+  tokens). Replaced with a top-of-file
+  `import { randomBytes } from 'node:crypto'` statement.
+
+- **N4 — Wired webhook secrets through `@maison/config/env` (Skill 2 §13.5).**
+  Per Skill 2 §13.5, all env access must go through the validated
+  `@maison/config` `env` object (not `process.env` direct access). Two
+  webhook route handlers were using direct `process.env`:
+  - `apps/web/src/app/api/webhooks/stripe/route.ts` — now imports `env` from
+    `@maison/config` and reads `env.STRIPE_WEBHOOK_SECRET`.
+  - `apps/web/src/app/api/webhooks/sanity/route.ts` — same pattern with
+    `env.SANITY_WEBHOOK_SECRET`.
+
+- **N5 — Removed `managerProcedure` dead code (ADR-008).** §3.2 of this
+  document previously listed `managerProcedure` as a 5th procedure tier
+  (per ADR-008). It was defined but never wired into any router — admin
+  mutations use `ownerProcedure`. Removed from `packages/api/src/trpc.ts`.
+  Updated `packages/api/src/index.ts` to remove the re-export. Updated
+  `packages/api/src/trpc.test.ts`: renamed "exports 5 procedure tiers" →
+  "exports 4 procedure tiers", removed the
+  `expect(trpc.managerProcedure).toBeDefined()` assertion, and added a new
+  test "does NOT export managerProcedure (removed in v8 — dead code)". The
+  codebase now exposes **4 canonical procedure tiers** (was 5):
+  `publicProcedure` / `protectedProcedure` / `staffProcedure` /
+  `ownerProcedure`. The PAD §3.2 procedure-tier list and §6.3 middleware
+  references should be read as 4 tiers going forward; if ADR-008 is later
+  amended to require a manager tier, it can be re-added.
+
+- **N6 — Pinned Stripe `apiVersion: '2026-06-24.dahlia'` (Skill 2 §9.9).**
+  Per Skill 2 §9.9, the Stripe API version must be pinned (not left to the
+  SDK default, which can drift on upgrade and silently change wire formats
+  or webhook payloads). `packages/payments/src/client.ts` now sets
+  `apiVersion: '2026-06-24.dahlia'` explicitly. The Payment Intents +
+  idempotency architecture (ADR-009 + ADR-014) is unchanged.
+
+- **N8 — Trimmed `tooling/tailwind/base.ts` (Skill 2 §9.5 / §13.6).** Per
+  Skill 2, Tailwind v4 is CSS-first — the canonical design tokens live in
+  `apps/web/src/app/globals.css` `@theme` (and `packages/ui/src/tokens/*.css`
+  for cross-package sharing), not in a JS config. Removed the duplicate
+  `theme.extend` block (colors, spacing, fontSize, borderRadius,
+  transitions, keyframes, animation) which was drifting away from the
+  CSS-first source of truth. File trimmed from 152 lines to ~30 lines. Kept
+  only `fontFamily` as a JS reference for non-CSS consumers (Storybook,
+  tests).
+
+- **Contract test count updates.** New contract test:
+  - `packages/api/src/routers/no-unknown-cast.contract.test.ts` (N1 — 1 test)
+  Updated: `packages/api/src/trpc.test.ts` renamed "5 procedure tiers" →
+  "4 procedure tiers" + added "does NOT export managerProcedure" test (net
+  +1 test). Deleted `packages/auth/src/types.test.ts` (10 tests — only
+  exercised the removed `isAdmin` / `isStaffOrAdmin` helpers).
+  Total @maison/web tests: 8 files, 99 tests (unchanged from v1.2.4).
+  Total @maison/api tests: 6 files, 20 tests (was 5 files, 22 tests).
+  Total @maison/auth tests: 2 files, 35 tests (was 3 files, 45 tests —
+  `types.test.ts` deleted).
+  @maison/payments tests: 3 files, 18 tests (unchanged).
+
 ---
 
-_End of Project Architecture Document v1.2.4. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+_End of Project Architecture Document v1.2.5. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

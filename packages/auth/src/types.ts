@@ -24,16 +24,7 @@ export interface Session {
   };
 }
 
-/** Helper to check if a session belongs to an owner (highest privilege — ADR-008). */
-export function isAdmin(session: Session | null): boolean {
-  return session?.user.role === 'owner';
-}
-
-/** Helper to check if a session belongs to staff, manager, or owner (staff-tier — ADR-008). */
-export function isStaffOrAdmin(session: Session | null): boolean {
-  return (
-    session?.user.role === 'staff' ||
-    session?.user.role === 'manager' ||
-    session?.user.role === 'owner'
-  );
-}
+// NOTE: The deprecated `isAdmin` and `isStaffOrAdmin` helpers were removed
+// in REMEDIATION_PLAN_v8 Task 1.2. They used "admin" terminology banned per
+// ADR-008. Use `canAccessOwner(session?.user.role)` and
+// `canAccessStaff(session?.user.role)` from `./rbac` instead.

@@ -18,4 +18,3 @@ export {
   isValidRole,
 } from './rbac';
 export type { UserRole, SessionUser } from './types';
-export { isAdmin, isStaffOrAdmin } from './types';

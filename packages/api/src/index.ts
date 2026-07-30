@@ -6,6 +6,5 @@ export {
   publicProcedure,
   protectedProcedure,
   staffProcedure,
-  managerProcedure,
   ownerProcedure,
 } from './trpc';

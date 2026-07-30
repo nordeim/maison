@@ -1507,6 +1507,45 @@ or the design system's surface contract):
   `packages/auth/src/rbac-aliases.contract.test.ts` (6 tests). The
   @maison/payments test count is unchanged (3 files, 18 tests).
 
+### v1.2.5 (July 31, 2026) — v8 Remediation (N1–N8, design-system-relevant subset)
+
+Skills-compliance + dead-code-removal fixes identified by the v8 remediation
+audit (see `docs/REMEDIATION_PLAN_v8.md`). All changes are TDD-driven; the
+codebase is the source of truth. Full per-fix detail is in the PRD + PAD
+REMEDIATION_HISTORY v1.2.5 subsections. This entry documents only the
+design-system-relevant changes (those that touch `tooling/tailwind/base.ts`,
+`apps/web/src/app/globals.css`, or the design system's surface contract):
+
+- **N8 — Trimmed `tooling/tailwind/base.ts` (Skill 2 §9.5 / §13.6).** Per
+  Skill 2, Tailwind v4 is CSS-first — the canonical design tokens live in
+  `apps/web/src/app/globals.css` `@theme` (and `packages/ui/src/tokens/*.css`
+  for cross-package sharing — see §3 + §5.6 of this guide), not in a JS
+  config. The shared `tooling/tailwind/base.ts` file previously duplicated
+  the `@theme` tokens inside a `theme.extend` block (colors, spacing,
+  fontSize, borderRadius, transitions, keyframes, animation), which was
+  drifting away from the CSS-first source of truth. The duplicate block was
+  removed; the file was trimmed from 152 lines to ~30 lines and now keeps
+  only `fontFamily` as a JS reference for non-CSS consumers (Storybook,
+  tests). **No design-token values changed** — this is purely a
+  single-source-of-truth cleanup so the tokens declared in `@theme` (and
+  referenced throughout this guide) are the only declaration. The visible
+  rendering of every section documented in this guide is unchanged.
+
+- **N1, N2, N3, N4, N5, N6, N9 (cross-reference).** Seven further v8 fixes
+  are design-system-adjacent but do not touch `globals.css`,
+  `tooling/tailwind/base.ts`, or any visual surface, so are documented only
+  in the PRD + PAD REMEDIATION_HISTORY v1.2.5 subsections: N1/N9 (removed 7
+  `as unknown as` casts per Skill 2 §9.2 — Resend stubs consolidated via
+  type union; Drizzle raw queries converted to typed query builder / row
+  mappers), N2 (removed `isAdmin` + `isStaffOrAdmin` dead code per ADR-008),
+  N3 (replaced `require('node:crypto')` with ESM import per Skill 3), N4
+  (wired Stripe + Sanity webhook secrets through `@maison/config/env` per
+  Skill 2 §13.5), N5 (removed `managerProcedure` dead code — 4 canonical
+  procedure tiers, was 5), N6 (pinned Stripe
+  `apiVersion: '2026-06-24.dahlia'` per Skill 2 §9.9). N1 is locked in by a
+  new contract test `packages/api/src/routers/no-unknown-cast.contract.test.ts`
+  (1 test). The @maison/payments test count is unchanged (3 files, 18 tests).
+
 ---
 
 ## Appendix C: Change Log (v4)

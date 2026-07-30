@@ -7,9 +7,9 @@
  */
 
 import { z } from 'zod';
-import { eq, and, desc, sql, avg } from 'drizzle-orm';
+import { eq, and, desc, sql, avg, count } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
-import { productReviews, products, orders, lineItems } from '@maison/db';
+import { productReviews, products, orders, lineItems, customers, users } from '@maison/db';
 import {
   router,
   publicProcedure,
@@ -96,15 +96,19 @@ export const reviewsRouter = router({
           message: 'Product not found',
         });
 
-      // Check if user is a customer
-      const customerResult = await ctx.db.execute(sql`
-        SELECT c.id, c.first_name, c.last_name, u.email
-        FROM customers c
-        JOIN users u ON c.user_id = u.id
-        WHERE c.user_id = ${ctx.session.user.id}
-        LIMIT 1
-      `);
-      const customer = (customerResult as unknown as Array<Record<string, unknown>>)[0];
+      // Check if user is a customer (typed Drizzle query — no raw SQL cast)
+      const customerRows = await ctx.db
+        .select({
+          id: customers.id,
+          firstName: customers.firstName,
+          lastName: customers.lastName,
+          email: users.email,
+        })
+        .from(customers)
+        .innerJoin(users, eq(customers.userId, users.id))
+        .where(eq(customers.userId, ctx.session.user.id))
+        .limit(1);
+      const customer = customerRows[0];
 
       let customerId: string | null = null;
       let customerName = ctx.session.user.name ?? 'Anonymous';
@@ -112,22 +116,24 @@ export const reviewsRouter = router({
       let isVerifiedPurchase = false;
 
       if (customer) {
-        customerId = customer.id as string;
+        customerId = customer.id;
         customerName =
-          [customer.first_name, customer.last_name].filter(Boolean).join(' ') || customerName;
-        customerEmail = customer.email as string;
+          [customer.firstName, customer.lastName].filter(Boolean).join(' ') || customerName;
+        customerEmail = customer.email;
 
-        // Check if customer purchased this product
-        const purchaseCheck = await ctx.db.execute(sql`
-          SELECT COUNT(*) as count
-          FROM line_items li
-          JOIN orders o ON li.order_id = o.id
-          WHERE o.customer_id = ${customerId}
-            AND li.product_id = ${product.id}
-            AND o.status NOT IN ('cancelled', 'refunded')
-        `);
-        isVerifiedPurchase =
-          Number((purchaseCheck as unknown as Array<Record<string, unknown>>)[0]?.count) > 0;
+        // Check if customer purchased this product (typed Drizzle count query)
+        const purchaseRows = await ctx.db
+          .select({ count: count() })
+          .from(lineItems)
+          .innerJoin(orders, eq(lineItems.orderId, orders.id))
+          .where(
+            and(
+              eq(orders.customerId, customerId),
+              eq(lineItems.productId, product.id),
+              sql`${orders.status} NOT IN ('cancelled', 'refunded')`,
+            ),
+          );
+        isVerifiedPurchase = (purchaseRows[0]?.count ?? 0) > 0;
       }
 
       const [review] = await ctx.db

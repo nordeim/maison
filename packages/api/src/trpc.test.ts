@@ -104,12 +104,11 @@ describe('tRPC error handling', () => {
 });
 
 describe('tRPC procedure tiers (ADR-008 — Stillwater v3.0.0 §15.17)', () => {
-  it('exports 5 procedure tiers with ADR-008 names', async () => {
+  it('exports 4 procedure tiers with ADR-008 names', async () => {
     const trpc = await import('./trpc');
     expect(trpc.publicProcedure).toBeDefined();
     expect(trpc.protectedProcedure).toBeDefined();
     expect(trpc.staffProcedure).toBeDefined();
-    expect(trpc.managerProcedure).toBeDefined();
     expect(trpc.ownerProcedure).toBeDefined();
   });
 
@@ -120,6 +119,14 @@ describe('tRPC procedure tiers (ADR-008 — Stillwater v3.0.0 §15.17)', () => {
     const trpc = await import('./trpc');
     expect(trpc).not.toHaveProperty('adminProcedure');
     expect(trpc).not.toHaveProperty('adminWriteProcedure');
+  });
+
+  it('does NOT export managerProcedure (removed in v8 — dead code)', async () => {
+    // Per REMEDIATION_PLAN_v8 Task 1.5: `managerProcedure` was removed
+    // (defined per ADR-008 but never wired into routers — admin mutations
+    // use `ownerProcedure`).
+    const trpc = await import('./trpc');
+    expect(trpc).not.toHaveProperty('managerProcedure');
   });
 
   it('package entrypoint does NOT re-export deprecated aliases', async () => {

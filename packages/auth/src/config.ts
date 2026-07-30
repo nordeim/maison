@@ -18,6 +18,7 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { customSession } from 'better-auth/plugins/custom-session';
 import { eq } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
 import { db, users } from '@maison/db';
 import { resend } from './resend-client';
 
@@ -150,8 +151,5 @@ export type Session = typeof auth.$Infer.Session;
  * a random string passes validation and is never used for actual signing.
  */
 function cryptoRandomSecret(): string {
-  const { randomBytes } = require('node:crypto') as {
-    randomBytes: (n: number) => Buffer;
-  };
   return randomBytes(32).toString('base64');
 }

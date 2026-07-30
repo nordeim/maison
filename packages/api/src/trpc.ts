@@ -1,12 +1,11 @@
 /**
  * Maison — tRPC router factory, context type, and procedure tiers
  *
- * Five procedure tiers per ADR-008 (aligned with Stillwater v3.0.0 §15.17):
+ * Four procedure tiers per ADR-008 (aligned with Stillwater v3.0.0 §15.17):
  *   publicProcedure    — no auth required (browse, search, cart)
  *   protectedProcedure — any authenticated user (account, wishlist, checkout)
  *   staffProcedure     — staff, manager, or owner role (admin read access)
- *   managerProcedure   — manager or owner role (admin mutations — products, orders)
- *   ownerProcedure     — owner role only (role management, store settings)
+ *   ownerProcedure     — owner role only (admin mutations, role management, store settings)
  *
  * RBAC roles (packages/db/src/schema/enums.ts):
  *   customer (default), staff, manager, owner
@@ -53,16 +52,7 @@ export const staffProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   return next();
 });
 
-/** Tier 4: Manager — manager or owner role (admin mutations). */
-export const managerProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const role = ctx.session.user.role;
-  if (role !== 'manager' && role !== 'owner') {
-    throw new TRPCError({ code: 'FORBIDDEN' });
-  }
-  return next();
-});
-
-/** Tier 5: Owner — owner role only (role management, store settings). */
+/** Tier 4: Owner — owner role only (role management, store settings, admin writes). */
 export const ownerProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const role = ctx.session.user.role;
   if (role !== 'owner') {
@@ -72,8 +62,8 @@ export const ownerProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 });
 
 // NOTE: ADR-008 — deprecated aliases `adminProcedure` and `adminWriteProcedure`
-// were removed in REMEDIATION_PLAN_v4 Task 1.1. Routers MUST import canonical
-// tier names (`staffProcedure` for admin reads, `ownerProcedure` for admin writes).
-// `managerProcedure` is defined for future use (manager-or-owner admin mutations
-// such as product/order CRUD) but not yet wired into routers — see
-// REMEDIATION_PLAN_v4 §"Deferred Items" for the design decision.
+// were removed in REMEDIATION_PLAN_v4 Task 1.1. `managerProcedure` was removed
+// in REMEDIATION_PLAN_v8 Task 1.5 (dead code — admin mutations use `ownerProcedure`).
+// The 4 canonical tiers are: publicProcedure, protectedProcedure, staffProcedure,
+// ownerProcedure. If ADR-008 is later amended to require a manager-tier, it can
+// be re-added.

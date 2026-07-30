@@ -7,9 +7,24 @@
 
 import { Resend } from 'resend';
 
-let cachedClient: Resend | null = null;
+/**
+ * Minimal Resend stub shape — mirrors the real `emails.send` return type
+ * ({ data, error } union) so the union `Resend | ResendStub` is callable
+ * without narrowing. Avoids `as unknown as Resend` cast (Skill 2 §9.2).
+ */
+interface ResendStub {
+  emails: {
+    send: (
+      payload: unknown,
+    ) => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+  };
+}
 
-export function getResendClient(): Resend {
+type ResendClient = Resend | ResendStub;
+
+let cachedClient: ResendClient | null = null;
+
+export function getResendClient(): ResendClient {
   if (cachedClient) return cachedClient;
 
   const apiKey = process.env['RESEND_API_KEY'];
@@ -24,10 +39,10 @@ export function getResendClient(): Resend {
       emails: {
         send: async (payload: unknown) => {
           console.log('[email] (stub) Would send:', payload);
-          return { id: 'stub-email-id' };
+          return { data: { id: 'stub-email-id' }, error: null };
         },
       },
-    } as unknown as Resend;
+    } satisfies ResendStub;
     return cachedClient;
   }
 

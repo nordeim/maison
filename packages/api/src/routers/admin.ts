@@ -526,6 +526,9 @@ export const adminRouter = router({
       const daysAgo = new Date();
       daysAgo.setDate(daysAgo.getDate() - input.days);
 
+      // Raw SQL aggregation (GROUP BY + SUM). Drizzle's `db.execute()` returns
+      // `{ rows: Record<string, unknown>[] }` — map each row through typed
+      // accessors to avoid `as unknown as` cast (Skill 2 §9.2).
       const result = await ctx.db.execute(sql`
         SELECT
           DATE(${orders.placedAt}) as date,
@@ -537,11 +540,16 @@ export const adminRouter = router({
         GROUP BY DATE(${orders.placedAt})
         ORDER BY DATE(${orders.placedAt})
       `);
+      const rows = (result?.rows ?? []).map((row) => ({
+        date: String(row['date'] ?? ''),
+        order_count: Number(row['order_count'] ?? 0),
+        revenue_cents: Number(row['revenue_cents'] ?? 0),
+      }));
 
-      return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
-        date: row.date as string,
-        orderCount: Number(row.order_count),
-        revenueCents: Number(row.revenue_cents),
+      return rows.map((row) => ({
+        date: row.date,
+        orderCount: row.order_count,
+        revenueCents: row.revenue_cents,
       }));
     }),
 
@@ -565,12 +573,18 @@ export const adminRouter = router({
         ORDER BY revenue_cents DESC
         LIMIT ${input.limit}
       `);
+      const rows = (result?.rows ?? []).map((row) => ({
+        product_name: String(row['product_name'] ?? ''),
+        product_slug: String(row['product_slug'] ?? ''),
+        units_sold: Number(row['units_sold'] ?? 0),
+        revenue_cents: Number(row['revenue_cents'] ?? 0),
+      }));
 
-      return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
-        productName: row.product_name as string,
-        productSlug: row.product_slug as string,
-        unitsSold: Number(row.units_sold),
-        revenueCents: Number(row.revenue_cents),
+      return rows.map((row) => ({
+        productName: row.product_name,
+        productSlug: row.product_slug,
+        unitsSold: row.units_sold,
+        revenueCents: row.revenue_cents,
       }));
     }),
 
@@ -608,10 +622,14 @@ export const adminRouter = router({
       ORDER BY cohort_month DESC
       LIMIT 12
     `);
+    const rows = (result?.rows ?? []).map((row) => ({
+      cohort_month: String(row['cohort_month'] ?? ''),
+      new_customers: Number(row['new_customers'] ?? 0),
+    }));
 
-    return (result as unknown as Array<Record<string, unknown>>).map((row) => ({
-      cohortMonth: row.cohort_month as string,
-      newCustomers: Number(row.new_customers),
+    return rows.map((row) => ({
+      cohortMonth: row.cohort_month,
+      newCustomers: row.new_customers,
     }));
   }),
 });

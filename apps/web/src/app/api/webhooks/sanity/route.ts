@@ -8,7 +8,9 @@
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
-const webhookSecret = process.env.SANITY_WEBHOOK_SECRET;
+import { env } from '@maison/config';
+
+const webhookSecret = env.SANITY_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
   if (!webhookSecret) {

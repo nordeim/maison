@@ -7,9 +7,24 @@
 import type { ReactElement } from 'react';
 import { Resend } from 'resend';
 
-let cachedClient: Resend | null = null;
+/**
+ * Minimal Resend stub shape — mirrors the real `emails.send` return type
+ * ({ data, error } union) so the union `Resend | ResendStub` is callable
+ * without narrowing. Avoids `as unknown as Resend` cast (Skill 2 §9.2).
+ */
+interface ResendStub {
+  emails: {
+    send: (
+      payload: unknown,
+    ) => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+  };
+}
 
-function getClient(): Resend {
+type ResendClient = Resend | ResendStub;
+
+let cachedClient: ResendClient | null = null;
+
+function getClient(): ResendClient {
   if (cachedClient) return cachedClient;
 
   const apiKey = process.env['RESEND_API_KEY'];
@@ -18,10 +33,10 @@ function getClient(): Resend {
       emails: {
         send: async (payload: unknown) => {
           console.log('[email] (stub) Would send:', payload);
-          return { id: 'stub-email-id' };
+          return { data: { id: 'stub-email-id' }, error: null };
         },
       },
-    } as unknown as Resend;
+    } satisfies ResendStub;
     return cachedClient;
   }
 
@@ -43,12 +58,11 @@ export async function sendEmail({ to, subject, react }: SendEmailOptions) {
   const client = getClient();
   const from = process.env['EMAIL_FROM'] ?? 'hello@maison-living.com';
 
-  const { data, error } = await client.emails.send({
-    from,
-    to,
-    subject,
-    react,
-  } as Parameters<typeof client.emails.send>[0]);
+  // Both Resend and ResendStub accept the same payload shape. The `as
+  // Parameters<...>[0]` cast was needed when `client` was typed as `Resend`
+  // only; with the union type, we pass the payload object directly.
+  const payload = { from, to, subject, react };
+  const { data, error } = await client.emails.send(payload);
 
   if (error) {
     console.error('[email] Send failed:', error);

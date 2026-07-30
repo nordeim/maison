@@ -14,9 +14,10 @@
 
 import { NextResponse } from 'next/server';
 
+import { env } from '@maison/config';
 import { constructWebhookEvent, handleWebhookEvent } from '@maison/payments';
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
   if (!webhookSecret) {
