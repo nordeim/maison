@@ -2726,6 +2726,67 @@ from v1.3.2:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.3.3 (August 6, 2026) — v16 Remediation (V16-1)
+
+Single-fix follow-up to v1.3.2 delivered by the v16 remediation pass: (V16-1)
+a LOW-severity skill-alignment hardening of the `escapeForScriptContext()`
+helper introduced in V11-2 (v1.2.8). The V11-2 implementation in
+`apps/web/src/lib/utils.ts` only escaped `<` → `\u003c` — sufficient to
+prevent `</script>` breakout from the JSON-LD `<script>` tag (the only call
+site at `apps/web/src/app/(shop)/products/[slug]/page.tsx:107`) but NOT the
+full Skill 2 §15.10 canonical pattern. Fix: `escapeForScriptContext()` now
+replaces the full canonical 5-character set per Skill 2 §15.10 — `<` →
+`\u003c`, `>` → `\u003e`, `&` → `\u0026`, U+2028 → `\u2028`, U+2029 →
+`\u2029`. The codebase remains the source of truth. This subsection documents
+the architecture-relevant changes from v1.3.3:
+
+- **V16-1 — Strengthened `escapeForScriptContext()` to the full Skill 2 §15.10
+  canonical 5-character escape pattern (LOW, Skill 2 §15.10).** The V11-2
+  (v1.2.8) fix introduced `escapeForScriptContext()` in
+  `apps/web/src/lib/utils.ts` to harden the PDP JSON-LD `<script>` tag at
+  `apps/web/src/app/(shop)/products/[slug]/page.tsx:107` against stored XSS
+  via `</script>` breakout. The v1.2.8 implementation only escaped `<` →
+  `\u003c`, which is technically sufficient for the JSON-LD-in-`<script>` use
+  case (only the literal `</script>` sequence can break out of a script
+  element, and `JSON.stringify` already escapes `"`, `'`, `\`, and control
+  chars). However, Skill 2 §15.10 specifies the canonical 5-character escape
+  pattern for any `dangerouslySetInnerHTML` content that must remain valid
+  JSON while being unparseable as HTML: `<` → `\u003c`, `>` → `\u003e`
+  (defense in depth), `&` → `\u0026` (prevents entity interpretation),
+  U+2028 → `\u2028` (LINE SEPARATOR — breaks JS parsing in some engines),
+  U+2029 → `\u2029` (PARAGRAPH SEPARATOR — same). Fix: the
+  `escapeForScriptContext()` body in `apps/web/src/lib/utils.ts` is now a
+  5-step `.replace()` chain covering all 5 characters, and the JSDoc comment
+  above it now references Skill 2 §9.1 + §15.10 + §16.3 and enumerates the
+  full set. Architecturally this is a defence-in-depth hardening of the
+  Layer-3 (Server Component) → `dangerouslySetInnerHTML` boundary at the PDP
+  JSON-LD call site — it does NOT touch the JSON-LD schema shape, the PDP
+  RSC contract, the Layer-1/2/3 security model, the Client/Server Component
+  boundary, the RSC/streaming posture, the `proxy.ts` Layer-1 invariant,
+  the rendering-strategy contract, or any procedure tier. No changes to the
+  call site at `products/[slug]/page.tsx:107` (the wrapper call
+  `escapeForScriptContext(JSON.stringify(jsonLd))` is unchanged), no new
+  contract test added (the existing call site is already locked by
+  `apps/web/src/lib/__tests__/page-metadata.contract.test.ts`), no changes
+  to the V11-1 + V12-1 + V14-1 + V15-1 scroll-reveal wiring stack. Note
+  that `"` and `'` are intentionally NOT in the canonical Skill 2 §15.10
+  set because `JSON.stringify` already escapes them — the prior v1.2.8
+  PRD/PAD prose that mentioned `"` and `'` "analogously" was an
+  over-statement that the v1.3.3 fix silently corrects by aligning the code
+  with the canonical skill pattern.
+
+- **Contract test count updates.** No new contract test files added in v1.3.3.
+  No new tests added to existing files. The V16-1 strengthening is a one-line
+  body change to a single helper function with a single call site already
+  covered by `page-metadata.contract.test.ts`; no dedicated contract test is
+  warranted (the helper's input/output behaviour is locked by TypeScript
+  type-checking + the existing PDP JSON-LD assertions). Test counts
+  unchanged:
+  Total @maison/web tests: 9 files, 104 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
-_End of Project Architecture Document v1.3.2. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+_End of Project Architecture Document v1.3.3. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

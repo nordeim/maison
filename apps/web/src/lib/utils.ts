@@ -92,14 +92,24 @@ export function formatDate(date: Date | string): string {
 /**
  * Escape a string for safe embedding inside a `<script>` element.
  *
- * Per Skill 2 §9.1 + §16.3: `dangerouslySetInnerHTML` with raw
+ * Per Skill 2 §9.1 + §15.10 + §16.3: `dangerouslySetInnerHTML` with raw
  * `JSON.stringify()` is an XSS vector if the data contains `</script>`.
- * This function replaces `<` with `\u003c` so the browser parser
- * does not interpret it as a tag boundary.
+ * This function replaces the canonical 5 characters that can break out
+ * of a `<script>` context:
+ *   - `<` → `\u003c` (prevents `</script>` breakout)
+ *   - `>` → `\u003e` (defense in depth)
+ *   - `&` → `\u0026` (prevents entity interpretation)
+ *   - U+2028 → `\u2028` (LINE SEPARATOR — breaks JS parsing)
+ *   - U+2029 → `\u2029` (PARAGRAPH SEPARATOR — breaks JS parsing)
  *
  * @example
  * escapeForScriptContext(JSON.stringify(jsonLd))
  */
 export function escapeForScriptContext(html: string): string {
-  return html.replace(/</g, '\\u003c');
+  return html
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
 }

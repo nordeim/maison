@@ -1842,6 +1842,38 @@ the PRD + PAD REMEDIATION_HISTORY v1.3.2 subsections.
   20 tests, @maison/auth 2 files / 35 tests, @maison/payments 3 files / 18
   tests (all unchanged from v1.3.1).
 
+### v1.3.3 (August 6, 2026) — v16 Remediation (V16-1, cross-reference only)
+
+Single-fix follow-up to v1.3.2. V16-1 is design-system-relevant only
+incidentally (it is a defence-in-depth hardening of an XSS-escape helper that
+does not touch `globals.css`, `tooling/tailwind/base.ts`, any design token,
+any keyframe, or any visible rendering surface). The V11-2 (v1.2.8) fix
+introduced `escapeForScriptContext()` in `apps/web/src/lib/utils.ts` to
+harden the PDP JSON-LD `<script>` tag against `</script>` breakout; the
+v1.2.8 implementation only escaped `<` → `\u003c` (sufficient for the
+JSON-LD use case but not the full canonical pattern). V16-1 strengthens the
+helper to the full Skill 2 §15.10 canonical 5-character escape set: `<` →
+`\u003c`, `>` → `\u003e`, `&` → `\u0026`, U+2028 → `\u2028`, U+2029 →
+`\u2029`. Full per-fix detail is in the PRD + PAD REMEDIATION_HISTORY v1.3.3
+subsections.
+
+- **V16-1 (cross-reference).** The JSON-LD XSS-hardening strengthening is
+  design-system-adjacent but does not touch `globals.css`,
+  `tooling/tailwind/base.ts`, any design token, any keyframe, or any visible
+  rendering surface, so is documented only in the PRD + PAD
+  REMEDIATION_HISTORY v1.3.3 subsections: strengthened
+  `escapeForScriptContext()` in `apps/web/src/lib/utils.ts` from the v1.2.8
+  single-character (`<` only) escape to the full Skill 2 §15.10 canonical
+  5-character escape set (`<` → `\u003c`, `>` → `\u003e`, `&` → `\u0026`,
+  U+2028 → `\u2028`, U+2029 → `\u2029`). The single call site at
+  `apps/web/src/app/(shop)/products/[slug]/page.tsx:107` is unchanged. The
+  visible rendering of every section documented in this guide is unchanged.
+
+- **Test counts.** No new contract test files added in v1.3.3. No new tests
+  added to existing files. Totals: @maison/web 9 files / 104 tests,
+  @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests,
+  @maison/payments 3 files / 18 tests (all unchanged from v1.3.2).
+
 ---
 
 ## Appendix C: Change Log (v4)
