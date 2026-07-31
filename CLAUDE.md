@@ -204,7 +204,7 @@ For bug fixes: write a regression test FIRST that reproduces the bug, then fix t
 
 ### Contract tests — the architectural invariants
 
-The repo has **9 contract test files / 102 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, `packages/api/src/routers/zod-email.contract.test.ts`, `packages/api/src/routers/no-unknown-cast.contract.test.ts`, `packages/auth/src/rbac-aliases.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
+The repo has **9 contract test files / 104 tests** in `apps/web/src/lib/__tests__/` (plus `packages/payments/src/webhooks.contract.test.ts`, `packages/api/src/routers/contact.contract.test.ts`, `packages/api/src/routers/zod-email.contract.test.ts`, `packages/api/src/routers/no-unknown-cast.contract.test.ts`, `packages/auth/src/rbac-aliases.contract.test.ts`, and `services/workers/trigger.config.test.ts`). Contract tests are RED-GREEN locked invariants — they fail loudly if anyone regresses the architecture. Current set:
 
 - `proxy-contract.test.ts` — ADR-006/010 Layer-1 invariant (`proxy.ts` cookie-only)
 - `rendering-strategy.contract.test.ts` — ADR-006/010 `api()`/`apiPublic()` split (○ Static vs ƒ Dynamic)
@@ -214,7 +214,7 @@ The repo has **9 contract test files / 102 tests** in `apps/web/src/lib/__tests_
 - `category-grid.contract.test.ts` — v1.2.2 F2: CategoryGrid `<img alt="">` (decorative) + `<a aria-label="Browse …">` (no triple-counted accessible name)
 - `page-metadata.contract.test.ts` — v1.2.2 F4 + v1.2.3 G1: page-split pattern (see below)
 - `pdp-thumbnail-alt.contract.test.ts` — v1.2.4 H4: PDP gallery thumbnail `<img>` has non-empty `alt` AND falls back to `img.altText` (was `alt=""`)
-- `scroll-reveal-wiring.contract.test.ts` — v1.2.8 V11-1: asserts the `useScrollReveal` hook exists in `apps/web/src/hooks/useScrollReveal.ts`, the `ScrollRevealTrigger` Client Component exists in `apps/web/src/components/shop/ScrollRevealTrigger.tsx` with a `'use client'` directive, and the `(shop)` layout imports + renders it. Locks the wiring that prevents `/products` (and every PDP) from rendering as a blank screen — the `.reveal` utility sets `opacity: 0` and only the hook adds the `.visible` modifier that transitions to `opacity: 1` (3 tests)
+- `scroll-reveal-wiring.contract.test.ts` — v1.2.8 V11-1 + v1.3.1 V14-1: asserts the `useScrollReveal` hook exists in `apps/web/src/hooks/useScrollReveal.ts`, the `ScrollRevealTrigger` Client Component exists in `apps/web/src/components/shop/ScrollRevealTrigger.tsx` with a `'use client'` directive, and the `(shop)` layout imports + renders it (V11-1). V14-1 additions: asserts the hook imports `usePathname` from `next/navigation` and the `useEffect` dependency array includes `pathname` (not empty `[]`) — locks the wiring that prevents `/products` (and every PDP) from rendering as a blank screen, AND prevents collection filter pages (e.g. `/products?collection=furniture`) from rendering blank on the FIRST client-side navigation. The `.reveal` utility sets `opacity: 0` and only the hook adds the `.visible` modifier that transitions to `opacity: 1`; with empty `[]` deps the effect never re-ran on `<Link>` navigation, so newly-rendered `.reveal` cards stayed invisible (5 tests: 3 V11-1 + 2 V14-1)
 
 Cross-package contract tests (not in `apps/web/`):
 
@@ -225,7 +225,7 @@ Cross-package contract tests (not in `apps/web/`):
 - `packages/payments/src/webhooks.contract.test.ts` — ADR-009 Payment Intents + ADR-014 idempotency
 - `services/workers/trigger.config.test.ts` — ADR-016 Trigger.dev config
 
-Total test counts (post-v1.2.8): @maison/web 9 files / 102 tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests, @maison/payments 3 files / 18 tests.
+Total test counts (post-v1.3.1): @maison/web 9 files / 104 tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests, @maison/payments 3 files / 18 tests.
 
 ### Client Component pages that need metadata — the split pattern
 

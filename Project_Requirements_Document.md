@@ -2112,6 +2112,66 @@ from v1.3.0:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.3.1 (August 4, 2026) — v14 Remediation (V14-1)
+
+Single-fix follow-up to v1.3.0 delivered by the v14 remediation pass: (V14-1) a
+CRITICAL visual-defect fix on collection filter pages (e.g.
+`/products?collection=furniture`) — they were rendering blank on the FIRST
+client-side navigation (clicking a filter pill via `<Link>`), even though a
+manual page reload of the same URL worked fine. Root cause: the
+`useScrollReveal` hook (`apps/web/src/hooks/useScrollReveal.ts`) had a
+`useEffect` with an empty dependency array `[]`, so it only ran once on initial
+mount. When users clicked a collection filter pill (client-side `<Link>`
+navigation), the new product cards rendered with the `.reveal` class
+(`opacity: 0`) but the `IntersectionObserver` never re-ran to observe them —
+the cards stayed invisible until a manual page reload. Fix: the hook now calls
+`usePathname()` + `useSearchParams()` from `next/navigation` and lists both as
+dependencies of the `useEffect` (`[pathname, searchParams]`), so the effect
+re-runs on every route/query change, re-observing any newly-rendered `.reveal`
+elements. The codebase remains the source of truth. This subsection documents
+the requirements-relevant changes from v1.3.1:
+
+- **V14-1 — Fixed collection filter pages blank on client-side navigation
+  (CRITICAL, visual, follow-up to V11/V12).** The V11-1 (v1.2.8) + V12-1
+  (v1.2.9) fixes wired the `useScrollReveal()` hook into the shop layout and
+  added a `requestAnimationFrame` first-paint fallback, but both fixes assumed
+  the effect ran once per page load — the `useEffect` dependency array was
+  `[]`. This worked for the initial mount and for full page reloads (Next.js
+  tears down + re-mounts the React tree), but on client-side navigation
+  (`<Link>` clicks between collection filter URLs like
+  `/products?collection=furniture` → `/products?collection=lighting`), the
+  layout and `ScrollRevealTrigger` Client Component stayed mounted, the
+  `useEffect` did NOT re-run, the new `ProductCard` instances rendered with
+  `className="product-card reveal"` (`opacity: 0`), and the
+  `IntersectionObserver` was never re-constructed to observe them — leaving
+  the grid visually blank until the user manually reloaded the page. Fix:
+  `useScrollReveal` now reads `const pathname = usePathname()` and
+  `const searchParams = useSearchParams()` from `next/navigation`, and the
+  `useEffect` dependency array is `[pathname, searchParams]` (was `[]`). On
+  every route or query-string change, React re-runs the effect: it tears down
+  the old `IntersectionObserver` (cleanup return), constructs a new one, and
+  observes every `.reveal` element currently in the DOM — including the
+  freshly-rendered product cards. No changes to the section structure, copy,
+  design tokens, the `ScrollRevealTrigger` Client Component, the shop layout
+  wiring, or any other component. The V12-1 `requestAnimationFrame` first-paint
+  fallback is preserved inside the effect body — it now also re-runs on each
+  route change, covering the same initial-viewport timing gap for the new set
+  of `.reveal` elements.
+
+- **Contract test count updates.** No new contract test files added in v1.3.1.
+  Two new tests were added to the existing
+  `apps/web/src/lib/__tests__/scroll-reveal-wiring.contract.test.ts` under a
+  new `V14-1 — scroll reveal re-runs on route change` describe block (now 5
+  tests total in the file, was 3): one asserts `useScrollReveal` imports
+  `usePathname` from `next/navigation`, the other asserts the `useEffect`
+  dependency array includes `pathname` (matches `},\s*[pathname` and rejects
+  empty `},\s*[]\s*)`). Test counts:
+  Total @maison/web tests: 9 files, 104 tests (was 9/102 — added 2 V14-1
+  contract tests).
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices
