@@ -267,5 +267,57 @@ This affected all statically-prerendered shop pages (`/cart`, `/checkout`, `/con
 
 ---
 
+Build succeeded 10/10 — no build errors. All pages return HTTP 200 with content. The V15 Suspense fix resolved the build failure. Now let me do agent-browser E2E + skills validation in parallel:
+## Summary
+
+**v16 remediation complete** — committed as `1014096` on `main` and pushed to GitHub. Build is green, live site is healthy, and all prior visual defects are confirmed fixed.
+
+### Pre-flight verification
+- Git pulled `40f5bfe` (latest remote with updated pnpm_log.txt + session_log_2.md)
+- pnpm_log.txt: **build succeeded 10/10** — V15 Suspense fix resolved the build failure. Only expected DYNAMIC_SERVER_USAGE warnings on auth-guarded routes (ADR-010)
+- curl: all 5 key pages return HTTP 200 with content (homepage 224KB, products 140KB, furniture 65KB, cart 38KB, contact 41KB)
+
+### E2E testing (agent-browser) — all prior fixes confirmed working
+- **`/products`**: 20 product cards, 4 visible in initial viewport (opacity:1), 16 below fold (opacity:0 — animate on scroll)
+- **Client-side nav `/products` → `?collection=furniture`**: 4 cards, ALL visible (opacity:1) — V14 fix confirmed working
+- **Client-side nav furniture → lighting**: 3 cards, ALL visible — V14 fix confirmed working
+- **No blank pages, no console errors**
+
+### Skills compliance (3 skills re-validated)
+- V15 fix verified (Suspense boundary)
+- **0 NEW non-compliances** introduced by v15
+- 1 minor gap found: `escapeForScriptContext` only escaped `<` (not the full Skill 2 §15.10 canonical 5-char set) — **fixed in V16-1**
+
+### Fix applied (V16-1)
+Strengthened `escapeForScriptContext()` from escaping only `<` to the full canonical 5-character set per Skill 2 §15.10:
+- `<` → `\u003c` (prevents `</script>` breakout)
+- `>` → `\u003e` (defense in depth)
+- `&` → `\u0026` (prevents entity interpretation)
+- U+2028 → `\u2028` (LINE SEPARATOR — breaks JS parsing)
+- U+2029 → `\u2029` (PARAGRAPH SEPARATOR — breaks JS parsing)
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass; 104 web tests
+- `pnpm format:check` → all files clean
+- `git push origin main` → `40f5bfe..1014096  main -> main` ✓
+
+### Remaining deferred items (unchanged, all carryover)
+- `noUnusedLocals`/`noUnusedParameters` (would require cleanup pass)
+- React Compiler (7 `useCallback` instances — requires config change)
+- 22 non-null assertions in tRPC routers (mostly safe Drizzle patterns)
+- Trigger.dev stubs (Phase 0, documented)
+
+### Visual defect fix arc — COMPLETE and build-safe
+- **V11**: Wired `useScrollReveal` into shop layout
+- **V12**: Added `requestAnimationFrame` fallback for initial viewport
+- **V13**: Fixed Philosophy section `next/image fill` + CSS Grid
+- **V14**: Added `pathname` + `searchParams` deps for client-side navigation
+- **V15**: Wrapped in `<Suspense>` to fix build failure
+- **V16**: Strengthened `escapeForScriptContext` to full canonical pattern
+
+---
+
 https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea
 
