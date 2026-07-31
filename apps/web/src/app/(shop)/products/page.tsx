@@ -6,6 +6,8 @@
  * Uses ProductCard for consistent product display.
  */
 
+import { Suspense } from 'react';
+
 import Link from 'next/link';
 
 import type { Metadata } from 'next';
@@ -152,7 +154,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           >
             Sort
           </label>
-          <SortSelect currentSort={sort} />
+          <Suspense fallback={null}>
+            <SortSelect currentSort={sort} />
+          </Suspense>
         </div>
       </div>
 
