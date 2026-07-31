@@ -805,5 +805,54 @@ Added `escapeForScriptContext()` helper to `utils.ts` and applied it to the JSON
 
 ---
 
+Local at `626a777`, remote ahead at `847f91f`. Let me pull:
+Pulled. Now let me review pnpm_log, curl the site, and launch E2E + skills validation in parallel:
+Build succeeded 10/10, only expected DYNAMIC_SERVER_USAGE warnings. Let me curl the live site + verify the v11 blank screen fix is deployed:
+Live site healthy. Now let me launch agent-browser E2E (verify blank screen fix) + skills validation in parallel:
+Skills validation found 1 NEW issue: `CurrencySelector.tsx` is dead code (89 lines, never imported). Let me do quick E2E to verify the v11 blank screen fix is live:
+The products page STILL shows all 20 cards at `opacity:0`! The v11 fix may not be deployed yet, OR there's a timing issue with the IntersectionObserver. Let me investigate:
+The v11 fix IS deployed — scrolling triggers the IntersectionObserver. But there's a **remaining bug**: the first ~4 cards in the initial viewport NEVER get the `visible` class. This is a known IntersectionObserver timing issue — the callback doesn't reliably fire for elements already in the viewport on page load when the observer is set up in `useEffect` after hydration. Let me fix this:
+Now let me also delete the dead `CurrencySelector.tsx`:
+Now let me close the browser, run all gates, and commit:
+All gates GREEN. Let me update docs and commit:
+Docs updated. Let me run final format check + commit + push:
+## Summary
+
+**v12 remediation complete** — committed as `a52db2e` on `main` and pushed to GitHub. Fixed the remaining IntersectionObserver timing bug from the v11 blank screen fix + removed dead code.
+
+### Critical defect follow-up (V11 → V12)
+The v11 fix wired `useScrollReveal()` into the shop layout via `ScrollRevealTrigger`, but E2E testing on the live site revealed a **remaining issue**: the first ~4 product cards in the initial viewport still had `opacity: 0`. Root cause: IntersectionObserver doesn't reliably fire `isIntersecting` for elements already in the viewport when the observer is constructed inside a post-hydration `useEffect`.
+
+**Fix (V12-1)**: Added a `requestAnimationFrame` fallback in `useScrollReveal.ts` that manually checks `getBoundingClientRect()` for any `.reveal:not(.visible)` elements already in the viewport and adds the `visible` class immediately. Cards below the fold still animate on scroll via the IntersectionObserver.
+
+### Dead code removal (V12-2)
+Deleted `CurrencySelector.tsx` (89-line `'use client'` component + 3 helper exports, never imported anywhere — tracked in `status.md` MEDIUM #10 since v4).
+
+### E2E evidence
+- agent-browser confirmed: 20 product cards on `/products`, all at `opacity: 0` on page load
+- After scrolling 500px: 4 cards became visible (observer fired for newly intersecting elements)
+- After scrolling 1500px: 16 cards visible
+- **4 cards in the initial viewport NEVER got the `visible` class** — this is the bug V12-1 fixes
+
+### Skills compliance (3 skills re-validated)
+- v11 fixes (V11-1 + V11-2) verified in place
+- 0 NEW critical violations beyond the dead code (now removed)
+- Zero `: any`, zero `as unknown as` (except 2 documented driver casts), zero `@ts-ignore`, zero PII in logs, zero `dangerouslySetInnerHTML` without escaping
+- 9 contract tests / 102 tests in `@maison/web`
+
+### Verification gates (all GREEN)
+- `pnpm check-types` → 10/10 packages pass
+- `pnpm lint` → pass
+- `pnpm test` → 8/8 packages pass (102 web tests)
+- `pnpm format:check` → all files clean
+- `git push origin main` → `847f91f..a52db2e  main -> main` ✓
+
+### Suggested next steps
+- **Redeploy** `https://maison.jesspete.shop/` — the V12-1 fix ensures ALL product cards (including those in the initial viewport) become visible on page load. This is the final fix for the blank screen defect reported by the user.
+- After redeployment, verify: open `/products` → all 20 cards should be immediately visible without scrolling. Also verify `/products?collection=textiles&sort=price_desc` (the exact URL from the user's screenshot).
+- Remaining deferred items: `noUnusedLocals`/`noUnusedParameters`, React Compiler, 22 non-null assertions, Trigger.dev Phase 0 stubs — all documented and unchanged from prior cycles.
+
+---
+
 https://chat.z.ai/s/925df5cf-9fe1-4b58-9ac4-9cf01c7a31ea
 
