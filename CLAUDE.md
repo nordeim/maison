@@ -280,23 +280,24 @@ Full instructions: `skills/how-to-git-push-using-ssh-wrapper/SKILL.md`.
 
 ## Common Mistakes To Avoid
 
-| Mistake                                 | Correct Approach                                                             |
-| --------------------------------------- | ---------------------------------------------------------------------------- |
-| Creating `middleware.ts`                | Create `proxy.ts` (Next.js 16 rename)                                        |
-| Adding `tailwind.config.js`             | Add tokens to `globals.css` `@theme` (Tailwind v4 CSS-first)                 |
-| Using `forwardRef`                      | Pass `ref` as a normal prop (React 19)                                       |
-| Forgetting `await params`               | Page params are `Promise<...>` — always await                                |
-| Storing money as `numeric`              | Store as `integer` cents (`_cents` suffix)                                   |
-| Using `DATABASE_URL` for migrations     | Use `DATABASE_URL_UNPOOLED` (PgBouncer breaks prepared statements)           |
-| `db:push` in production                 | Always use `db:migrate` in prod; `db:push` is dev-only                       |
-| Rate limiter failing closed             | Fail OPEN — allow requests if Redis is down, log for review                  |
-| `any` type in production                | Use `unknown` + type guard, or define a proper type                          |
-| Default export for components           | Named export (except `page.tsx` / `route.ts` which Next.js requires)         |
-| `"use client"` at top of layout         | Keep layouts as Server Components; push `"use client"` to leaf components    |
-| Google Fonts CDN                        | Self-host woff2 in `packages/ui/src/fonts/` (privacy + performance)          |
-| Stripe Tokens (legacy)                  | Use Payment Intents (current standard, supports Apple Pay / Google Pay)      |
-| Skipping webhook signature verification | Always verify with `STRIPE_WEBHOOK_SECRET` — never trust unverified webhooks |
-| Generic SaaS copy ("Empower your…")     | Write like a human editor: "Objects of Quiet Beauty"                         |
+| Mistake                                             | Correct Approach                                                                                                                                                                                                           |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Creating `middleware.ts`                            | Create `proxy.ts` (Next.js 16 rename)                                                                                                                                                                                      |
+| Adding `tailwind.config.js`                         | Add tokens to `globals.css` `@theme` (Tailwind v4 CSS-first)                                                                                                                                                               |
+| Using `forwardRef`                                  | Pass `ref` as a normal prop (React 19)                                                                                                                                                                                     |
+| Forgetting `await params`                           | Page params are `Promise<...>` — always await                                                                                                                                                                              |
+| Storing money as `numeric`                          | Store as `integer` cents (`_cents` suffix)                                                                                                                                                                                 |
+| Using `DATABASE_URL` for migrations                 | Use `DATABASE_URL_UNPOOLED` (PgBouncer breaks prepared statements)                                                                                                                                                         |
+| `db:push` in production                             | Always use `db:migrate` in prod; `db:push` is dev-only                                                                                                                                                                     |
+| Rate limiter failing closed                         | Fail OPEN — allow requests if Redis is down, log for review                                                                                                                                                                |
+| `any` type in production                            | Use `unknown` + type guard, or define a proper type                                                                                                                                                                        |
+| Default export for components                       | Named export (except `page.tsx` / `route.ts` which Next.js requires)                                                                                                                                                       |
+| `"use client"` at top of layout                     | Keep layouts as Server Components; push `"use client"` to leaf components                                                                                                                                                  |
+| Google Fonts CDN                                    | Self-host woff2 in `packages/ui/src/fonts/` (privacy + performance)                                                                                                                                                        |
+| Stripe Tokens (legacy)                              | Use Payment Intents (current standard, supports Apple Pay / Google Pay)                                                                                                                                                    |
+| Skipping webhook signature verification             | Always verify with `STRIPE_WEBHOOK_SECRET` — never trust unverified webhooks                                                                                                                                               |
+| Using `next/image fill` directly as a CSS Grid item | Wrap in `<div style={{ position: 'relative', gridColumn, gridRow, overflow: 'hidden' }}>` that carries the grid placement — `fill` renders `position: absolute`, which is removed from Grid flow (V13-1, locked in v1.3.0) |
+| Generic SaaS copy ("Empower your…")                 | Write like a human editor: "Objects of Quiet Beauty"                                                                                                                                                                       |
 
 ---
 

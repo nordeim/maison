@@ -33,27 +33,54 @@ export function Philosophy() {
             aspectRatio: '1 / 1',
           }}
         >
-          <Image
-            src="https://images.pexels.com/photos/38428357/pexels-photo-38428357.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1100&w=600"
-            alt="Artisan workshop with hand tools"
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            style={{ objectFit: 'cover', gridColumn: 1, gridRow: '1 / 3' }}
-          />
-          <Image
-            src="https://images.pexels.com/photos/31149584/pexels-photo-31149584.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400"
-            alt="Quiet living space"
-            fill
-            sizes="(max-width: 1024px) 50vw, 25vw"
-            style={{ objectFit: 'cover', gridColumn: 2, gridRow: 1 }}
-          />
-          <Image
-            src="https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=400"
-            alt="Detail of crafted object"
-            fill
-            sizes="(max-width: 1024px) 50vw, 25vw"
-            style={{ objectFit: 'cover', gridColumn: 2, gridRow: 2 }}
-          />
+          <div
+            style={{
+              position: 'relative',
+              gridColumn: 1,
+              gridRow: '1 / 3',
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              src="https://images.pexels.com/photos/38428357/pexels-photo-38428357.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1100&w=600"
+              alt="Artisan workshop with hand tools"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+          <div
+            style={{
+              position: 'relative',
+              gridColumn: 2,
+              gridRow: 1,
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              src="https://images.pexels.com/photos/31149584/pexels-photo-31149584.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400"
+              alt="Quiet living space"
+              fill
+              sizes="(max-width: 1024px) 50vw, 25vw"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+          <div
+            style={{
+              position: 'relative',
+              gridColumn: 2,
+              gridRow: 2,
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              src="https://images.pexels.com/photos/13712877/pexels-photo-13712877.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=400"
+              alt="Detail of crafted object"
+              fill
+              sizes="(max-width: 1024px) 50vw, 25vw"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
         </div>
         <div>
           <span

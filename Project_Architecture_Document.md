@@ -2543,6 +2543,57 @@ from v1.2.9:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.3.0 (August 3, 2026) — v13 Remediation (V13-1)
+
+Single-fix follow-up to v1.2.9 delivered by the v13 remediation pass: (V13-1) a
+CRITICAL visual-defect fix on the live homepage — the "Our Philosophy" section
+(`apps/web/src/components/shop/sections/Philosophy.tsx`) was rendering with all
+three of its images absent, because the `next/image fill` instances were placed
+directly as CSS Grid items. `fill` mode renders the underlying `<img>` with
+`position: absolute`, which removes the element from CSS Grid flow — so the
+`gridColumn` / `gridRow` styles set directly on the `<Image>` had no effect,
+and all three images positioned themselves relative to a distant ancestor
+(1280×577 px) and visually overlapped off-screen. The codebase remains the
+source of truth. This subsection documents the architecture-relevant changes
+from v1.3.0:
+
+- **V13-1 — Fixed Philosophy section images not showing (CRITICAL, visual).**
+  Root cause: `Philosophy.tsx` used `<Image fill style={{ gridColumn, gridRow,
+  objectFit: 'cover' }} />` directly as a grid item. Because `next/image fill`
+  renders the `<img>` with `position: absolute`, the element is removed from CSS
+  Grid flow — `gridColumn` / `gridRow` set on the absolutely-positioned image
+  had no effect, and all three images stacked on a distant ancestor box
+  (1280×577 px) rather than their intended grid cells. Architecturally this is
+  a composition-layer defect (CSS Grid + `next/image` interaction), not a
+  rendering-strategy or layer-model issue — the section was already a Server
+  Component rendering static images, no Client/Server boundary or auth layer
+  was touched. Fix: wrapped each `<Image fill>` in a `<div style={{ position:
+  'relative', gridColumn, gridRow, overflow: 'hidden' }}>` that *is* a grid
+  item (the div carries the grid placement; the Image `fill` then correctly
+  fills its wrapper div). The Image components now carry only `style={{
+  objectFit: 'cover' }}` (no `gridColumn` / `gridRow` on the `img` style). No
+  changes to the rendering-strategy contract, the Layer-1/2/3 security model,
+  the Client/Server Component boundary, the section's RSC/streaming posture, or
+  any other component. Also audited all 12 other `next/image fill` usages
+  across the codebase (`FeaturedCollection`, `CategoryGrid`, `Hero`,
+  `InstagramGrid`, `JournalSection`, `HyggeEdit`, `ProductCard` ×2,
+  `SearchModal`, `products/[slug]/page.tsx` ×2, `about/page.tsx` ×2) — all are
+  compliant (each has a `position: relative` parent, or `position: absolute`
+  inside a `position: relative` ancestor, plus `aspectRatio` + `overflow:
+  'hidden'`). The Philosophy.tsx defect was the only Image-fill / grid-flow
+  violation in the codebase.
+
+- **Contract test count updates.** No new contract test files added in v1.3.0.
+  V13-1 has no dedicated contract test — the fix is a structural CSS/JSX
+  composition change with no observable contract surface beyond "the image is
+  now visible," which is covered by the existing E2E smoke tests
+  (`e2e/smoke.spec.ts`) asserting the homepage renders the Philosophy section.
+  Test counts unchanged:
+  Total @maison/web tests: 9 files, 102 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
-_End of Project Architecture Document v1.2.9. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._
+_End of Project Architecture Document v1.3.0. For product requirements, see `docs/PRD_unified.md` (v1.2). For the canonical design system reference, see `docs/MAISON_Design_Guide.md`. For skill-alignment validation, see `docs/PRD_PAD_Validation_Against_Skills.md`. For developer onboarding, see `README.md`. For AI agent instructions, see `AGENTS.md` and `CLAUDE.md`._

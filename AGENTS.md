@@ -80,6 +80,30 @@ These are documented in the architecture skills but repeatedly cause bugs:
 
 ---
 
+## next/image `fill` + CSS Grid (V13-1, locked in v1.3.0)
+
+**Image `fill` renders `position: absolute` — always wrap in a `position: relative` div if placing in a CSS Grid.**
+
+`next/image` with the `fill` prop renders the underlying `<img>` with `position: absolute` (so it can stretch to fill its nearest _positioned_ ancestor). An absolutely-positioned element is **removed from CSS Grid flow** — so `gridColumn` / `gridRow` set directly on the `<Image fill>` style **have no effect**, and the image will position itself relative to a distant ancestor (typically the section root) rather than its intended grid cell. On the live homepage this manifested as the entire "Our Philosophy" section (`apps/web/src/components/shop/sections/Philosophy.tsx`) rendering with all 3 images absent — they were stacking off-screen at 1280×577 px relative to a distant ancestor instead of inside their grid cells (V13-1, fixed in v1.3.0).
+
+**Correct pattern** (carries grid placement on the wrapper, NOT the Image):
+
+```tsx
+<div style={{ position: 'relative', gridColumn: '1 / 2', gridRow: '1 / 3', overflow: 'hidden' }}>
+  <Image src={...} alt={...} fill style={{ objectFit: 'cover' }} />
+</div>
+```
+
+**Wrong pattern** (grid placement on the absolutely-positioned Image — silently ignored):
+
+```tsx
+<Image src={...} alt={...} fill style={{ gridColumn: '1 / 2', gridRow: '1 / 3', objectFit: 'cover' }} />
+```
+
+All 13 production `next/image fill` usages in the codebase were audited post-V13-1 — the 12 non-Philosophy sites (`FeaturedCollection`, `CategoryGrid`, `Hero`, `InstagramGrid`, `JournalSection`, `HyggeEdit`, `ProductCard` ×2, `SearchModal`, `products/[slug]/page.tsx` ×2, `about/page.tsx` ×2) all have a `position: 'relative'` parent (or `position: 'absolute'` inside a `position: 'relative'` ancestor) plus `aspectRatio` + `overflow: 'hidden'`. If you add a new `Image fill`, follow the same wrapper-div pattern — and never put `gridColumn` / `gridRow` on the `<Image>` itself.
+
+---
+
 ## Tailwind v4 (CSS-first, no config file)
 
 - ❌ Do NOT create `tailwind.config.js` or `tailwind.config.ts`.

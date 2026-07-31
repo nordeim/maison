@@ -1683,6 +1683,59 @@ REMEDIATION_HISTORY v1.2.9 subsections.
   tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests,
   @maison/payments 3 files / 18 tests.
 
+### v1.3.0 (August 3, 2026) — v13 Remediation (V13-1, design-system-relevant)
+
+Single-fix follow-up to v1.2.9. V13-1 IS design-system-relevant: it fixes a
+visual rendering defect on the live homepage — the "Our Philosophy" section
+(`apps/web/src/components/shop/sections/Philosophy.tsx`) was rendering with all
+three of its images absent, because the `next/image fill` instances were placed
+directly as CSS Grid items. `fill` mode renders the underlying `<img>` with
+`position: absolute`, which removes the element from CSS Grid flow — so the
+`gridColumn` / `gridRow` styles set directly on the `<Image>` had no effect,
+and all three images positioned themselves relative to a distant ancestor
+(1280×577 px) and visually overlapped off-screen. Full per-fix detail is in
+the PRD + PAD REMEDIATION_HISTORY v1.3.0 subsections.
+
+- **V13-1 — Fixed Philosophy section images not showing (CRITICAL, visual).**
+  The "Our Philosophy" section in `Philosophy.tsx` is the canonical editorial
+  3-image asymmetric grid called out in §9 (one tall image spanning two rows +
+  two square images stacked beside it). The defect: each `<Image fill>` was
+  given `style={{ gridColumn, gridRow, objectFit: 'cover' }}` directly on the
+  image element, but `next/image fill` renders the underlying `<img>` with
+  `position: absolute` — and an absolutely-positioned element is removed from
+  CSS Grid flow, so `gridColumn` / `gridRow` had no effect. All three images
+  positioned themselves relative to a distant ancestor box (1280×577 px) and
+  visually overlapped off-screen, leaving the section appearing image-less on
+  the live homepage. Fix: wrapped each `<Image fill>` in a `<div style={{
+  position: 'relative', gridColumn, gridRow, overflow: 'hidden' }}>` that *is*
+  a grid item (the div carries the grid placement; the Image `fill` then
+  correctly fills its wrapper div, per the `next/image fill` contract that
+  requires a positioned ancestor). The Image components now carry only
+  `style={{ objectFit: 'cover' }}` (no `gridColumn` / `gridRow` on the `img`
+  style). No change to `globals.css`, the design tokens, the section's grid
+  template, the copy, or any keyframe — the fix is a structural CSS/JSX
+  composition change inside `Philosophy.tsx` only. The visible rendering of
+  every section documented in this guide now works as originally specified,
+  including the asymmetric Philosophy image grid.
+
+- **Audit cross-reference.** All 12 other `next/image fill` usages across the
+  codebase (`FeaturedCollection`, `CategoryGrid`, `Hero`, `InstagramGrid`,
+  `JournalSection`, `HyggeEdit`, `ProductCard` ×2, `SearchModal`,
+  `products/[slug]/page.tsx` ×2, `about/page.tsx` ×2) were audited and
+  confirmed compliant — each has a `position: 'relative'` parent, or
+  `position: 'absolute'` inside a `position: 'relative'` ancestor, plus
+  `aspectRatio` + `overflow: 'hidden'`. The Philosophy.tsx defect was the only
+  Image-fill / grid-flow violation in the codebase. No design-system surface
+  beyond Philosophy.tsx was touched.
+
+- **Test counts.** No new contract test files added in v1.3.0. V13-1 has no
+  dedicated contract test — the fix is a structural CSS/JSX composition change
+  with no observable contract surface beyond "the image is now visible," which
+  is covered by the existing E2E smoke tests (`e2e/smoke.spec.ts`) asserting
+  the homepage renders the Philosophy section. Totals unchanged: @maison/web
+  9 files / 102 tests, @maison/api 6 files / 20 tests, @maison/auth 2 files /
+  35 tests, @maison/payments 3 files / 18 tests.
+
 ---
 
 ## Appendix C: Change Log (v4)
