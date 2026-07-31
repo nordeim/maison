@@ -1,10 +1,9 @@
-
 I now have ground truth on the key numbers — including the fact that "16 fill usages" (the report's headline invariant count) is ambiguous: there are 44 raw fill token matches across 23 files, many of which are non-<Image fill> (e.g.  
 form fill attributes, CartDrawer, WishlistButton). The report's "16" only counted a specific subset of <Image fill> sites. This is exactly the kind of claim a meticulous validation must probe, not accept. 
  
 I have enough grounding. Here is the validation plan. 
  
-──────────────────────────────────────────────────────────────────────────────── 
+---
  
 Executive Summary 
  
@@ -21,7 +20,7 @@ anchor, so the report is in fact validating the current tree.
 I have pre-verified the structural backbone of both documents: the hook wiring (V11/14), the ScrollRevealTrigger Client Component, the <Suspense> boundary (V15), the full 5-char escapeForScriptContext (V16-1), the Philosophy 
 grid-placement on wrapper divs (V13-1), the deleted CurrencySelector (V12-2), and the 5-test scroll-reveal contract. The plan below covers everything still open. 
  
-──────────────────────────────────────────────────────────────────────────────── 
+---
  
 The Meticulous Plan 
  
@@ -118,7 +117,7 @@ Output: docs/validation_of_2_validation.md (or inline summary — your choice), 
 5. The honest meta-finding — whether findings.md's "report is literally true but incomplete" judgment survives verification, or whether findings.md itself overstates. 
 6. Recommended remediations — e.g. "update report §3 to acknowledge SortSelect latent risk + routing-table drift" or "the 16-fill count is reproducible only with these exact grep anchors — document them." 
  
-──────────────────────────────────────────────────────────────────────────────── 
+---
  
 Risks & mitigations I've identified up front 
  
