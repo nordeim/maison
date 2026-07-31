@@ -1,3 +1,5 @@
+$ rm -rf .next */.next */*/.next
+(venv) pete@pop-os:/home/project/maison
 $ pnpm build
 $ turbo build
 • turbo 2.10.7
@@ -6,13 +8,12 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
-@maison/email:build: cache hit, replaying logs 99cc0c6aac383be6
-@maison/email:build: $ tsc --build
-@maison/config:build: cache hit, replaying logs 43bcc38b2aef396f
-@maison/config:build: $ tsc --build
 @maison/ui:build: cache hit, replaying logs 62c6755f8605acb7
 @maison/ui:build: $ tsc --build
+@maison/config:build: cache hit, replaying logs 43bcc38b2aef396f
+@maison/config:build: $ tsc --build
 @maison/studio:build: cache hit, replaying logs 970c922270e07228
+@maison/email:build: cache hit, replaying logs 99cc0c6aac383be6
 @maison/studio:build: $ sanity build
 @maison/studio:build: 
 @maison/studio:build: 
@@ -21,24 +22,25 @@ $ turbo build
 @maison/studio:build:    │   Update available: 6.6.0 → 6.7.0    │
 @maison/studio:build:    │                                      │
 @maison/studio:build:    │   Run pnpm update sanity to update   │
+@maison/email:build: $ tsc --build
+@maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
+@maison/db:build: $ tsc --build
 @maison/studio:build:    │                                      │
 @maison/studio:build:    ╰──────────────────────────────────────╯
 @maison/studio:build: 
 @maison/studio:build: 
 ✔ Clean output folder (88ms)
-@maison/db:build: cache hit, replaying logs e4e87c0ac9c77fbe
-@maison/db:build: $ tsc --build
 ✔ Build Sanity Studio (33003ms)
 @maison/studio:build: 
-@maison/auth:build: cache hit, replaying logs 157d3a6d5851a19f
-@maison/auth:build: $ tsc --build
 @maison/payments:build: cache hit, replaying logs 3742622f2ff3e57e
 @maison/payments:build: $ tsc --build
+@maison/auth:build: cache hit, replaying logs 157d3a6d5851a19f
+@maison/auth:build: $ tsc --build
+@maison/api:build: cache hit, replaying logs 7672a76161a9cb6f
 @maison/workers:build: cache hit, replaying logs 4831aeb92fdc7ed0
 @maison/workers:build: $ tsc --build
-@maison/api:build: cache hit, replaying logs 7672a76161a9cb6f
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing d49fc1dc04f3f446
+@maison/web:build: cache hit, replaying logs d49fc1dc04f3f446
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
@@ -210,8 +212,8 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    9 cached, 10 total
-  Time:    34.163s 
+Cached:    10 cached, 10 total
+  Time:    231ms >>> FULL TURBO
 
 (venv) pete@pop-os:/home/project/maison
 $ pnpm start
@@ -220,5 +222,6 @@ $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 186ms
+✓ Ready in 210ms
+
 
