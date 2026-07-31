@@ -2172,6 +2172,58 @@ the requirements-relevant changes from v1.3.1:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.3.2 (August 5, 2026) — v15 Remediation (V15-1)
+
+Single-fix follow-up to v1.3.1 delivered by the v15 remediation pass: (V15-1) a
+CRITICAL production-build-failure fix. The V14 fix (v1.3.1) added
+`useSearchParams()` to `useScrollReveal.ts` so the `IntersectionObserver` would
+re-run on collection filter navigation — but `useSearchParams()` triggers a
+Client-Side Rendering bailout during static prerendering, and the live site
+returned HTTP 502 because the production build failed with:
+`"useSearchParams() should be wrapped in a suspense boundary at page /cart"`.
+Fix: `<ScrollRevealTrigger />` is now wrapped in `<Suspense fallback={null}>`
+in `apps/web/src/app/(shop)/layout.tsx` — the standard Next.js pattern for
+`useSearchParams()` in statically-prerendered pages. The codebase remains the
+source of truth. This subsection documents the requirements-relevant changes
+from v1.3.2:
+
+- **V15-1 — Fixed production build failure from V14's `useSearchParams()`
+  addition (CRITICAL, build/production).** The V14-1 (v1.3.1) fix that wired
+  `useSearchParams()` into `useScrollReveal.ts` (so the `IntersectionObserver`
+  re-runs on collection filter navigation) introduced a static-prerendering
+  defect: `useSearchParams()` from `next/navigation` opts the consuming
+  Client Component out of static prerendering, and Next.js requires any
+  component using `useSearchParams()` to be wrapped in a `<Suspense>`
+  boundary — otherwise the build fails with
+  `"useSearchParams() should be wrapped in a suspense boundary at page /cart"`
+  (and any other statically-prerendered page that transitively renders the
+  consuming component). The V14-1 fix worked in dev (Next.js auto-suspends
+  statically-prerendered pages in dev mode) but the production build
+  (`next build`) failed, and the live site returned HTTP 502 because there
+  was no build artifact to serve. Fix: the `<ScrollRevealTrigger />` Client
+  Component is now wrapped in `<Suspense fallback={null}>` inside
+  `apps/web/src/app/(shop)/layout.tsx` (the standard Next.js pattern for
+  `useSearchParams()` in statically-prerendered pages — `fallback={null}` is
+  correct because the trigger renders nothing visible anyway; the
+  `IntersectionObserver` setup is the only side-effect). No changes to
+  `useScrollReveal.ts`, the `ScrollRevealTrigger` Client Component itself,
+  the `.reveal` / `.visible` utilities, the design tokens, the section
+  structure, the copy, or any keyframe. The V11-1 + V12-1 + V14-1 wiring
+  inside the hook is unchanged.
+
+- **Contract test count updates.** No new contract test files added in v1.3.2.
+  No new tests added to existing files. The existing test in
+  `apps/web/src/lib/__tests__/scroll-reveal-wiring.contract.test.ts` titled
+  "shop layout imports and renders ScrollRevealTrigger" was tightened to also
+  assert the presence of a `<Suspense>` boundary wrapping the component (test
+  renamed to "shop layout imports and renders ScrollRevealTrigger wrapped in
+  Suspense"; now asserts `source` matches `/Suspense/` AND
+  `/<Suspense[^>]*>\s*<ScrollRevealTrigger/`). Test counts unchanged:
+  Total @maison/web tests: 9 files, 104 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices

@@ -39,10 +39,15 @@ describe('V11-1 — scroll reveal is wired (not just defined)', () => {
     }
   });
 
-  it('shop layout imports and renders ScrollRevealTrigger', () => {
+  it('shop layout imports and renders ScrollRevealTrigger wrapped in Suspense', () => {
     const source = readFileSync(SHOP_LAYOUT, 'utf8');
     expect(source).toMatch(/ScrollRevealTrigger/);
     expect(source).toMatch(/<ScrollRevealTrigger\s*\/>/);
+    // V15 fix: useSearchParams() requires a Suspense boundary for static
+    // prerendering. Without it, the build fails on /cart and other static
+    // pages with "useSearchParams() should be wrapped in a suspense boundary".
+    expect(source).toMatch(/Suspense/);
+    expect(source).toMatch(/<Suspense[^>]*>\s*<ScrollRevealTrigger/);
   });
 });
 
