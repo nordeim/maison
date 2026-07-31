@@ -1636,6 +1636,53 @@ and is documented here as a cross-reference. Full per-fix detail is in the PRD
   unchanged (@maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests,
   @maison/payments 3 files / 18 tests).
 
+### v1.2.9 (August 2, 2026) — v12 Remediation (V12-1 + V12-2, design-system-relevant subset)
+
+Two-part follow-up to v1.2.8. V12-1 IS design-system-relevant: it fixes a
+residual visual rendering defect (the first ~4 `ProductCard`s in the initial
+viewport still rendering at `opacity: 0` despite the V11-1 wiring fix, because
+`IntersectionObserver` does not reliably fire its `isIntersecting` callback for
+elements already in the viewport when the observer is constructed inside a
+post-hydration `useEffect`). V12-2 is dead-code removal only and is documented
+here as a cross-reference. Full per-fix detail is in the PRD + PAD
+REMEDIATION_HISTORY v1.2.9 subsections.
+
+- **V11-1 → V12-1 — Fixed IntersectionObserver initial-viewport timing (CRITICAL, visual, follow-up to V11-1).**
+  The `.reveal` utility in `apps/web/src/app/globals.css` (declared alongside the
+  §6.2 scroll-reveal motion row) sets `opacity: 0` on any element with the
+  `reveal` class and transitions to `opacity: 1` only when the `.visible`
+  modifier is added by the `useScrollReveal()` hook in
+  `apps/web/src/hooks/useScrollReveal.ts`. The V11-1 fix (v1.2.8) wired the hook
+  into the shop layout via `ScrollRevealTrigger`, but E2E testing showed the
+  first ~4 `ProductCard`s in the initial viewport still had `opacity: 0` after
+  page load — `IntersectionObserver` does not reliably fire `isIntersecting` for
+  elements already in the viewport when the observer is set up inside a
+  `useEffect` that runs after hydration. Fix (V12-1): added a
+  `requestAnimationFrame` fallback to `useScrollReveal.ts` that, after the first
+  paint, queries `.reveal:not(.visible)` and manually adds the `visible` class to
+  any element whose `getBoundingClientRect()` is already inside the viewport
+  (accounting for the `-60px` `rootMargin` the observer uses). No change to
+  `globals.css`, the `.reveal` utility, the design tokens, or any keyframe — the
+  rAF fallback is additive JS inside the hook. The visible rendering of every
+  section documented in this guide now works as originally specified, including
+  the first paint of the initial viewport.
+
+- **V12-2 (cross-reference).** The `CurrencySelector.tsx` dead-code removal is
+  design-system-adjacent but does not touch `globals.css`,
+  `tooling/tailwind/base.ts`, or any visual surface (the file was an 89-line
+  `'use client'` component that was never imported and never rendered — tracked
+  in `status.md` MEDIUM #10 since v4), so is documented only in the PRD + PAD
+  REMEDIATION_HISTORY v1.2.9 subsections. The visible rendering of every section
+  documented in this guide is unchanged.
+
+- **Test counts.** No new contract test files added in v1.2.9. V12-1 is locked
+  by the existing `scroll-reveal-wiring.contract.test.ts` (3 tests, added in
+  v1.2.8 V11-1 — the rAF fallback is an additive implementation detail inside the
+  hook and does not change the contract surface). V12-2 has no test (deleting
+  unreachable code cannot regress). Totals unchanged: @maison/web 9 files / 102
+  tests, @maison/api 6 files / 20 tests, @maison/auth 2 files / 35 tests,
+  @maison/payments 3 files / 18 tests.
+
 ---
 
 ## Appendix C: Change Log (v4)

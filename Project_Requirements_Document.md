@@ -2013,6 +2013,59 @@ truth. This subsection documents the requirements-relevant changes from v1.2.8:
   Total @maison/auth tests: 2 files, 35 tests.
   @maison/payments tests: 3 files, 18 tests.
 
+### v1.2.9 (August 2, 2026) — v12 Remediation (V12-1 + V12-2)
+
+Two-part follow-up to v1.2.8 delivered by the v12 remediation pass: (V12-1) a
+CRITICAL follow-up to the V11-1 scroll-reveal wiring fix — E2E testing on
+`/products` revealed that the first ~4 `ProductCard`s in the initial viewport
+still rendered at `opacity: 0` despite the V11-1 wiring, because
+`IntersectionObserver` does not reliably fire its `isIntersecting` callback for
+elements already in the viewport when the observer is constructed inside a
+post-hydration `useEffect`; and (V12-2) removal of dead code
+(`CurrencySelector.tsx`, an 89-line `'use client'` component + 3 helper exports
+that were never imported anywhere, tracked in `status.md` MEDIUM #10 since v4
+but never remediated). The codebase remains the source of truth. This subsection
+documents the requirements-relevant changes from v1.2.9:
+
+- **V12-1 — Fixed IntersectionObserver initial-viewport timing (CRITICAL, visual, follow-up to V11-1).**
+  The V11-1 fix (v1.2.8) wired the `useScrollReveal()` hook into the shop layout
+  via `ScrollRevealTrigger`, but E2E testing showed the first ~4 product cards in
+  the initial viewport still had `opacity: 0` after page load. Root cause:
+  `IntersectionObserver` only reliably fires `isIntersecting` for elements that
+  *enter* the viewport after the observer is constructed; for elements already in
+  the viewport at observe-time, the callback is fired asynchronously and
+  unreliably when the observer is set up inside a `useEffect` that runs after
+  hydration. Fix: added a `requestAnimationFrame` fallback to
+  `apps/web/src/hooks/useScrollReveal.ts` that, after the first paint, queries
+  `.reveal:not(.visible)` and manually adds the `visible` class to any element
+  whose `getBoundingClientRect()` is already inside the viewport (accounting for
+  the `-60px` `rootMargin` the observer uses). No changes to `ProductCard.tsx`,
+  `ScrollRevealTrigger.tsx`, `globals.css`, or the design tokens — the
+  IntersectionObserver setup is unchanged; the rAF fallback is additive and
+  defensive only.
+
+- **V12-2 — Deleted dead code `CurrencySelector.tsx` (LOW, Skill 3 dead-code removal).**
+  `apps/web/src/components/shop/CurrencySelector.tsx` was an 89-line `'use client'`
+  component (plus 3 helper exports) that was never imported by any file in the
+  repo. It had been tracked in `status.md` as MEDIUM #10 since v4 but never
+  remediated. Deleted in full. No references to update (verified by grep across
+  `apps/`, `packages/`, `services/`, `tooling/`). No behaviour change, no test
+  change — the file was never reachable from any route.
+
+- **Contract test count updates.** No new contract test files added in v1.2.9.
+  V12-1 is locked by the existing
+  `apps/web/src/lib/__tests__/scroll-reveal-wiring.contract.test.ts` (3 tests,
+  added in v1.2.8 V11-1 — asserts the `useScrollReveal` hook exists, the
+  `ScrollRevealTrigger` Client Component exists with a `'use client'` directive,
+  and the `(shop)` layout imports + renders it; the rAF fallback is an additive
+  implementation detail inside the hook and does not change the contract
+  surface). V12-2 has no test (deleting unreachable code cannot regress). Test
+  counts unchanged:
+  Total @maison/web tests: 9 files, 102 tests.
+  Total @maison/api tests: 6 files, 20 tests.
+  Total @maison/auth tests: 2 files, 35 tests.
+  @maison/payments tests: 3 files, 18 tests.
+
 ---
 
 ## 20. Appendices
