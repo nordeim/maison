@@ -6,7 +6,7 @@
 
 ## Project Identity
 
-**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The codebase is fully scaffolded and Phase 3 complete — 13 tRPC routers, 24 Drizzle tables, full admin back-office, 30 E2E tests (22 smoke + 8 accessibility), and 37 production routes (25 static ○ + 12 dynamic ƒ). All application packages exist under `apps/` and `packages/` per the PRD §8.2 file hierarchy.
+**Maison** is a premium DTC e-commerce platform for curated Scandinavian home goods. The repo is a **Turborepo monorepo** (Next.js 16 + React 19 + Tailwind v4 + tRPC v11 + Drizzle ORM + Better Auth + Stripe). The codebase is fully scaffolded and Phase 3 complete — 13 tRPC routers, 24 Drizzle tables, full admin back-office, 30 E2E tests (22 smoke + 8 accessibility), and 42 production routes (16 static ○ + 26 dynamic ƒ). All application packages exist under `apps/` and `packages/` per the PRD §8.2 file hierarchy.
 
 **Stack version pins** (do not deviate without ADR):
 
