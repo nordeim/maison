@@ -42,7 +42,7 @@
     "@maison/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "6.9.1",
     "dotenv": "^17.4.2",
-    "eslint": "^9.39.4",
+    "eslint": "^10.8.0",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "server-only": "^0.0.1",

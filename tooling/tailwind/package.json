@@ -15,6 +15,6 @@
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
-    "eslint": "^9.39.4"
+    "eslint": "^10.8.0"
   }
 }
