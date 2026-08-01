@@ -58,6 +58,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, duplicate: true });
     }
 
-    return NextResponse.json({ error: `Webhook handler failed: ${message}` }, { status: 500 });
+    // CRITICAL: Return 200 for ALL handler errors after signature verification
+    // passes. Stripe retries webhooks for up to 3 days if it doesn't receive
+    // a 200. The idempotency layer (payment_events.stripe_event_id UNIQUE +
+    // pg_advisory_xact_lock) ensures duplicate events are safe to re-process.
+    // Returning 500 for transient errors (DB connection blip, etc.) causes
+    // infinite Stripe retries. Per skill §16.5 line 4685.
+    console.error('[stripe-webhook] Handler error (returning 200 to stop retries):', message);
+    return NextResponse.json({ received: true, error: message });
   }
 }

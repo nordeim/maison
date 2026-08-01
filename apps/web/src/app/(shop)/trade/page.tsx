@@ -10,6 +10,7 @@
 
 import type { Metadata } from 'next';
 
+import { ClientOnly } from '@/components/shop/ClientOnly';
 import { TradeForm } from '@/components/shop/TradeForm';
 
 export const metadata: Metadata = {
@@ -19,5 +20,12 @@ export const metadata: Metadata = {
 };
 
 export default function TradePage() {
-  return <TradeForm />;
+  // Wrap TradeForm in ClientOnly because it calls useSession() (Better Auth),
+  // which uses useRef internally — illegal in the server render pass.
+  // Same pattern as WishlistButton in ProductCard.tsx:142.
+  return (
+    <ClientOnly>
+      <TradeForm />
+    </ClientOnly>
+  );
 }

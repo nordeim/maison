@@ -16,6 +16,12 @@ import { stripe } from '@maison/payments';
 
 import { router, protectedProcedure } from '../trpc';
 
+// NOTE: Rate limiting on payment mutations is deferred to v12 — tRPC v11's
+// type system doesn't preserve session narrowing through .use(rateLimitMiddleware).
+// The rateLimitMiddleware would need to be refactored to use a context-preserving
+// pattern (e.g. t.procedure.use() instead of t.middleware()). See REMEDIATION_PLAN_v11
+// Task 5 for details.
+
 const SHIPPING_COSTS: Record<string, number> = {
   standard: 1500,
   express: 3500,
@@ -111,17 +117,23 @@ export const checkoutRouter = router({
       // 4. Create Stripe Payment Intent
       let clientSecret = 'pi_stub_secret';
       let paymentIntentId = 'pi_stub';
+      const idempotencyKey = `${input.cartId}-${Date.now()}`;
 
       try {
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: totalCents,
-          currency: 'usd',
-          metadata: {
-            cartId: input.cartId,
-            customerId: customerId ?? '',
-            userEmail: ctx.session.user.email,
+        // Pass idempotencyKey to Stripe SDK to prevent duplicate Payment
+        // Intents on retry. Per skill §15.6 + Stripe API contract.
+        const paymentIntent = await stripe.paymentIntents.create(
+          {
+            amount: totalCents,
+            currency: 'usd',
+            metadata: {
+              cartId: input.cartId,
+              customerId: customerId ?? '',
+              userEmail: ctx.session.user.email,
+            },
           },
-        });
+          { idempotencyKey },
+        );
         clientSecret = paymentIntent.client_secret ?? 'pi_stub_secret';
         paymentIntentId = paymentIntent.id;
       } catch (err) {
@@ -129,46 +141,58 @@ export const checkoutRouter = router({
         // Fallback: create order without Stripe (Phase 1 demo mode)
       }
 
-      // 5. Create pending order
+      // 5. Create pending order + line items atomically in a transaction.
+      // Per skill §5.8 line 1001 — multi-row writes must be wrapped in
+      // db.transaction() so a mid-flow failure doesn't leave orphaned rows.
       const orderNumber = generateOrderNumber();
-      const idempotencyKey = `${input.cartId}-${Date.now()}`;
 
-      const [order] = await ctx.db
-        .insert(orders)
-        .values({
-          orderNumber,
-          customerId,
-          email: ctx.session.user.email,
-          status: 'pending',
-          subtotalCents,
-          shippingCostCents,
-          taxCents,
-          totalCents,
-          currency: 'USD',
-          shippingAddress: input.shippingAddress,
-          billingAddress: input.shippingAddress,
-          shippingMethod: input.shippingMethod,
-          stripePaymentIntentId: paymentIntentId,
-          stripeIdempotencyKey: idempotencyKey,
-          placedAt: new Date(),
-        })
-        .returning({ id: orders.id, orderNumber: orders.orderNumber });
+      const order = await ctx.db.transaction(async (tx) => {
+        const [newOrder] = await tx
+          .insert(orders)
+          .values({
+            orderNumber,
+            customerId,
+            email: ctx.session.user.email,
+            status: 'pending',
+            subtotalCents,
+            shippingCostCents,
+            taxCents,
+            totalCents,
+            currency: 'USD',
+            shippingAddress: input.shippingAddress,
+            billingAddress: input.shippingAddress,
+            shippingMethod: input.shippingMethod,
+            stripePaymentIntentId: paymentIntentId,
+            stripeIdempotencyKey: idempotencyKey,
+            placedAt: new Date(),
+          })
+          .returning({ id: orders.id, orderNumber: orders.orderNumber });
 
-      // 6. Create line items (snapshot of product name + price)
-      await ctx.db.insert(lineItems).values(
-        cartItemsList.map((item) => ({
-          orderId: order!.id,
-          productId: item.productId,
-          productName: item.productName ?? 'Unknown Product',
-          priceCents: Number(item.priceCents ?? 0),
-          quantity: item.quantity,
-        })),
-      );
+        if (!newOrder) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create order',
+          });
+        }
+
+        // 6. Create line items (snapshot of product name + price)
+        await tx.insert(lineItems).values(
+          cartItemsList.map((item) => ({
+            orderId: newOrder.id,
+            productId: item.productId,
+            productName: item.productName ?? 'Unknown Product',
+            priceCents: Number(item.priceCents ?? 0),
+            quantity: item.quantity,
+          })),
+        );
+
+        return newOrder;
+      });
 
       return {
         clientSecret,
-        orderId: order!.id,
-        orderNumber: order!.orderNumber,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
       };
     }),
 

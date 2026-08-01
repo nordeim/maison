@@ -16,6 +16,8 @@ import { tradeApplications } from '@maison/db';
 
 import { router, protectedProcedure, staffProcedure, ownerProcedure } from '../trpc';
 
+// NOTE: Rate limiting on trade application is deferred to v12 — see checkout.ts.
+
 export const tradeRouter = router({
   /**
    * Submit a trade application.

@@ -46,7 +46,7 @@ export const contactRouter = router({
         console.error('[contact] Failed to send notification email:', err);
       }
 
-      console.log('[contact] Submission received (PII redacted)');
+      console.warn('[contact] Submission received (PII redacted)');
 
       return { success: true };
     }),

@@ -13,6 +13,8 @@ import { giftCards, customers } from '@maison/db';
 
 import { router, publicProcedure, protectedProcedure, staffProcedure } from '../trpc';
 
+// NOTE: Rate limiting on gift card purchase is deferred to v12 — see checkout.ts.
+
 /**
  * Generate a unique gift card code: MAIS-GC-XXXX-XXXX
  */

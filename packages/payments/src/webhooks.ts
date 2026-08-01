@@ -51,7 +51,7 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
     .limit(1);
 
   if (existing) {
-    console.log(`[stripe] Event ${event.id} (${event.type}) already processed, skipping`);
+    console.warn(`[stripe] Event ${event.id} (${event.type}) already processed, skipping`);
     return;
   }
 
@@ -70,7 +70,7 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
         .limit(1);
 
       if (doubleCheck) {
-        console.log(`[stripe] Event ${event.id} processed by concurrent request, skipping`);
+        console.warn(`[stripe] Event ${event.id} processed by concurrent request, skipping`);
         return;
       }
 
@@ -92,7 +92,7 @@ export async function handleWebhookEvent(event: StripeEvent): Promise<void> {
   } catch (err) {
     // 5. On unique violation: already processed by a concurrent request — success
     if (isUniqueViolation(err)) {
-      console.log(`[stripe] Event ${event.id} idempotency conflict resolved (already processed)`);
+      console.warn(`[stripe] Event ${event.id} idempotency conflict resolved (already processed)`);
       return;
     }
     throw err;
@@ -114,7 +114,7 @@ async function processEventByType(
       await handleChargeRefunded(event.data.object, tx);
       break;
     default:
-      console.log(`[stripe] Unhandled event type: ${event.type}`);
+      console.warn(`[stripe] Unhandled event type: ${event.type}`);
   }
 }
 
@@ -126,7 +126,7 @@ async function handlePaymentIntentSucceeded(
   paymentIntent: Stripe.PaymentIntent,
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
 ): Promise<void> {
-  console.log('[stripe] payment_intent.succeeded:', paymentIntent.id);
+  console.warn('[stripe] payment_intent.succeeded:', paymentIntent.id);
 
   // Find the order by stripe_payment_intent_id
   const [order] = await tx
@@ -142,7 +142,7 @@ async function handlePaymentIntentSucceeded(
 
   // Idempotency: if already confirmed, skip
   if (order.status === 'confirmed' || order.status === 'shipped' || order.status === 'delivered') {
-    console.log(`[stripe] Order ${order.orderNumber} already ${order.status}, skipping`);
+    console.warn(`[stripe] Order ${order.orderNumber} already ${order.status}, skipping`);
     return;
   }
 
@@ -182,7 +182,7 @@ async function handlePaymentIntentSucceeded(
       }),
     });
 
-    console.log(`[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)`);
+    console.warn(`[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)`);
   } catch (err) {
     console.error(
       `[stripe] Failed to send confirmation email for order ${order.orderNumber}:`,
@@ -199,7 +199,7 @@ async function handleChargeRefunded(
   charge: Stripe.Charge,
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
 ): Promise<void> {
-  console.log('[stripe] charge.refunded:', charge.id);
+  console.warn('[stripe] charge.refunded:', charge.id);
 
   const paymentIntentId = charge.payment_intent as string;
   if (!paymentIntentId) return;
@@ -220,5 +220,5 @@ async function handleChargeRefunded(
     })
     .where(eq(orders.id, order.id));
 
-  console.log(`[stripe] Order ${order.orderNumber} refunded`);
+  console.warn(`[stripe] Order ${order.orderNumber} refunded`);
 }

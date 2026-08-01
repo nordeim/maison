@@ -14,10 +14,19 @@
 
 import { useState } from 'react';
 
+import { useSession } from '@maison/auth/client';
+
 import { trpc } from '@/lib/trpc/client';
 
 export function TradeForm() {
-  const { data: existingApp, isLoading } = trpc.trade.myStatus.useQuery();
+  const { data: session } = useSession();
+  // Skip the protected `trade.myStatus` query when unauthenticated.
+  // Without `enabled: !!session`, the query retries 3x with exponential
+  // backoff (~7 seconds) before erroring, leaving unauthenticated visitors
+  // stuck on "Loading…". Mirrors the WishlistButton.tsx:52 pattern.
+  const { data: existingApp, isLoading } = trpc.trade.myStatus.useQuery(undefined, {
+    enabled: !!session,
+  });
   const applyMutation = trpc.trade.submitApplication.useMutation();
 
   const [form, setForm] = useState({
