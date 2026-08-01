@@ -5,9 +5,10 @@
  */
 
 import { pgTable, uuid, integer, timestamp } from 'drizzle-orm/pg-core';
+
 import { carts } from './carts';
-import { products } from './products';
 import { productVariants } from './product-variants';
+import { products } from './products';
 
 export const cartItems = pgTable('cart_items', {
   id: uuid('id').defaultRandom().primaryKey(),

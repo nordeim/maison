@@ -8,6 +8,7 @@ import {
   canAccessOwner,
   isValidRole,
 } from './rbac';
+
 import type { UserRole } from '@maison/db';
 
 describe('RBAC role tables (ADR-008 — aligned with Stillwater v3.0.0 §15.17)', () => {

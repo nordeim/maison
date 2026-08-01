@@ -15,14 +15,14 @@
 import Stripe from 'stripe';
 
 /** Stripe API version pinned to match SDK 22.3.x (ADR-009). */
-const STRIPE_API_VERSION = '2026-06-24.dahlia' as Stripe.LatestApiVersion;
+const STRIPE_API_VERSION = '2026-06-24.dahlia';
 
 let cachedClient: Stripe | null = null;
 
 export function getStripeClient(): Stripe {
   if (cachedClient) return cachedClient;
 
-  const apiKey = process.env['STRIPE_SECRET_KEY'];
+  const apiKey = process.env.STRIPE_SECRET_KEY;
   if (!apiKey || apiKey.includes('placeholder')) {
     // Return a stub — module import succeeds; actual API calls fail gracefully
     console.warn(

@@ -8,6 +8,7 @@
  */
 
 import { pgTable, uuid, text, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
+
 import { customers } from './customers';
 import { orders } from './orders';
 

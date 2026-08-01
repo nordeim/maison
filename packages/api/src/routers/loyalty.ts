@@ -8,11 +8,12 @@
  * Tiers: member (0), silver (500), gold (2000), platinum (5000).
  */
 
-import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
+
 import { loyaltyAccounts, loyaltyTransactions, customers, users } from '@maison/db';
+
 import { router, protectedProcedure, staffProcedure } from '../trpc';
-import { sql } from 'drizzle-orm';
 
 const TIER_THRESHOLDS = {
   member: 0,

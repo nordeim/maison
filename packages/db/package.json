@@ -29,7 +29,9 @@
     "db:reset": "tsx src/scripts/reset.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -37,11 +39,13 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
     "@types/pg": "^8.11.10",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.4",
     "tsx": "^4.23.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"

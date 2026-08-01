@@ -4,8 +4,9 @@
  * Uses Resend. Returns a stub in build/test contexts.
  */
 
-import type { ReactElement } from 'react';
 import { Resend } from 'resend';
+
+import type { ReactElement } from 'react';
 
 /**
  * Minimal Resend stub shape — mirrors the real `emails.send` return type
@@ -27,7 +28,7 @@ let cachedClient: ResendClient | null = null;
 function getClient(): ResendClient {
   if (cachedClient) return cachedClient;
 
-  const apiKey = process.env['RESEND_API_KEY'];
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey.includes('placeholder')) {
     cachedClient = {
       emails: {
@@ -59,7 +60,7 @@ export interface SendEmailOptions {
  */
 export async function sendEmail({ to, subject, react }: SendEmailOptions) {
   const client = getClient();
-  const from = process.env['EMAIL_FROM'] ?? 'hello@maison-living.com';
+  const from = process.env.EMAIL_FROM ?? 'hello@maison-living.com';
 
   // Both Resend and ResendStub accept the same payload shape. The `as
   // Parameters<...>[0]` cast was needed when `client` was typed as `Resend`

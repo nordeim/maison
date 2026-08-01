@@ -11,9 +11,11 @@
  */
 
 import './env'; // Load .env before db client reads DATABASE_URL
+import { eq } from 'drizzle-orm';
+
 import { db } from '../index';
 import { collections, products, productVariants, productImages } from '../schema';
-import { eq } from 'drizzle-orm';
+
 import { seedCollections } from './fixtures/collections';
 import { seedProducts, productCollectionMap, productImagesMap } from './fixtures/products';
 
@@ -26,14 +28,14 @@ async function seed() {
     const [existing] = await db
       .select()
       .from(collections)
-      .where(eq(collections.slug, col.slug!))
+      .where(eq(collections.slug, col.slug))
       .limit(1);
 
     if (existing) {
       await db
         .update(collections)
         .set({ ...col, updatedAt: new Date() })
-        .where(eq(collections.slug, col.slug!));
+        .where(eq(collections.slug, col.slug));
     } else {
       await db.insert(collections).values(col);
     }
@@ -46,13 +48,13 @@ async function seed() {
   // 3. Products + images + default variant
   console.log(`→ Upserting ${seedProducts.length} products…`);
   for (const product of seedProducts) {
-    const collectionSlug = productCollectionMap[product.slug!];
+    const collectionSlug = productCollectionMap[product.slug];
     const collectionId = collectionSlug ? (collectionBySlug.get(collectionSlug) ?? null) : null;
 
     const [existing] = await db
       .select()
       .from(products)
-      .where(eq(products.slug, product.slug!))
+      .where(eq(products.slug, product.slug))
       .limit(1);
 
     let productId: string;
@@ -61,7 +63,7 @@ async function seed() {
       await db
         .update(products)
         .set({ ...product, collectionId, updatedAt: new Date() })
-        .where(eq(products.slug, product.slug!));
+        .where(eq(products.slug, product.slug));
       productId = existing.id;
     } else {
       const [inserted] = await db
@@ -72,7 +74,7 @@ async function seed() {
     }
 
     // 3a. Images
-    const imageUrls = productImagesMap[product.slug!] ?? [];
+    const imageUrls = productImagesMap[product.slug] ?? [];
     for (let i = 0; i < imageUrls.length; i++) {
       const url = imageUrls[i]!;
       const [existingImg] = await db
@@ -93,7 +95,7 @@ async function seed() {
     }
 
     // 3b. Default variant (single, no options — covers stock for the product)
-    const sku = product.slug!.toUpperCase().replace(/-/g, '-').slice(0, 20);
+    const sku = product.slug.toUpperCase().replace(/-/g, '-').slice(0, 20);
     const [existingVariant] = await db
       .select()
       .from(productVariants)

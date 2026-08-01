@@ -6,8 +6,8 @@
  * are returned to the client.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TRPCError } from '@trpc/server';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock the db module
 vi.mock('@maison/db', () => ({

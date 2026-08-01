@@ -14,19 +14,22 @@
  * production. The app MUST fail fast rather than silently using a known secret.
  */
 
+import { randomBytes } from 'node:crypto';
+
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { customSession } from 'better-auth/plugins/custom-session';
 import { eq } from 'drizzle-orm';
-import { randomBytes } from 'node:crypto';
+
 import { db, users } from '@maison/db';
+
 import { resend } from './resend-client';
 
 const isBuildContext =
-  process.env['NEXT_PHASE'] === 'phase-production-build' || process.env['NODE_ENV'] === 'test';
+  process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test';
 
 // ── BETTER_AUTH_SECRET — fail fast in production ────────────────────
-const secret = process.env['BETTER_AUTH_SECRET'];
+const secret = process.env.BETTER_AUTH_SECRET;
 if (!secret && !isBuildContext) {
   throw new Error(
     'BETTER_AUTH_SECRET is not set. Generate one with `openssl rand -base64 32` ' +
@@ -38,7 +41,7 @@ if (!secret && !isBuildContext) {
 const effectiveSecret = secret ?? cryptoRandomSecret();
 
 // ── BETTER_AUTH_URL — fail fast in production ───────────────────────
-const baseURL = process.env['BETTER_AUTH_URL'];
+const baseURL = process.env.BETTER_AUTH_URL;
 if (!baseURL && !isBuildContext) {
   throw new Error(
     '[auth] BETTER_AUTH_URL is not set. Set it to your app URL ' +
@@ -48,7 +51,7 @@ if (!baseURL && !isBuildContext) {
 }
 const effectiveBaseURL = baseURL ?? 'https://maison.jesspete.shop';
 
-const emailFrom = process.env['EMAIL_FROM'] ?? 'hello@maison-living.com';
+const emailFrom = process.env.EMAIL_FROM ?? 'hello@maison-living.com';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -74,7 +77,7 @@ export const auth = betterAuth({
     // full user object — not a bare `email` string. The old `({ email, url })`
     // signature was a silent runtime bug: `email` was `undefined`, so reset
     // emails were sent to nobody. Derive the recipient from `user.email`.
-    sendResetPassword: async ({ user, url, token }) => {
+    sendResetPassword: async ({ user, url, token: _token }) => {
       await resend.emails.send({
         from: emailFrom,
         to: user.email,

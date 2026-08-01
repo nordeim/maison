@@ -6,8 +6,8 @@
  * The fix uses Drizzle's `isNull()` operator instead.
  */
 
-import { describe, it, expect } from 'vitest';
 import { isNull, eq, and } from 'drizzle-orm';
+import { describe, it, expect } from 'vitest';
 
 describe('cart router: null variantId handling', () => {
   it('isNull is importable from drizzle-orm', () => {

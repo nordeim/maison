@@ -15,8 +15,9 @@
  */
 
 import { initTRPC, TRPCError } from '@trpc/server';
-import type { DrizzleDB } from '@maison/db';
+
 import type { Session } from '@maison/auth';
+import type { DrizzleDB } from '@maison/db';
 
 // ── Context shape ──────────────────────────────────────────────────
 export interface TRPCContext {

@@ -8,9 +8,11 @@
  */
 
 import { z } from 'zod';
-import { router, publicProcedure } from '../trpc';
-import { rateLimitMiddleware } from '../middleware/rateLimit';
+
 import { sendEmail, ContactNotificationEmail } from '@maison/email';
+
+import { rateLimitMiddleware } from '../middleware/rateLimit';
+import { router, publicProcedure } from '../trpc';
 
 const rateLimited = publicProcedure.use(rateLimitMiddleware);
 

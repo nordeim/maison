@@ -2,8 +2,8 @@
  * Maison — Welcome email for new customers
  */
 
-import { EmailLayout } from '../components/EmailLayout';
 import { EmailButton } from '../components/EmailButton';
+import { EmailLayout } from '../components/EmailLayout';
 
 interface WelcomeEmailProps {
   name?: string;

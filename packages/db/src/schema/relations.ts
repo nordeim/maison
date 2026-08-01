@@ -6,20 +6,21 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { users } from './users';
-import { sessions } from './sessions';
+
 import { accounts } from './accounts';
-import { customers } from './customers';
 import { addresses } from './addresses';
-import { collections } from './collections';
-import { products } from './products';
-import { productVariants } from './product-variants';
-import { productImages } from './product-images';
-import { carts } from './carts';
 import { cartItems } from './cart-items';
+import { carts } from './carts';
+import { collections } from './collections';
+import { customers } from './customers';
+import { lineItems } from './line-items';
 import { orders } from './orders';
 import { paymentEvents } from './payment-events';
-import { lineItems } from './line-items';
+import { productImages } from './product-images';
+import { productVariants } from './product-variants';
+import { products } from './products';
+import { sessions } from './sessions';
+import { users } from './users';
 import { wishlistItems } from './wishlist-items';
 
 export const userRelations = relations(users, ({ many, one }) => ({

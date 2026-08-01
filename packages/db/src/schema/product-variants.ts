@@ -6,6 +6,7 @@
  */
 
 import { pgTable, uuid, text, integer, boolean } from 'drizzle-orm/pg-core';
+
 import { products } from './products';
 
 export const productVariants = pgTable('product_variants', {

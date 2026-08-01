@@ -15,6 +15,7 @@
  */
 
 import { pgTable, uuid, text, jsonb, timestamp } from 'drizzle-orm/pg-core';
+
 import { orders } from './orders';
 
 export const paymentEvents = pgTable('payment_events', {

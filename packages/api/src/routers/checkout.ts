@@ -7,11 +7,13 @@
  * Per PRD §10.2 and PROJECT-ARCHITECTURE.md §3.3 (Pattern 2).
  */
 
-import { z } from 'zod';
-import { eq, and, sql } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
-import { carts, cartItems, products, orders, lineItems, customers } from '@maison/db';
+import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
+
+import { cartItems, products, orders, lineItems, customers } from '@maison/db';
 import { stripe } from '@maison/payments';
+
 import { router, protectedProcedure } from '../trpc';
 
 const SHIPPING_COSTS: Record<string, number> = {
@@ -212,7 +214,7 @@ export const checkoutRouter = router({
 
       // Clear the cart (mark items as converted — for now, just delete them)
       // In production, we'd archive the cart rather than delete it
-      const [orderDetail] = await ctx.db
+      const [_orderDetail] = await ctx.db
         .select({ customerId: orders.customerId })
         .from(orders)
         .where(eq(orders.id, order.id))

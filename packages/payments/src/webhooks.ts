@@ -8,13 +8,15 @@
  * Per Stillwater v3.0.0 §15.21.1 and ADR-014.
  */
 
-import type Stripe from 'stripe';
-import { stripe } from './client';
-import { db } from '@maison/db';
-import { orders, lineItems, paymentEvents } from '@maison/db';
-import { env } from '@maison/config';
 import { eq, sql } from 'drizzle-orm';
+
+import { env } from '@maison/config';
+import { db, orders, lineItems, paymentEvents } from '@maison/db';
+
+import { stripe } from './client';
 import { isUniqueViolation, hashStringToBigInt } from './idempotency';
+
+import type Stripe from 'stripe';
 
 type StripeEvent = Stripe.Event;
 
@@ -106,10 +108,10 @@ async function processEventByType(
 ): Promise<void> {
   switch (event.type) {
     case 'payment_intent.succeeded':
-      await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, tx);
+      await handlePaymentIntentSucceeded(event.data.object, tx);
       break;
     case 'charge.refunded':
-      await handleChargeRefunded(event.data.object as Stripe.Charge, tx);
+      await handleChargeRefunded(event.data.object, tx);
       break;
     default:
       console.log(`[stripe] Unhandled event type: ${event.type}`);

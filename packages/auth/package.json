@@ -16,22 +16,27 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
     "dev": "tsc --build --watch",
     "clean": "rm -rf dist .turbo",
     "check-types": "tsc -p tsconfig.config.json --noEmit && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@maison/db": "workspace:*",
     "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
-    "resend": "^6.17.0"
+    "resend": "^6.17.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"
   }

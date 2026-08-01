@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import { site } from './site';
 
 describe('site config', () => {

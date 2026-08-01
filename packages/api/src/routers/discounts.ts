@@ -7,9 +7,11 @@
  * Per PRD §4.4 (CK-006: Promo/discount code application).
  */
 
-import { z } from 'zod';
 import { eq, and, sql } from 'drizzle-orm';
+import { z } from 'zod';
+
 import { discounts } from '@maison/db';
+
 import { router, publicProcedure, staffProcedure, ownerProcedure } from '../trpc';
 
 export const discountsRouter = router({

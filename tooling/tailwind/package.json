@@ -8,5 +8,13 @@
   ],
   "dependencies": {
     "tailwindcss": "^4.3.2"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@maison/eslint-config": "workspace:*",
+    "eslint": "^9.39.4"
   }
 }

@@ -4,10 +4,11 @@
  * Public procedures for browsing collections.
  */
 
+import { eq, asc, and } from 'drizzle-orm';
 import { z } from 'zod';
-import { eq, asc } from 'drizzle-orm';
+
 import { collections, products, productImages } from '@maison/db';
-import { and, sql } from 'drizzle-orm';
+
 import { router, publicProcedure } from '../trpc';
 
 export const collectionsRouter = router({

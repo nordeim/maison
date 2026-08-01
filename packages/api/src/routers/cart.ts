@@ -9,10 +9,12 @@
  * productId server-side.
  */
 
-import { z } from 'zod';
-import { eq, and, isNull } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
+import { eq, and, isNull } from 'drizzle-orm';
+import { z } from 'zod';
+
 import { carts, cartItems, products } from '@maison/db';
+
 import { router, publicProcedure } from '../trpc';
 
 export const cartRouter = router({
@@ -104,7 +106,7 @@ export const cartRouter = router({
           .update(cartItems)
           .set({ quantity: existingItem.quantity + input.quantity })
           .where(eq(cartItems.id, existingItem.id));
-        return { cartId: cartId!, itemId: existingItem.id };
+        return { cartId, itemId: existingItem.id };
       }
 
       // Insert new cart item
@@ -118,7 +120,7 @@ export const cartRouter = router({
         })
         .returning({ id: cartItems.id });
 
-      return { cartId: cartId!, itemId: item!.id };
+      return { cartId, itemId: item!.id };
     }),
 
   /**

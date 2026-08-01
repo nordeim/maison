@@ -9,6 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
 import { config } from './trigger.config';
 
 describe('Trigger.dev v4 config (ADR-016)', () => {

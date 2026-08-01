@@ -5,9 +5,10 @@
  * Real implementation with DB queries (not stubs).
  */
 
-import { z } from 'zod';
-import { eq, desc, and } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
+import { eq, desc, and } from 'drizzle-orm';
+import { z } from 'zod';
+
 import {
   customers,
   orders,
@@ -18,6 +19,7 @@ import {
   addresses,
   type DrizzleDB,
 } from '@maison/db';
+
 import { router, protectedProcedure } from '../trpc';
 
 export const accountRouter = router({

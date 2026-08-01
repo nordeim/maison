@@ -9,9 +9,10 @@
  * and PROJECT-ARCHITECTURE.md §6.2.
  */
 
+import { TRPCError } from '@trpc/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { TRPCError } from '@trpc/server';
+
 import { middleware } from '../trpc';
 
 let cachedRatelimiter: Ratelimit | null = null;
@@ -19,8 +20,8 @@ let cachedRatelimiter: Ratelimit | null = null;
 function getRatelimiter(): Ratelimit | null {
   if (cachedRatelimiter) return cachedRatelimiter;
 
-  const url = process.env['UPSTASH_REDIS_REST_URL'];
-  const token = process.env['UPSTASH_REDIS_REST_TOKEN'];
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token || url.includes('placeholder')) {
     return null; // Fail open — no Redis configured

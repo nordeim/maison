@@ -8,10 +8,12 @@
  * at checkout via the customers.trade_discount_percent column.
  */
 
-import { z } from 'zod';
-import { eq, and, desc, sql } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
-import { tradeApplications, customers, users } from '@maison/db';
+import { eq, desc, sql } from 'drizzle-orm';
+import { z } from 'zod';
+
+import { tradeApplications } from '@maison/db';
+
 import { router, protectedProcedure, staffProcedure, ownerProcedure } from '../trpc';
 
 export const tradeRouter = router({

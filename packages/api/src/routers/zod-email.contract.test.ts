@@ -14,10 +14,11 @@
  *   v4/v5/v6 remediations: contact.ts, newsletter.ts, gift-cards.ts, env.ts.
  */
 
-import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { describe, it, expect } from 'vitest';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, '..', '..', '..', '..'); // up from packages/api/src/routers/
@@ -36,7 +37,7 @@ function readSource(relPath: string): string {
 
 describe('H1 — Zod v4 email validation (ADR-018)', () => {
   for (const file of FILES_TO_CHECK) {
-    describe(`${file}`, () => {
+    describe(file, () => {
       const source = readSource(file);
 
       it('does NOT use the deprecated z.string().email() pattern', () => {

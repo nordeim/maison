@@ -57,7 +57,7 @@ async function createRealJobsClient(): Promise<JobsClient> {
   //   string task name we bind TTask = AnyTask, so TaskIdentifier<AnyTask> = string
   //   (the call is type-safe) and the returned RunHandle widens to { id: string }.
   const { TriggerClient } = await import('@trigger.dev/sdk');
-  const accessToken = process.env['TRIGGER_SECRET_KEY'];
+  const accessToken = process.env.TRIGGER_SECRET_KEY;
   if (!accessToken) {
     throw new Error('TRIGGER_SECRET_KEY is not set — cannot create real Trigger.dev client');
   }
@@ -81,9 +81,9 @@ export function getJobsClient(): JobsClient {
   if (cachedClient) return cachedClient;
 
   const hasTriggerKey =
-    process.env['TRIGGER_SECRET_KEY'] &&
-    process.env['TRIGGER_SECRET_KEY'].startsWith('tr_') &&
-    !process.env['TRIGGER_SECRET_KEY'].includes('placeholder');
+    process.env.TRIGGER_SECRET_KEY &&
+    process.env.TRIGGER_SECRET_KEY.startsWith('tr_') &&
+    !process.env.TRIGGER_SECRET_KEY.includes('placeholder');
 
   if (!hasTriggerKey) {
     cachedClient = createStubJobsClient();

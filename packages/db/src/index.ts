@@ -12,16 +12,17 @@
  * infrastructure clients use process.env directly.
  */
 
+import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle as drizzleNeon, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres';
-import { neon, neonConfig } from '@neondatabase/serverless';
 import { Pool } from 'pg';
+
 import * as schema from './schema';
 
-const rawConnectionString = process.env['DATABASE_URL'];
+const rawConnectionString = process.env.DATABASE_URL;
 
 const isBuildContext =
-  process.env['NEXT_PHASE'] === 'phase-production-build' || process.env['NODE_ENV'] === 'test';
+  process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test';
 
 const PLACEHOLDER_URL = 'postgresql://placeholder:placeholder@localhost:5432/placeholder';
 

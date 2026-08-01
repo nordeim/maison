@@ -18,5 +18,10 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-tailwindcss": "^4.0.6",
     "typescript-eslint": "^8.45.0"
-  }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {}
 }

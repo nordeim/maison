@@ -5,6 +5,7 @@
  */
 
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+
 import { users } from './users';
 
 export const accounts = pgTable('account', {

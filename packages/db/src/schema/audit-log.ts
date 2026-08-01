@@ -6,6 +6,7 @@
  */
 
 import { pgTable, uuid, text, jsonb, timestamp } from 'drizzle-orm/pg-core';
+
 import { users } from './users';
 
 export const auditLog = pgTable('audit_log', {

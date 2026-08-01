@@ -6,7 +6,7 @@ describe('payment_events table (ADR-014 — webhook idempotency log)', () => {
   it('is a Drizzle pgTable named "payment_events"', () => {
     expect(paymentEvents).toBeDefined();
     // The table name is accessible via the Drizzle internal symbol
-    const tableName = (paymentEvents as unknown as { [Symbol: string]: string })[
+    const tableName = (paymentEvents as unknown as Record<string, string>)[
       Symbol.for('drizzle:Name')
     ];
     expect(tableName).toBe('payment_events');

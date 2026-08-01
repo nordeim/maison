@@ -5,6 +5,7 @@
  */
 
 import { pgTable, uuid, text, boolean, timestamp } from 'drizzle-orm/pg-core';
+
 import { customers } from './customers';
 
 export const addresses = pgTable('addresses', {

@@ -2,7 +2,8 @@
   "extends": "@maison/typescript-config/library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "composite": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

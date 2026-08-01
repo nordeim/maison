@@ -7,8 +7,9 @@
  */
 
 import { pgTable, uuid, text, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
-import { products } from './products';
+
 import { customers } from './customers';
+import { products } from './products';
 
 export const productReviews = pgTable('product_reviews', {
   id: uuid('id').defaultRandom().primaryKey(),

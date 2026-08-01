@@ -65,6 +65,9 @@ importers:
         specifier: ^6.1.15
         version: 6.4.4(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.1
@@ -74,6 +77,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.17)
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -232,12 +238,18 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.1
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -259,13 +271,22 @@ importers:
       resend:
         specifier: ^6.17.0
         version: 6.18.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.1
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -285,12 +306,18 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
         specifier: ^22.19.15
         version: 22.20.1
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -310,6 +337,9 @@ importers:
         specifier: ^8.13.1
         version: 8.22.0
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -325,6 +355,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       tsx:
         specifier: ^4.23.0
         version: 4.23.1
@@ -344,6 +377,9 @@ importers:
         specifier: ^6.17.0
         version: 6.18.0
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -356,6 +392,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.4
         version: 6.0.4(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(rolldown@1.1.5)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -381,12 +420,18 @@ importers:
         specifier: ^22.3.0
         version: 22.3.2(@types/node@26.1.1)
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.1
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -396,9 +441,15 @@ importers:
 
   packages/ui:
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
@@ -421,12 +472,18 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
       '@maison/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.1
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
       tsx:
         specifier: ^4.23.0
         version: 4.23.1
@@ -469,6 +526,13 @@ importers:
       tailwindcss:
         specifier: ^4.3.2
         version: 4.3.3
+    devDependencies:
+      '@maison/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
 
   tooling/typescript: {}
 

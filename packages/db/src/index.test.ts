@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
 import * as schema from './index';
 
 describe('DB schema', () => {

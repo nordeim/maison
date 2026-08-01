@@ -27,7 +27,7 @@ export const site = {
   tagline: 'Objects of Quiet Beauty',
   description:
     'Handcrafted home goods, sculptural lighting, and tactile lifestyle pieces — curated for considered living. Made by Nordic artisans from solid oak, linen, and clay.',
-  url: process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://maison.jesspete.shop',
+  url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://maison.jesspete.shop',
   locale: 'en_US',
   themeColor: '#faf8f5',
 
@@ -116,7 +116,7 @@ export const site = {
   },
 
   analytics: {
-    posthogHost: process.env['NEXT_PUBLIC_POSTHOG_HOST'] ?? 'https://app.posthog.com',
+    posthogHost: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://app.posthog.com',
   },
 } as const;
 

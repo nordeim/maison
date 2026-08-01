@@ -6,12 +6,12 @@
  * Mutation procedures require owner role (ownerProcedure — ADR-008).
  */
 
-import { z } from 'zod';
 import { eq, desc, asc, and, ilike, sql, count } from 'drizzle-orm';
+import { z } from 'zod';
+
 import {
   products,
   productVariants,
-  productImages,
   collections,
   orders,
   lineItems,
@@ -21,6 +21,7 @@ import {
   discounts,
   cartItems,
 } from '@maison/db';
+
 import { router, staffProcedure, ownerProcedure } from '../trpc';
 
 export const adminRouter = router({
@@ -214,7 +215,7 @@ export const adminRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const { id, ...updates } = input;
-      const [product] = await ctx.db
+      const [_product] = await ctx.db
         .update(products)
         .set({ ...updates, updatedAt: new Date() })
         .where(eq(products.id, id))
@@ -541,9 +542,9 @@ export const adminRouter = router({
         ORDER BY DATE(${orders.placedAt})
       `);
       const rows = (result?.rows ?? []).map((row) => ({
-        date: String(row['date'] ?? ''),
-        order_count: Number(row['order_count'] ?? 0),
-        revenue_cents: Number(row['revenue_cents'] ?? 0),
+        date: String(row.date ?? ''),
+        order_count: Number(row.order_count ?? 0),
+        revenue_cents: Number(row.revenue_cents ?? 0),
       }));
 
       return rows.map((row) => ({
@@ -574,10 +575,10 @@ export const adminRouter = router({
         LIMIT ${input.limit}
       `);
       const rows = (result?.rows ?? []).map((row) => ({
-        product_name: String(row['product_name'] ?? ''),
-        product_slug: String(row['product_slug'] ?? ''),
-        units_sold: Number(row['units_sold'] ?? 0),
-        revenue_cents: Number(row['revenue_cents'] ?? 0),
+        product_name: String(row.product_name ?? ''),
+        product_slug: String(row.product_slug ?? ''),
+        units_sold: Number(row.units_sold ?? 0),
+        revenue_cents: Number(row.revenue_cents ?? 0),
       }));
 
       return rows.map((row) => ({
@@ -623,8 +624,8 @@ export const adminRouter = router({
       LIMIT 12
     `);
     const rows = (result?.rows ?? []).map((row) => ({
-      cohort_month: String(row['cohort_month'] ?? ''),
-      new_customers: Number(row['new_customers'] ?? 0),
+      cohort_month: String(row.cohort_month ?? ''),
+      new_customers: Number(row.new_customers ?? 0),
     }));
 
     return rows.map((row) => ({

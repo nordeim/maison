@@ -36,10 +36,14 @@
     "build": "tsc --build",
     "dev": "tsc --build --watch",
     "clean": "rm -rf dist .turbo",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.0"
   }
 }

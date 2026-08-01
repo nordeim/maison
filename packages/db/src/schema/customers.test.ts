@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
 import { customers } from './customers';
 
 describe('customers schema', () => {

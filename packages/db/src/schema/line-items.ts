@@ -7,9 +7,10 @@
  */
 
 import { pgTable, uuid, text, integer } from 'drizzle-orm/pg-core';
+
 import { orders } from './orders';
-import { products } from './products';
 import { productVariants } from './product-variants';
+import { products } from './products';
 
 export const lineItems = pgTable('line_items', {
   id: uuid('id').defaultRandom().primaryKey(),

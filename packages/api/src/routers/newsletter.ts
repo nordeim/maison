@@ -5,8 +5,9 @@
  */
 
 import { z } from 'zod';
-import { router, publicProcedure, middleware } from '../trpc';
+
 import { rateLimitMiddleware } from '../middleware/rateLimit';
+import { router, publicProcedure } from '../trpc';
 
 const rateLimited = publicProcedure.use(rateLimitMiddleware);
 

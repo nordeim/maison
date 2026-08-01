@@ -8,8 +8,6 @@
  * Never run against a production database.
  */
 
-import { db } from '../index';
-
 async function seedE2E() {
   console.log('── Maison E2E seed (stub) ───────────────────────────────');
   console.log('  → E2E seed to be implemented in Phase 1');

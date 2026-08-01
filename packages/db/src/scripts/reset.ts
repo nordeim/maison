@@ -7,11 +7,12 @@
  * Usage: pnpm db:reset
  */
 
-import { db } from '../index';
 import { sql } from 'drizzle-orm';
 
+import { db } from '../index';
+
 async function reset() {
-  const isProduction = process.env['NODE_ENV'] === 'production';
+  const isProduction = process.env.NODE_ENV === 'production';
   if (isProduction) {
     console.error('✗ Refusing to reset database in production.');
     process.exit(1);

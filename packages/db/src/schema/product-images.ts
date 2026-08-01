@@ -5,6 +5,7 @@
  */
 
 import { pgTable, uuid, text, integer } from 'drizzle-orm/pg-core';
+
 import { products } from './products';
 
 export const productImages = pgTable('product_images', {

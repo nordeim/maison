@@ -36,12 +36,17 @@ const CHECKS: PkgCheck[] = [
     relPath: 'packages/api',
     deps: ['@maison/config'],
   },
-  // MEDIUM-2: @maison/auth
-  {
-    pkgName: '@maison/auth',
-    relPath: 'packages/auth',
-    deps: ['zod'],
-  },
+  // MEDIUM-2: @maison/auth — zod KEPT (transitive type dependency)
+  // Better Auth's inferred type for `auth` in config.ts:56 references
+  // zod/v4/core internally (TS2742 error if zod is removed). zod is not
+  // directly imported in src/ but is required for type portability.
+  // The AUDIT_REPORT.md MEDIUM-2 claim was incorrect — zod IS needed.
+  // See REMEDIATION_PLAN_v10 Task 2 REFACTOR note.
+  // {
+  //   pkgName: '@maison/auth',
+  //   relPath: 'packages/auth',
+  //   deps: ['zod'],
+  // },
   // MEDIUM-3: @maison/db
   {
     pkgName: '@maison/db',

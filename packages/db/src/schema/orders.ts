@@ -6,6 +6,7 @@
  */
 
 import { pgTable, uuid, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
+
 import { customers } from './customers';
 import { orderStatusEnum, shippingMethodEnum } from './enums';
 

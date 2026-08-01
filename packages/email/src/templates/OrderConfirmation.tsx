@@ -4,17 +4,17 @@
  * Sent via Trigger.dev job after checkout.confirmOrder succeeds.
  */
 
-import { EmailLayout } from '../components/EmailLayout';
 import { EmailButton } from '../components/EmailButton';
+import { EmailLayout } from '../components/EmailLayout';
 
 interface OrderConfirmationEmailProps {
   orderNumber: string;
   customerName: string;
-  items: Array<{
+  items: {
     name: string;
     quantity: number;
     priceCents: number;
-  }>;
+  }[];
   subtotalCents: number;
   shippingCents: number;
   taxCents: number;

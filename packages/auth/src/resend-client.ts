@@ -27,7 +27,7 @@ let cachedClient: ResendClient | null = null;
 export function getResendClient(): ResendClient {
   if (cachedClient) return cachedClient;
 
-  const apiKey = process.env['RESEND_API_KEY'];
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey.includes('placeholder')) {
     // Return a stub that logs instead of sending. Module import succeeds;
     // actual sends fail gracefully (logged, not thrown).

@@ -5,9 +5,11 @@
  * Per PRD §10.1.
  */
 
-import { z } from 'zod';
 import { eq, desc, asc, and, sql } from 'drizzle-orm';
+import { z } from 'zod';
+
 import { products, productImages, productVariants, collections } from '@maison/db';
+
 import { router, publicProcedure } from '../trpc';
 
 // Note: productVariants imported for future use in PDP variant display

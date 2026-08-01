@@ -5,6 +5,7 @@
  */
 
 import { pgTable, uuid, timestamp, unique } from 'drizzle-orm/pg-core';
+
 import { customers } from './customers';
 import { products } from './products';
 

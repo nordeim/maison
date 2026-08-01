@@ -29,7 +29,9 @@
     "clean": "rm -rf dist .turbo",
     "check-types": "tsc -p tsconfig.config.json --noEmit && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
@@ -37,8 +39,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^22.19.15",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"
   }
