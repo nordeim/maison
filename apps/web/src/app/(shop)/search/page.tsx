@@ -40,7 +40,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (query.length >= 2) {
     try {
       const caller = await apiPublic();
-      results = await caller.products.search({ q: query, limit: 24 });
+      const searchResult = await caller.products.search({ q: query, limit: 24 });
+      results = searchResult.items;
     } catch (err) {
       console.error('[search] Failed to fetch:', err);
     }

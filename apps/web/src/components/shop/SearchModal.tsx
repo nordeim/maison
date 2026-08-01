@@ -37,10 +37,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     };
   }, [query]);
 
-  const { data: results, isLoading } = trpc.products.search.useQuery(
+  const { data: searchData, isLoading } = trpc.products.search.useQuery(
     { q: debouncedQuery, limit: 8 },
     { enabled: debouncedQuery.length >= 2 },
   );
+  const results = searchData?.items ?? [];
 
   // Close on Escape
   useEffect(() => {
@@ -192,7 +193,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             >
               <p style={{ fontSize: '0.875rem' }}>Searching…</p>
             </div>
-          ) : results && results.length > 0 ? (
+          ) : results.length > 0 ? (
             results.map((product) => (
               <button
                 key={product.id}

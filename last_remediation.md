@@ -893,3 +893,42 @@ Removed `import 'server-only'` from `packages/db/src/index.ts` ONLY. The other 6
 | `pnpm test` | 313 / 9 pkgs ✅ | 314 / 9 pkgs ✅ (+1 net: +2 new db-seed tests, -1 removed server-only-guards case) |
 | `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
 | `pnpm db:seed` | ❌ BROKEN | ✅ Fixed (module-load throw eliminated) |
+
+---
+
+## v15 Remediation (2026-08-01) — Skill doc update + outstanding fixes
+
+**Plan:** `docs/REMEDIATION_PLAN_v15.md`
+**Approach:** E2E confirmed live site healthy; skill-compliance audit found `nextjs-typescript_SKILL.md` missing 10 v12-v14 lessons; 3 HIGH-priority outstanding fixes addressed.
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | `products.search` had no cursor pagination | Added compound cursor (mirrors `list` pattern) | `search-cursor.contract.test.ts` (2 tests) |
+| 2 | Stripe idempotency key not locked by contract test | Added contract test (already implemented in v11) | `stripe-idempotency.contract.test.ts` (1 test) |
+| 3 | Rate-limited procedures not locked by contract test | Added contract test (already implemented in v12) | `rate-limited-procedures.contract.test.ts` (3 tests) |
+| 4 | `nextjs-typescript_SKILL.md` missing v12-v14 lessons | Appended §15 v1.6 Supplement (10 lessons) | (documentation) |
+| 5 | `last_remediation.md` missing v15 section + deferred items | Appended this section + explicit "Deferred to v16" | (documentation) |
+
+### Verification gates — post-v15
+
+| Gate | Pre-v15 | Post-v15 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 314 / 9 pkgs ✅ | 320 / 9 pkgs ✅ (+6 contract tests) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+### Deferred to v16
+
+| Item | Reason |
+|---|---|
+| Remaining 14 non-null assertions (admin/account/loyalty) | Lower-risk paths; mechanical cleanup |
+| ESLint deferral block removal (9 remaining rules) | ~200+ warnings; needs dedicated sprint |
+| `noUnusedLocals` / `noUnusedParameters` enablement | Coupled to ESLint cleanup |
+| Trigger.dev Phase 0 stubs | Intentional placeholder |
+| Stripe API version automation | Needs Renovate/Dependabot config |
+| React Compiler enablement | Needs benchmarking |
+| Better Auth `session.user.name` nullability | Monitor upstream |

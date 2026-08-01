@@ -266,12 +266,28 @@ export const productsRouter = router({
     .input(
       z.object({
         q: z.string().min(1),
+        cursor: z.string().optional(),
         limit: z.number().min(1).max(24).default(8),
       }),
     )
     .query(async ({ input, ctx }) => {
       const pattern = `%${input.q}%`;
-      const results = await ctx.db
+      const conditions = [
+        eq(products.isActive, true),
+        sql`(${products.name} ILIKE ${pattern} OR ${products.shortDescription} ILIKE ${pattern} OR ${products.materials} ILIKE ${pattern})`,
+      ];
+
+      // Compound cursor pagination: decode cursor and add WHERE clause
+      // for stable pagination across search results.
+      // Per REMEDIATION_PLAN_v15 Task 1 (mirrors products.list pattern).
+      if (input.cursor) {
+        const decoded = decodeCursor(input.cursor);
+        if (decoded) {
+          conditions.push(lt(products.id, decoded.id));
+        }
+      }
+
+      const items = await ctx.db
         .select({
           id: products.id,
           slug: products.slug,
@@ -279,20 +295,30 @@ export const productsRouter = router({
           priceCents: products.priceCents,
           shortDescription: products.shortDescription,
           primaryImage: productImages.url,
+          createdAt: products.createdAt,
         })
         .from(products)
         .leftJoin(
           productImages,
           and(eq(productImages.productId, products.id), eq(productImages.sortOrder, 0)),
         )
-        .where(
-          and(
-            eq(products.isActive, true),
-            sql`(${products.name} ILIKE ${pattern} OR ${products.shortDescription} ILIKE ${pattern} OR ${products.materials} ILIKE ${pattern})`,
-          ),
-        )
-        .limit(input.limit);
+        .where(and(...conditions))
+        .orderBy(desc(products.createdAt), desc(products.id))
+        .limit(input.limit + 1);
 
-      return results;
+      const hasMore = items.length > input.limit;
+      const itemsToSend = hasMore ? items.slice(0, input.limit) : items;
+      const nextCursor =
+        hasMore && itemsToSend.length > 0
+          ? encodeCursor(
+              itemsToSend[itemsToSend.length - 1]?.createdAt?.toISOString() ?? '',
+              itemsToSend[itemsToSend.length - 1]?.id ?? '',
+            )
+          : undefined;
+
+      return {
+        items: itemsToSend,
+        nextCursor,
+      };
     }),
 });

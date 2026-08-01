@@ -5668,3 +5668,170 @@ This handbook should be used as a living guide:
 
 The ultimate goal is not merely to fix the current project, but to make future agents **less likely to repeat the same class of mistakes** and **more likely to troubleshoot with discipline, precision, and clean handoffs**.
 
+
+---
+
+# 15. v12-v14 Remediation Arc Lessons (v1.6 Supplement)
+
+**Date:** 2026-08-01
+**Source:** Maison e-commerce monorepo remediation (commits `5eee3370` through `ee397b2e`)
+
+This supplement documents 10 lessons from the v12-v14 remediation arc that are not covered in the main handbook (§1-§14). Each lesson follows the same structure: **Symptom → Root Cause → Fix → Contract Test**.
+
+## 15.1 ENV-1: createEnv() proxy throws on client at module load
+
+**Symptom:** Live site shows "This page couldn't load" — server returns HTTP 200 with correct HTML, but React fails to hydrate.
+
+**Root cause:** `@t3-oss/env-core`'s `createEnv()` uses a proxy that throws when server-side env vars (like `BETTER_AUTH_URL`) are accessed on the client (`isServer=false`). If a module-load-time statement accesses `env.BETTER_AUTH_URL`, the entire client bundle crashes.
+
+**Fix:** Guard all server-side env access with `typeof window === 'undefined'` (or `typeof globalThis.window === 'undefined'`).
+
+```ts
+// BAD — throws on client
+export const env = loadEnv();
+warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL);
+
+// GOOD — server-only
+export const env = loadEnv();
+if (typeof globalThis !== 'undefined' && typeof (globalThis as { window?: unknown }).window === 'undefined') {
+  warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL);
+}
+```
+
+**Contract test:** `env-server-only.contract.test.ts` — asserts the guard exists and `env.BETTER_AUTH_URL` is not accessed unguarded.
+
+## 15.2 DB-4: server-only guard on db client breaks tsx CLI scripts
+
+**Symptom:** `pnpm db:seed` fails with `"This module cannot be imported from a Client Component module"`.
+
+**Root cause:** `import 'server-only'` was added to `packages/db/src/index.ts`. The seed script (`tsx src/seed/index.ts`) imports `db` from `../index`. The `tsx` runtime doesn't set the `react-server` export condition, so the `server-only` package resolves to its `index.js` (which throws) instead of `empty.js` (which is a no-op).
+
+**Fix:** The `server-only` guard belongs at the **API/server boundary consumer** (like `api/context.ts`, `api/trpc.ts`, `auth/config.ts`), NOT the low-level db utility layer. The db client is consumed by both server code AND CLI scripts.
+
+**Contract test:** `db-seed-runnable.contract.test.ts` — asserts `packages/db/src/index.ts` does NOT contain `import 'server-only'`.
+
+## 15.3 DB-5: Compound cursor must be USED in WHERE, not just accepted
+
+**Symptom:** Product listing pagination returns the same first N items on every "next page" request.
+
+**Root cause:** The `cursor` input was accepted by the query schema but never used in the WHERE clause. The `conditions` array only had `isActive` and `collection` filters — the cursor was computed and returned as `nextCursor`, but when the client passed it back, it was silently ignored.
+
+**Fix:** Implement compound cursor pagination:
+1. Change cursor schema from `z.string().uuid()` to `z.string()` (opaque encoded cursor)
+2. Decode cursor as `${sortValue}|${id}`
+3. Add cursor-based WHERE clause for each sort option (using `OR` for tie-breaking)
+4. Encode `nextCursor` from the last row's sort value + id
+
+**Contract test:** `cursor-pagination.contract.test.ts` — asserts the cursor is decoded and used in a WHERE condition.
+
+## 15.4 SDK-5: Stripe webhook returning 500 on handler errors → infinite retries
+
+**Symptom:** Transient errors (DB connection blip) cause Stripe to retry webhooks for up to 3 days.
+
+**Root cause:** The webhook route returned HTTP 500 on any handler error after signature verification. Stripe interprets non-200 responses as "retry later" and retries for 3 days.
+
+**Fix:** Return HTTP 200 for ALL handler errors after signature verification passes. The idempotency layer (`payment_events.stripe_event_id` UNIQUE + `pg_advisory_xact_lock`) ensures duplicate events are safe to re-process.
+
+```ts
+// BAD — Stripe retries forever
+return NextResponse.json({ error: message }, { status: 500 });
+
+// GOOD — Stripe stops retrying
+console.error('[stripe-webhook] Handler error:', message);
+return NextResponse.json({ received: true, error: message });
+```
+
+**Contract test:** `webhook-error-handling.contract.test.ts` — asserts the route does not return status 500 in the handler-error catch block.
+
+## 15.5 DB-6: Non-atomic multi-row writes (must use db.transaction())
+
+**Symptom:** A mid-flow failure (e.g., line-items insert fails) leaves an orphaned pending order in the database.
+
+**Root cause:** `checkout.createPaymentIntent` inserted the order and then inserted line items as two separate queries without wrapping in `db.transaction()`.
+
+**Fix:** Wrap multi-row writes in `db.transaction()`.
+
+```ts
+const order = await ctx.db.transaction(async (tx) => {
+  const [newOrder] = await tx.insert(orders).values({...}).returning({...});
+  if (!newOrder) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+  await tx.insert(lineItems).values(cartItemsList.map(item => ({ orderId: newOrder.id, ... })));
+  return newOrder;
+});
+```
+
+## 15.6 SDK-6: Missing Stripe idempotencyKey in stripe.paymentIntents.create()
+
+**Symptom:** A retry creates duplicate Payment Intents for the same order.
+
+**Root cause:** The code generated an idempotency key and stored it on the order, but never passed it to the Stripe SDK call.
+
+**Fix:** Pass `{ idempotencyKey }` as the second argument to `stripe.paymentIntents.create()`.
+
+```ts
+const paymentIntent = await stripe.paymentIntents.create(
+  { amount, currency: 'usd', metadata: {...} },
+  { idempotencyKey },
+);
+```
+
+**Contract test:** `stripe-idempotency.contract.test.ts` — asserts the 2nd argument shape.
+
+## 15.7 TRPC-3: rateLimitMiddleware loses session type narrowing
+
+**Symptom:** Adding `.use(rateLimitMiddleware)` after `protectedProcedure` causes TS18047: `'ctx.session' is possibly 'null'`.
+
+**Root cause:** The standalone `rateLimitMiddleware` (created via `t.middleware()`) doesn't preserve the session type narrowing that `protectedProcedure` establishes via `next({ ctx: { ...ctx, session: ctx.session } })`.
+
+**Fix:** Define a `protectedRateLimitedProcedure` builder that composes the rate-limit step inside the narrowed context via inline `.use()`:
+
+```ts
+export const protectedRateLimitedProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    // rate limiting logic here — ctx.session is narrowed to Session (not null)
+    return next({ ctx });
+  },
+);
+```
+
+**Contract test:** `rate-limited-procedures.contract.test.ts` — asserts the 3 payment mutations use `protectedRateLimitedProcedure`.
+
+## 15.8 AUTH-1: Missing BETTER_AUTH_URL host-mismatch warning
+
+**Symptom:** Session cookies set for the wrong domain → P0 auth outage (users can't log in).
+
+**Root cause:** No runtime check comparing `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` hosts.
+
+**Fix:** Add a `warnOnAuthUrlMismatch()` helper in `packages/config/src/env.ts`, guarded by `typeof window === 'undefined'` (see ENV-1 above).
+
+**Contract test:** `auth-url-warning.contract.test.ts` — asserts the check exists.
+
+## 15.9 TEST-2: vitest server-only stub alias required
+
+**Symptom:** Tests that transitively import a `server-only`-guarded module fail with `"This module cannot be imported from a Client Component module"`.
+
+**Root cause:** The `server-only` package throws in non-`react-server` contexts. Vitest runs in Node, not React Server Components.
+
+**Fix:** Add a `server-only` stub alias to every `vitest.config.ts`:
+
+```ts
+resolve: {
+  alias: {
+    'server-only': resolve(__dirname, '../../scripts/server-only-stub.js'),
+  },
+},
+```
+
+The stub file (`scripts/server-only-stub.js`) is a 1-line no-op: `// Stub for vitest — server-only is a no-op in test environments`.
+
+## 15.10 Lesson Summary: server-only guard placement principle
+
+The `server-only` guard is a **build-time** tool to prevent accidental client-side bundling. Its placement follows a simple principle:
+
+| Layer | Guard? | Why |
+|---|---|---|
+| **API/server boundary consumer** (`api/context.ts`, `api/trpc.ts`, `auth/config.ts`) | ✅ YES | These modules are only imported by server code; the guard prevents accidental client imports |
+| **Low-level utility** (`db/index.ts`) | ❌ NO | These modules are consumed by both server code AND CLI scripts (`tsx`); the guard breaks CLI scripts |
+| **Client Component** (`'use client'` files) | ❌ NO | These are explicitly client-side |
+
+**The guard belongs at the consumer, not the utility.**
