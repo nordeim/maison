@@ -8,6 +8,7 @@
  * Tiers: member (0), silver (500), gold (2000), platinum (5000).
  */
 
+import { TRPCError } from '@trpc/server';
 import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -55,12 +56,26 @@ export const loyaltyRouter = router({
         .values({ userId: ctx.session.user.id })
         .returning({ id: customers.id });
 
+      if (!newCustomer) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create customer record',
+        });
+      }
+
       const [loyaltyAccount] = await ctx.db
         .insert(loyaltyAccounts)
-        .values({ customerId: newCustomer!.id })
+        .values({ customerId: newCustomer.id })
         .returning();
 
-      return formatLoyaltyAccount(loyaltyAccount!);
+      if (!loyaltyAccount) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create loyalty account',
+        });
+      }
+
+      return formatLoyaltyAccount(loyaltyAccount);
     }
 
     let [loyaltyAccount] = await ctx.db
@@ -76,17 +91,24 @@ export const loyaltyRouter = router({
         .returning();
     }
 
+    if (!loyaltyAccount) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Loyalty account not found',
+      });
+    }
+
     // Check if tier should be upgraded
-    const correctTier = calculateTier(loyaltyAccount!.lifetimePoints);
-    if (loyaltyAccount!.tier !== correctTier) {
+    const correctTier = calculateTier(loyaltyAccount.lifetimePoints);
+    if (loyaltyAccount.tier !== correctTier) {
       await ctx.db
         .update(loyaltyAccounts)
         .set({ tier: correctTier })
-        .where(eq(loyaltyAccounts.id, loyaltyAccount!.id));
-      loyaltyAccount!.tier = correctTier;
+        .where(eq(loyaltyAccounts.id, loyaltyAccount.id));
+      loyaltyAccount.tier = correctTier;
     }
 
-    return formatLoyaltyAccount(loyaltyAccount!);
+    return formatLoyaltyAccount(loyaltyAccount);
   }),
 
   /**

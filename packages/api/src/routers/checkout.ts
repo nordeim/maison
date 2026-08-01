@@ -46,7 +46,7 @@ export const checkoutRouter = router({
   createPaymentIntent: protectedRateLimitedProcedure
     .input(
       z.object({
-        cartId: z.string().uuid(),
+        cartId: z.uuid(),
         shippingAddress: z.object({
           line1: z.string(),
           line2: z.string().optional(),
@@ -206,7 +206,7 @@ export const checkoutRouter = router({
   confirmOrder: protectedProcedure
     .input(
       z.object({
-        orderId: z.string().uuid(),
+        orderId: z.uuid(),
         paymentIntentId: z.string(),
       }),
     )

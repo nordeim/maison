@@ -82,7 +82,7 @@ export const reviewsRouter = router({
         rating: z.number().int().min(1).max(5),
         title: z.string().max(100).optional(),
         body: z.string().max(5000).optional(),
-        photoUrls: z.array(z.string().url()).max(5).optional(),
+        photoUrls: z.array(z.url()).max(5).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -154,7 +154,10 @@ export const reviewsRouter = router({
         })
         .returning({ id: productReviews.id });
 
-      return { id: review!.id, pendingApproval: true };
+      if (!review) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'review not found' });
+      }
+      return { id: review.id, pendingApproval: true };
     }),
 
   /**
@@ -183,7 +186,7 @@ export const reviewsRouter = router({
    * Admin: approve a review.
    */
   approve: ownerProcedure
-    .input(z.object({ reviewId: z.string().uuid() }))
+    .input(z.object({ reviewId: z.uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db
         .update(productReviews)
@@ -196,7 +199,7 @@ export const reviewsRouter = router({
    * Admin: reject (delete) a review.
    */
   reject: ownerProcedure
-    .input(z.object({ reviewId: z.string().uuid() }))
+    .input(z.object({ reviewId: z.uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.delete(productReviews).where(eq(productReviews.id, input.reviewId));
       return { success: true };

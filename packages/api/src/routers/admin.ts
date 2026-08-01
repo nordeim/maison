@@ -6,6 +6,7 @@
  * Mutation procedures require owner role (ownerProcedure — ADR-008).
  */
 
+import { TRPCError } from '@trpc/server';
 import { eq, desc, asc, and, ilike, sql, count } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -175,7 +176,7 @@ export const adminRouter = router({
         name: z.string().min(1),
         slug: z.string().min(1),
         priceCents: z.number().int().positive(),
-        collectionId: z.string().uuid().optional(),
+        collectionId: z.uuid().optional(),
         shortDescription: z.string().optional(),
         longDescription: z.string().optional(),
         materials: z.string().optional(),
@@ -186,15 +187,21 @@ export const adminRouter = router({
       const [product] = await ctx.db.insert(products).values(input).returning({ id: products.id });
 
       // Write audit log
+      if (!product) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create product',
+        });
+      }
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
         action: 'product.create',
         entityType: 'product',
-        entityId: product!.id,
+        entityId: product.id,
         diff: input,
       });
 
-      return { id: product!.id };
+      return { id: product.id };
     }),
 
   /**
@@ -203,7 +210,7 @@ export const adminRouter = router({
   productsUpdate: ownerProcedure
     .input(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         name: z.string().optional(),
         priceCents: z.number().int().positive().optional(),
         shortDescription: z.string().optional(),
@@ -285,7 +292,7 @@ export const adminRouter = router({
   ordersUpdateStatus: ownerProcedure
     .input(
       z.object({
-        orderId: z.string().uuid(),
+        orderId: z.uuid(),
         status: z.enum(['confirmed', 'shipped', 'delivered', 'cancelled', 'refunded']),
         trackingNumber: z.string().optional(),
       }),
@@ -425,7 +432,7 @@ export const adminRouter = router({
   inventoryUpdate: ownerProcedure
     .input(
       z.object({
-        variantId: z.string().uuid(),
+        variantId: z.uuid(),
         stockQuantity: z.number().int().min(0),
       }),
     )
@@ -470,8 +477,8 @@ export const adminRouter = router({
         value: z.number().int().min(0),
         minOrderCents: z.number().int().min(0).default(0),
         maxUses: z.number().int().positive().nullable().optional(),
-        startsAt: z.string().datetime().optional(),
-        endsAt: z.string().datetime().optional(),
+        startsAt: z.iso.datetime().optional(),
+        endsAt: z.iso.datetime().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -489,22 +496,28 @@ export const adminRouter = router({
         })
         .returning({ id: discounts.id });
 
+      if (!discount) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create discount',
+        });
+      }
       await ctx.db.insert(auditLog).values({
         actorUserId: ctx.session.user.id,
         action: 'discount.create',
         entityType: 'discount',
-        entityId: discount!.id,
+        entityId: discount.id,
         diff: input,
       });
 
-      return { id: discount!.id };
+      return { id: discount.id };
     }),
 
   /**
    * Deactivate a discount (admin only — soft delete).
    */
   discountsDeactivate: ownerProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.uuid() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
 

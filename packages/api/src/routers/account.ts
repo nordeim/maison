@@ -261,7 +261,7 @@ export const accountRouter = router({
   upsertAddress: protectedProcedure
     .input(
       z.object({
-        addressId: z.string().uuid().optional(),
+        addressId: z.uuid().optional(),
         label: z.string().max(50).optional(),
         line1: z.string().min(1),
         line2: z.string().optional(),
@@ -318,7 +318,10 @@ export const accountRouter = router({
             isDefaultBilling: input.isDefaultBilling,
           })
           .returning({ id: addresses.id });
-        return { id: addr!.id };
+        if (!addr) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'addr not found' });
+        }
+        return { id: addr.id };
       }
 
       // If setting as default, unset other defaults first
@@ -365,14 +368,17 @@ export const accountRouter = router({
           isDefaultBilling: input.isDefaultBilling,
         })
         .returning({ id: addresses.id });
-      return { id: addr!.id };
+      if (!addr) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'addr not found' });
+      }
+      return { id: addr.id };
     }),
 
   /**
    * Delete an address.
    */
   deleteAddress: protectedProcedure
-    .input(z.object({ addressId: z.string().uuid() }))
+    .input(z.object({ addressId: z.uuid() }))
     .mutation(async ({ input, ctx }) => {
       const [customer] = await ctx.db
         .select()

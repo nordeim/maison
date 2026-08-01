@@ -33,7 +33,7 @@ export const tradeRouter = router({
         lastName: z.string().min(1).max(50),
         company: z.string().min(1).max(100),
         role: z.string().min(1).max(50),
-        website: z.string().url().optional().or(z.literal('')),
+        website: z.url().optional().or(z.literal('')),
         instagram: z.string().max(50).optional(),
         projectTypes: z.string().max(200).optional(),
       }),
@@ -75,7 +75,10 @@ export const tradeRouter = router({
         })
         .returning({ id: tradeApplications.id });
 
-      return { id: application!.id };
+      if (!application) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'application not found' });
+      }
+      return { id: application.id };
     }),
 
   /**
@@ -129,7 +132,7 @@ export const tradeRouter = router({
   approve: ownerProcedure
     .input(
       z.object({
-        applicationId: z.string().uuid(),
+        applicationId: z.uuid(),
         discountPercent: z.number().int().min(5).max(30).default(10),
       }),
     )
@@ -163,7 +166,7 @@ export const tradeRouter = router({
   reject: ownerProcedure
     .input(
       z.object({
-        applicationId: z.string().uuid(),
+        applicationId: z.uuid(),
         notes: z.string().max(500).optional(),
       }),
     )

@@ -7,6 +7,7 @@
  * Per PRD §4.4 (CK-006: Promo/discount code application).
  */
 
+import { TRPCError } from '@trpc/server';
 import { eq, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -126,8 +127,8 @@ export const discountsRouter = router({
         value: z.number().int().min(0),
         minOrderCents: z.number().int().min(0).default(0),
         maxUses: z.number().int().positive().nullable().optional(),
-        startsAt: z.string().datetime().optional(),
-        endsAt: z.string().datetime().optional(),
+        startsAt: z.iso.datetime().optional(),
+        endsAt: z.iso.datetime().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -144,16 +145,17 @@ export const discountsRouter = router({
           isActive: true,
         })
         .returning({ id: discounts.id });
-      return { id: discount!.id };
+      if (!discount) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'discount not found' });
+      }
+      return { id: discount.id };
     }),
 
   /**
    * Deactivate a discount (admin only — soft delete).
    */
-  deactivate: ownerProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .mutation(async ({ input, ctx }) => {
-      await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
-      return { success: true };
-    }),
+  deactivate: ownerProcedure.input(z.object({ id: z.uuid() })).mutation(async ({ input, ctx }) => {
+    await ctx.db.update(discounts).set({ isActive: false }).where(eq(discounts.id, input.id));
+    return { success: true };
+  }),
 });

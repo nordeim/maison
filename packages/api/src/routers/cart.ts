@@ -22,7 +22,7 @@ export const cartRouter = router({
    * Get cart contents by cartId.
    */
   get: publicProcedure
-    .input(z.object({ cartId: z.string().uuid().optional() }))
+    .input(z.object({ cartId: z.uuid().optional() }))
     .query(async ({ input, ctx }) => {
       if (!input.cartId) return null;
 
@@ -55,9 +55,9 @@ export const cartRouter = router({
   addItem: publicProcedure
     .input(
       z.object({
-        cartId: z.string().uuid().optional(),
+        cartId: z.uuid().optional(),
         productSlug: z.string().min(1),
-        variantId: z.string().uuid().optional(),
+        variantId: z.uuid().optional(),
         quantity: z.number().min(1).max(99).default(1),
       }),
     )
@@ -141,8 +141,8 @@ export const cartRouter = router({
   updateItem: publicProcedure
     .input(
       z.object({
-        cartId: z.string().uuid(),
-        itemId: z.string().uuid(),
+        cartId: z.uuid(),
+        itemId: z.uuid(),
         quantity: z.number().min(0).max(99),
       }),
     )
@@ -166,8 +166,8 @@ export const cartRouter = router({
   removeItem: publicProcedure
     .input(
       z.object({
-        cartId: z.string().uuid(),
-        itemId: z.string().uuid(),
+        cartId: z.uuid(),
+        itemId: z.uuid(),
       }),
     )
     .mutation(async ({ input, ctx }) => {

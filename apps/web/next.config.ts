@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
   // ── Experimental features ──────────────────────────────────────
   experimental: {
     turbopackFileSystemCacheForDev: true,
+    // NOTE: React Compiler (reactCompiler: true) is not yet available in
+    // Next.js 16.2.x types. The babel-plugin-react-compiler is installed
+    // as a devDep. Enable when Next.js 16.3+ adds the config flag.
+    // Per skill §9.9 Gotcha 11 + REMEDIATION_PLAN_v16 Task 3.
   },
 
   // ── Logging ────────────────────────────────────────────────────

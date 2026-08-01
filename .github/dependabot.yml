@@ -1,0 +1,44 @@
+# Dependabot config for Maison monorepo
+# Checks for npm dependency updates weekly, with special attention to Stripe SDK
+# (which must stay in sync with the pinned STRIPE_API_VERSION in packages/payments/src/client.ts).
+version: 2
+updates:
+  # Root package.json
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # apps/web
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - web
+
+  # packages/payments (critical: Stripe SDK version sync)
+  - package-ecosystem: npm
+    directory: /packages/payments
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - payments
+    # Stripe SDK major bumps require manual review of STRIPE_API_VERSION
+    # in packages/payments/src/client.ts — don't auto-merge.

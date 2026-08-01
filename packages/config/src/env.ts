@@ -67,7 +67,7 @@ const serverSchema = {
         });
       }
     }),
-  BETTER_AUTH_URL: z.string().url(),
+  BETTER_AUTH_URL: z.url(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
 
@@ -87,11 +87,11 @@ const serverSchema = {
   TRIGGER_SECRET_KEY: z.string().startsWith('tr_'),
 
   // Redis
-  UPSTASH_REDIS_REST_URL: z.string().url(),
+  UPSTASH_REDIS_REST_URL: z.url(),
   UPSTASH_REDIS_REST_TOKEN: z.string(),
 
   // Observability (optional)
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: z.url().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
   AXIOM_TOKEN: z.string().optional(),
   AXIOM_DATASET: z.string().optional(),
@@ -102,21 +102,21 @@ const serverSchema = {
   CLOUDFLARE_R2_ACCESS_KEY_ID: z.string(),
   CLOUDFLARE_R2_SECRET_ACCESS_KEY: z.string(),
   CLOUDFLARE_R2_BUCKET: z.string(),
-  CLOUDFLARE_R2_ENDPOINT: z.string().url(),
+  CLOUDFLARE_R2_ENDPOINT: z.url(),
 
   // App
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 };
 
 const clientSchema = {
-  NEXT_PUBLIC_APP_URL: z.string().url(),
+  NEXT_PUBLIC_APP_URL: z.url(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
   NEXT_PUBLIC_SANITY_PROJECT_ID: z.string(),
   NEXT_PUBLIC_SANITY_DATASET: z.string(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string(),
-  NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-  NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL: z.string().url(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.url().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
+  NEXT_PUBLIC_CLOUDFLARE_IMAGES_URL: z.url(),
 };
 
 /**

@@ -218,7 +218,7 @@ export const productsRouter = router({
   getRelated: publicProcedure
     .input(
       z.object({
-        productId: z.string().uuid(),
+        productId: z.uuid(),
         limit: z.number().min(1).max(8).default(4),
       }),
     )

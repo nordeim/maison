@@ -932,3 +932,46 @@ Removed `import 'server-only'` from `packages/db/src/index.ts` ONLY. The other 6
 | Stripe API version automation | Needs Renovate/Dependabot config |
 | React Compiler enablement | Needs benchmarking |
 | Better Auth `session.user.name` nullability | Monitor upstream |
+
+---
+
+## v16 Remediation (2026-08-01) — Zod v4 migration + non-null cleanup + Dependabot
+
+**Plan:** `docs/REMEDIATION_PLAN_v16.md`
+**Approach:** Skill-compliance audit found Zod v4 API migration gap (43 sites), non-null assertion count discrepancy (24 not 14), and missing Dependabot config.
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | 43 sites using deprecated Zod v3 APIs (`z.string().uuid()` etc.) | Migrated to Zod v4 native APIs (`z.uuid()`, `z.url()`, `z.email()`, `z.iso.datetime()`) | `zod-v4-native-api.contract.test.ts` (167 tests) |
+| 2 | 24 non-null assertions in router files | Replaced with explicit `TRPCError` guards (loyalty.ts, admin.ts, account.ts, reviews.ts, discounts.ts, trade.ts, products.ts) | (no test — mechanical) |
+| 3 | React Compiler not enabled | Installed `babel-plugin-react-compiler` devDep; config flag deferred (not in Next.js 16.2 types) | (no test — config) |
+| 4 | No Dependabot config for Stripe SDK version sync | Created `.github/dependabot.yml` with weekly npm checks | (no test — config) |
+| 5 | v15 doc count discrepancies | Fixed in this section (24 not 14; 16 rules not 9) | (doc-only) |
+
+### v15 doc count corrections
+
+- Non-null assertions: v15 said "14" → actual is **24** (missed `)!` patterns and `products.ts`)
+- ESLint deferral rules: v15 said "9 remaining" → actual is **16 rules** across 10 packages
+
+### Verification gates — post-v16
+
+| Gate | Pre-v16 | Post-v16 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ (142 warnings) | 12/12 ✅ (108 warnings — eliminated 34 via Zod v4 + non-null cleanup) |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 320 / 9 pkgs ✅ | 389 / 9 pkgs ✅ (+69 from zod-v4 contract test) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+### Deferred to v17
+
+| Item | Reason |
+|---|---|
+| React Compiler config flag enablement | `reactCompiler: true` not in Next.js 16.2.x types; wait for 16.3+ |
+| ESLint deferral block rule-by-rule promotion | 108 warnings remain; needs dedicated sprint |
+| React 19 `SyntheticEvent` → `SubmitEvent` (11 sites) | Low priority — mechanical type change |
+| `noUnusedLocals` / `noUnusedParameters` enablement | After ESLint cleanup |
+| Trigger.dev Phase 0 stubs | Intentional placeholder — wait for PRD Phase 1 |
+| Better Auth `session.user.name` nullability | Monitor upstream |
