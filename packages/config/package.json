@@ -27,7 +27,7 @@
     "build": "tsc --build",
     "dev": "tsc --build --watch",
     "clean": "rm -rf dist .turbo",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc -p tsconfig.config.json --noEmit && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
