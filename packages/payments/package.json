@@ -24,8 +24,7 @@
     "@maison/db": "workspace:*",
     "@maison/email": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "stripe": "^22.3.0",
-    "zod": "^4.4.3"
+    "stripe": "^22.3.0"
   },
   "devDependencies": {
     "@maison/typescript-config": "workspace:*",

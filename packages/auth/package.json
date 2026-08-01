@@ -27,8 +27,7 @@
     "@maison/db": "workspace:*",
     "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
-    "resend": "^6.17.0",
-    "zod": "^4.4.3"
+    "resend": "^6.17.0"
   },
   "devDependencies": {
     "@maison/typescript-config": "workspace:*",

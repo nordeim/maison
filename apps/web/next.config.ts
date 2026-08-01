@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     '@neondatabase/serverless',
     'drizzle-orm',
     'better-auth',
-    '@sanity/client',
+
     'stripe',
     'resend',
   ],

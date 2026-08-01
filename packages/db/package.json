@@ -34,8 +34,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "drizzle-orm": "^0.45.2",
-    "pg": "^8.13.1",
-    "zod": "^4.4.3"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@maison/typescript-config": "workspace:*",
@@ -43,7 +42,6 @@
     "@types/pg": "^8.11.10",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
-    "testcontainers": "^11.0.3",
     "tsx": "^4.23.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"

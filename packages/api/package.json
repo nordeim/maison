@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@maison/auth": "workspace:*",
-    "@maison/config": "workspace:*",
     "@maison/email": "workspace:*",
     "@maison/payments": "workspace:*",
     "@maison/db": "workspace:*",
