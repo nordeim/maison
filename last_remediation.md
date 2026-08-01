@@ -854,3 +854,42 @@ Audited against 3 skills (`nextjs16-react19-tailwindv4-trpcv11-drizzle-better-au
 | `pnpm format:check` | clean ✅ | clean ✅ |
 | `pnpm test` | 299 / 9 pkgs ✅ | 313 / 9 pkgs ✅ (+14 contract tests) |
 | `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+---
+
+## v14 Remediation (2026-08-01) — Fix db:seed regression from v13 server-only guard
+
+**Plan:** `docs/REMEDIATION_PLAN_v14.md`
+**Approach:** E2E testing confirmed live site is healthy (v13 hotfix worked). Review of `pnpm_log.txt` found `pnpm db:seed` regression caused by v13's `import 'server-only'` in `packages/db/src/index.ts`.
+
+### CRITICAL regression: `pnpm db:seed` broken
+
+**Symptom:** `pnpm db:seed` fails with `"This module cannot be imported from a Client Component module"`.
+
+**Root cause:** v13 added `import 'server-only'` to `packages/db/src/index.ts`. The seed script (`tsx src/seed/index.ts`) imports `db` from `../index`, which triggers the `server-only` package to throw (tsx doesn't set the `react-server` condition).
+
+**Affected scripts:** `pnpm db:seed` and `pnpm db:reset` (both use `tsx` and import from `../index`).
+
+### Fix (Option A — skill-compliant)
+
+Removed `import 'server-only'` from `packages/db/src/index.ts` ONLY. The other 6 guarded modules (auth/config, payments/client, email/send, auth/resend-client, api/context, api/trpc) keep their guards — they are NOT consumed by tsx CLI scripts.
+
+**Skill compliance:** The `nextjs16-react19-tailwind4-better-auth-monorepo` skill shows the canonical db client with NO `import 'server-only'` guard. The guard belongs at the API/server boundary consumer (like `api/context.ts`), not the low-level db utility layer.
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | `pnpm db:seed` broken by `server-only` guard | Remove `import 'server-only'` from `packages/db/src/index.ts` | `db-seed-runnable.contract.test.ts` (2 tests) |
+| 1b | Update existing server-only-guards test | Remove `packages/db/src/index.ts` from `SERVER_ONLY_MODULES` array (7 → 6) | (updated existing test) |
+
+### Verification gates — post-v14
+
+| Gate | Pre-v14 | Post-v14 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 313 / 9 pkgs ✅ | 314 / 9 pkgs ✅ (+1 net: +2 new db-seed tests, -1 removed server-only-guards case) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+| `pnpm db:seed` | ❌ BROKEN | ✅ Fixed (module-load throw eliminated) |

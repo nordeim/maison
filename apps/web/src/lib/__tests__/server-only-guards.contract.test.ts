@@ -25,7 +25,11 @@ const REPO_ROOT = join(HERE, '..', '..', '..', '..', '..');
 
 const SERVER_ONLY_MODULES = [
   'packages/auth/src/config.ts',
-  'packages/db/src/index.ts',
+  // NOTE: packages/db/src/index.ts is intentionally NOT in this list.
+  // It's imported by tsx-based CLI scripts (db:seed, db:reset) that cannot
+  // set the react-server condition. The guard belongs at the API/server
+  // boundary consumer, not the db utility layer.
+  // Per REMEDIATION_PLAN_v14 Task 1 + skill §db-client-pattern.
   'packages/payments/src/client.ts',
   'packages/email/src/send.ts',
   'packages/auth/src/resend-client.ts',
