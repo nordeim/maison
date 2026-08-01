@@ -72,3 +72,26 @@ Blocked
 - Commit not yet made.
 Key Decisions
 - Only genuine defect to fix: loyalty.ts:196 residual tiers[idx + 1]! (array-index non-null assertion missed by v16 cleanup). Others were wording/doc-count drifts deferred to next doc pass.
+
+---
+
+All work is complete and verified. Here's the final state:
+Summary
+Fix (applied + verified):
+- packages/api/src/routers/loyalty.ts:196 — tiers[idx + 1]! rewritten to const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null; return nextTier ?? null; (behavior-identical, no !)
+- New packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts (6 tests) — locks the invariant across the 6 v16-cleanup routers, excluding intentional Drizzle or()/and() sites in products.ts. RED confirmed the residual first (1 failure exactly at loyalty.ts:196), now GREEN 6/6.
+Gates (full re-run): check-types 10/10 · lint 12/12 (0 errors; api 40 warnings, net +1 from the new test's template literals) · format:check clean · test 493 total (api 20 → 26) · build unaffected (TS-only change).
+Docs updated:
+- docs/SESSION_LOG_3_VALIDATION_REPORT.md — V16 #2b row → RESOLVED, gate table (493 tests, 40 warnings), roll-up #5, verdict, new §Post-Validation Fix (TDD table)
+- docs/REMEDIATION_PLAN_v16.md — Task 2 "Post-v16 follow-up" note
+- AGENTS.md — api contract-test list now includes the new test; counts corrected to 6 files, 26 tests
+- Contract-test comment fixed to reference docs/REMEDIATION_PLAN_v16.md (the last_remediation.md it cited doesn't exist)
+Working tree verified clean after the earlier stash/pop interruption — no leftover stashes; skills/ deletions and your status.md / docs/status_18.md changes left untouched.
+→1 answered
++ Thought: 401ms
+Understood — leaving everything uncommitted in the working tree:
+- M packages/api/src/routers/loyalty.ts (the fix)
+- ?? packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts (new contract test)
+- M docs/SESSION_LOG_3_VALIDATION_REPORT.md, M docs/REMEDIATION_PLAN_v16.md, M AGENTS.md (docs)
+All gates pass (check-types 10/10, lint 12/12, format clean, 493 tests). Ready to commit whenever you want.
+

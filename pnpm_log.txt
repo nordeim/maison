@@ -1,11 +1,82 @@
 $ rm -rf .next */.next */*/.next
 (venv) pete@pop-os:/home/project/maison
 $ pnpm install
+pnpm db:migrate
+pnpm db:seed
+pnpm build
+pnpm start
+
 Scope: all 14 workspace projects
 Already up to date
-Done in 613ms using pnpm v11.17.0
-(venv) pete@pop-os:/home/project/maison
-$ pnpm build
+Done in 621ms using pnpm v11.17.0
+$ turbo db:migrate --filter=@maison/db
+╭───────────────────────────────────────────────────────────────────────────╮
+│                                                                           │
+│                    Update available v2.10.7 ≫ v2.10.8                     │
+│    Changelog: https://github.com/vercel/turborepo/releases/tag/v2.10.8    │
+│           Run "pnpm dlx @turbo/codemod@latest update" to update           │
+│                                                                           │
+│          Follow @turborepo for updates: https://x.com/turborepo           │
+╰───────────────────────────────────────────────────────────────────────────╯
+• turbo 2.10.7
+
+   • Packages in scope: @maison/db
+   • Running db:migrate in 1 packages
+   • Remote caching disabled
+
+@maison/db:db:migrate: cache bypass, force executing e7d1f34cd3d7750d
+@maison/db:db:migrate: $ drizzle-kit migrate
+@maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
+@maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+@maison/db:db:migrate: Using 'pg' driver for database querying
+[✓] migrations applied successfully!
+
+ Tasks:    1 successful, 1 total
+Cached:    0 cached, 1 total
+  Time:    1.852s 
+
+$ turbo db:seed --filter=@maison/db
+╭───────────────────────────────────────────────────────────────────────────╮
+│                                                                           │
+│                    Update available v2.10.7 ≫ v2.10.8                     │
+│    Changelog: https://github.com/vercel/turborepo/releases/tag/v2.10.8    │
+│           Run "pnpm dlx @turbo/codemod@latest update" to update           │
+│                                                                           │
+│          Follow @turborepo for updates: https://x.com/turborepo           │
+╰───────────────────────────────────────────────────────────────────────────╯
+• turbo 2.10.7
+
+   • Packages in scope: @maison/db
+   • Running db:seed in 1 packages
+   • Remote caching disabled
+
+@maison/db:db:migrate: cache bypass, force executing e7d1f34cd3d7750d
+@maison/db:db:migrate: $ drizzle-kit migrate
+@maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
+@maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
+@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ◈ secrets for agents [www.dotenvx.com]
+@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:migrate: Using 'pg' driver for database querying
+[✓] migrations applied successfully!
+@maison/db:db:seed: cache bypass, force executing a3ca87b0715b9d61
+@maison/db:db:seed: $ tsx src/seed/index.ts
+@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
+@maison/db:db:seed: ── Maison seed ──────────────────────────────────────────
+@maison/db:db:seed: → Upserting 8 collections…
+@maison/db:db:seed: → Upserting 20 products…
+@maison/db:db:seed: ── ✓ Seed complete ──────────────────────────────────────
+@maison/db:db:seed:   Collections: 8
+@maison/db:db:seed:   Products:    20
+@maison/db:db:seed:   Variants:    20 (1 default per product)
+@maison/db:db:seed:   Images:      40
+
+ Tasks:    2 successful, 2 total
+Cached:    0 cached, 2 total
+  Time:    3.817s 
+
 $ turbo build
 ╭───────────────────────────────────────────────────────────────────────────╮
 │                                                                           │
@@ -21,42 +92,42 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
-@maison/studio:build: cache miss, executing 6518e28584c69e83
-@maison/ui:build: cache miss, executing b63f381cf7638610
-@maison/db:build: cache miss, executing fd2d42735500b12c
-@maison/config:build: cache miss, executing 5bcba2640c3692b7
-@maison/email:build: cache miss, executing 856b6991b1127e4a
-@maison/studio:build: $ sanity build
-@maison/ui:build: $ tsc --build
-@maison/email:build: $ tsc --build
+@maison/db:build: cache hit, replaying logs fd2d42735500b12c
 @maison/db:build: $ tsc --build
+@maison/email:build: cache miss, executing e48f27bb832e2951
+@maison/config:build: cache hit, replaying logs 5bcba2640c3692b7
 @maison/config:build: $ tsc --build
-@maison/auth:build: cache miss, executing 641bf02c6f66c472
-@maison/workers:build: cache miss, executing fe68644c72e4c1c6
-@maison/workers:build: $ tsc --build
-@maison/auth:build: $ tsc
+@maison/studio:build: cache hit, replaying logs 6518e28584c69e83
+@maison/studio:build: $ sanity build
 ✔ Clean output folder (75ms)
-@maison/payments:build: cache miss, executing c961687c9df56aec
-@maison/payments:build: $ tsc --build
-@maison/api:build: cache miss, executing cc21e0081b565c2d
 ✔ Build Sanity Studio (4702ms)
 @maison/studio:build: 
+@maison/ui:build: cache hit, replaying logs b63f381cf7638610
+@maison/auth:build: cache hit, replaying logs 641bf02c6f66c472
+@maison/ui:build: $ tsc --build
+@maison/auth:build: $ tsc
+@maison/email:build: $ tsc --build
+@maison/workers:build: cache miss, executing 4323c92df78465c0
+@maison/payments:build: cache miss, executing 25e45cbfd56ae175
+@maison/workers:build: $ tsc --build
+@maison/payments:build: $ tsc --build
+@maison/api:build: cache miss, executing cfd06c4969519f6b
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing af21badb055042de
+@maison/web:build: cache miss, executing ecab10787de36d49
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
 @maison/web:build: 
 @maison/web:build:   Creating an optimized production build ...
-@maison/web:build: ✓ Compiled successfully in 13.8s
-@maison/web:build: ✓ Finished TypeScript in 14.1s 
+@maison/web:build: ✓ Compiled successfully in 19.8s
+@maison/web:build: ✓ Finished TypeScript in 14.0s 
 ⚠ Using edge runtime on a page currently disables static generation for that page
 @maison/web:build: ✓ Collecting page data using 3 workers in 2.6s 
 [account orders] Failed to fetch: Error: Dynamic server usage: Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__071qnzx._.js:1:10997)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__071qnzx._.js:1:10996)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -65,7 +136,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__04an4ew._.js:1:11017)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__04an4ew._.js:1:11016)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /account couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -74,7 +145,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0ru1px-._.js:1:11224)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0ru1px-._.js:1:11223)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /account/wishlist couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -83,7 +154,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__152t8xd._.js:1:11053)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__152t8xd._.js:1:11052)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/analytics couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -92,7 +163,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__1ejzbpl._.js:1:11005)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__1ejzbpl._.js:1:11004)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/customers couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -101,7 +172,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0m3a76o._.js:1:11256)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0m3a76o._.js:1:11255)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/discounts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -110,7 +181,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at g (.next/server/chunks/ssr/[root-of-the-server]__0hc7spq._.js:1:10298)
+@maison/web:build:     at g (.next/server/chunks/ssr/[root-of-the-server]__0hc7spq._.js:1:10297)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/inventory couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -119,7 +190,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__1713erc._.js:1:11951)
+@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__1713erc._.js:1:11950)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -128,7 +199,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__1bh8nrp._.js:1:10991)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__1bh8nrp._.js:1:10990)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -137,7 +208,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0htvhen._.js:1:11004)
+@maison/web:build:     at h (.next/server/chunks/ssr/[root-of-the-server]__0htvhen._.js:1:11003)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/products couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -146,7 +217,7 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__0meups8._.js:1:11944)
+@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__0meups8._.js:1:11943)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/reviews couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
@@ -155,13 +226,13 @@ $ turbo build
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
 @maison/web:build:     at i (.next/server/chunks/ssr/_1-2sv46._.js:39:1864)
-@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__107mf3v._.js:1:11935)
+@maison/web:build:     at i (.next/server/chunks/ssr/[root-of-the-server]__107mf3v._.js:1:11934)
 @maison/web:build:     at stringify (<anonymous>) {
 @maison/web:build:   description: "Route /admin/trade couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 800ms
-@maison/web:build: ✓ Finalizing page optimization in 11ms 
+@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 862ms
+@maison/web:build: ✓ Finalizing page optimization in 37ms 
 @maison/web:build: 
 @maison/web:build: Route (app)
 @maison/web:build: ┌ ○ /
@@ -214,87 +285,13 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    0 cached, 10 total
-  Time:    50.226s 
+Cached:    5 cached, 10 total
+  Time:    54.096s 
 
-(venv) pete@pop-os:/home/project/maison
-$ pnpm db:migrate
-$ turbo db:migrate --filter=@maison/db
-╭───────────────────────────────────────────────────────────────────────────╮
-│                                                                           │
-│                    Update available v2.10.7 ≫ v2.10.8                     │
-│    Changelog: https://github.com/vercel/turborepo/releases/tag/v2.10.8    │
-│           Run "pnpm dlx @turbo/codemod@latest update" to update           │
-│                                                                           │
-│          Follow @turborepo for updates: https://x.com/turborepo           │
-╰───────────────────────────────────────────────────────────────────────────╯
-• turbo 2.10.7
-
-   • Packages in scope: @maison/db
-   • Running db:migrate in 1 packages
-   • Remote caching disabled
-
-@maison/db:db:migrate: cache bypass, force executing e7d1f34cd3d7750d
-@maison/db:db:migrate: $ drizzle-kit migrate
-@maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
-@maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌘ enable debugging { debug: true }
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
-@maison/db:db:migrate: Using 'pg' driver for database querying
-[✓] migrations applied successfully!
-
- Tasks:    1 successful, 1 total
-Cached:    0 cached, 1 total
-  Time:    1.872s 
-
-(venv) pete@pop-os:/home/project/maison
-$ pnpm db:seed
-$ turbo db:seed --filter=@maison/db
-╭───────────────────────────────────────────────────────────────────────────╮
-│                                                                           │
-│                    Update available v2.10.7 ≫ v2.10.8                     │
-│    Changelog: https://github.com/vercel/turborepo/releases/tag/v2.10.8    │
-│           Run "pnpm dlx @turbo/codemod@latest update" to update           │
-│                                                                           │
-│          Follow @turborepo for updates: https://x.com/turborepo           │
-╰───────────────────────────────────────────────────────────────────────────╯
-• turbo 2.10.7
-
-   • Packages in scope: @maison/db
-   • Running db:seed in 1 packages
-   • Remote caching disabled
-
-@maison/db:db:migrate: cache bypass, force executing e7d1f34cd3d7750d
-@maison/db:db:migrate: $ drizzle-kit migrate
-@maison/db:db:migrate: No config path provided, using default 'drizzle.config.ts'
-@maison/db:db:migrate: Reading config file '/home/project/maison/packages/db/drizzle.config.ts'
-@maison/db:db:migrate: ◇ injected env (35) from ../../.env.local // tip: ⌁ auth for agents [www.vestauth.com]
-@maison/db:db:migrate: ◇ injected env (0) from ../../.env // tip: ⌘ suppress logs { quiet: true }
-@maison/db:db:migrate: Using 'pg' driver for database querying
-[✓] migrations applied successfully!
-@maison/db:db:seed: cache bypass, force executing a3ca87b0715b9d61
-@maison/db:db:seed: $ tsx src/seed/index.ts
-@maison/db:db:seed: ◇ injected env (35) from ../../.env.local // tip: ⌁ auth for agents [www.vestauth.com]
-@maison/db:db:seed: ◇ injected env (0) from ../../.env // tip: ⌘ override existing { override: true }
-@maison/db:db:seed: ── Maison seed ──────────────────────────────────────────
-@maison/db:db:seed: → Upserting 8 collections…
-@maison/db:db:seed: → Upserting 20 products…
-@maison/db:db:seed: ── ✓ Seed complete ──────────────────────────────────────
-@maison/db:db:seed:   Collections: 8
-@maison/db:db:seed:   Products:    20
-@maison/db:db:seed:   Variants:    20 (1 default per product)
-@maison/db:db:seed:   Images:      40
-
- Tasks:    2 successful, 2 total
-Cached:    0 cached, 2 total
-  Time:    4.035s 
-
-(venv) pete@pop-os:/home/project/maison
-$ pnpm start
 $ pnpm --filter=@maison/web start
 $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 191ms
+✓ Ready in 187ms
 
