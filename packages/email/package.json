@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "react": "^19.2.7",
-    "resend": "^6.17.0"
+    "resend": "^6.18.1"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",

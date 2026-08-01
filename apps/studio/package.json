@@ -12,10 +12,10 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@sanity/vision": "^6.3.0",
+    "@sanity/vision": "^6.7.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "sanity": "^6.6.0",
+    "sanity": "^6.7.0",
     "styled-components": "^6.1.15"
   },
   "devDependencies": {
