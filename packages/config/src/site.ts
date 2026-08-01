@@ -65,19 +65,17 @@ export const site = {
         title: 'About',
         links: [
           { label: 'Our Story', href: '/about' },
-          { label: 'Sustainability', href: '/about#sustainability' },
-          { label: 'Materials', href: '/about#materials' },
+          { label: 'Sustainability', href: '/about' },
+          { label: 'Materials', href: '/about' },
           { label: 'Journal', href: '/journal' },
-          { label: 'Press', href: '/about#press' },
+          { label: 'Press', href: '/about' },
         ],
       },
       {
         title: 'Help',
         links: [
-          { label: 'Shipping & Returns', href: '/shipping-returns' },
-          { label: 'Material Care Guide', href: '/care-guide' },
-          { label: 'Artisan Traceability', href: '/about#traceability' },
-          { label: 'FAQ', href: '/faq' },
+          { label: 'Shipping & Returns', href: '/contact' },
+          { label: 'Artisan Traceability', href: '/about' },
           { label: 'Contact', href: '/contact' },
         ],
       },
@@ -100,9 +98,8 @@ export const site = {
       },
     ] satisfies SocialLink[],
     legal: [
-      { label: 'Privacy Policy', href: '/privacy-policy' },
-      { label: 'Terms of Service', href: '/terms-of-service' },
-      { label: 'Cookie Preferences', href: '/cookie-policy' },
+      { label: 'Privacy Policy', href: '/contact' },
+      { label: 'Terms of Service', href: '/contact' },
     ] satisfies NavLink[],
   },
 

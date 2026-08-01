@@ -6,14 +6,19 @@
  * Admin: list all gift cards.
  */
 
+import { TRPCError } from '@trpc/server';
 import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { giftCards, customers } from '@maison/db';
 
-import { router, publicProcedure, protectedProcedure, staffProcedure } from '../trpc';
-
-// NOTE: Rate limiting on gift card purchase is deferred to v12 — see checkout.ts.
+import {
+  router,
+  publicProcedure,
+  protectedProcedure,
+  staffProcedure,
+  protectedRateLimitedProcedure,
+} from '../trpc';
 
 /**
  * Generate a unique gift card code: MAIS-GC-XXXX-XXXX
@@ -70,7 +75,7 @@ export const giftCardsRouter = router({
    * Purchase a gift card (authenticated users).
    * Creates a gift card record — the actual charge happens via checkout.
    */
-  purchase: protectedProcedure
+  purchase: protectedRateLimitedProcedure
     .input(
       z.object({
         amountCents: z.number().int().min(2500).max(100000), // $25–$1000
@@ -93,7 +98,13 @@ export const giftCardsRouter = router({
           .insert(customers)
           .values({ userId: ctx.session.user.id })
           .returning({ id: customers.id });
-        customerId = newCustomer!.id;
+        if (!newCustomer) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create customer record',
+          });
+        }
+        customerId = newCustomer.id;
       }
 
       // Generate unique code (retry if collision)
@@ -124,7 +135,13 @@ export const giftCardsRouter = router({
         })
         .returning({ id: giftCards.id, code: giftCards.code });
 
-      return { id: card!.id, code: card!.code };
+      if (!card) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create gift card record',
+        });
+      }
+      return { id: card.id, code: card.code };
     }),
 
   /**

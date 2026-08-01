@@ -83,7 +83,13 @@ export const cartRouter = router({
           .insert(carts)
           .values({ currency: 'USD' })
           .returning({ id: carts.id });
-        cartId = newCart!.id;
+        if (!newCart) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create cart',
+          });
+        }
+        cartId = newCart.id;
       }
 
       // Check if item already exists in cart (same product + variant) — if so, increment quantity
@@ -120,7 +126,13 @@ export const cartRouter = router({
         })
         .returning({ id: cartItems.id });
 
-      return { cartId, itemId: item!.id };
+      if (!item) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to add item to cart',
+        });
+      }
+      return { cartId, itemId: item.id };
     }),
 
   /**

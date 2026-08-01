@@ -179,4 +179,27 @@ function loadEnv() {
   });
 }
 
+/**
+ * Warn if BETTER_AUTH_URL and NEXT_PUBLIC_APP_URL hosts differ in production.
+ * A mismatch causes session cookies to be set for the wrong domain → P0 auth outage.
+ * Per REMEDIATION_PLAN_v12 Task 4 + skill §5.6.0 lines 925-937.
+ */
+function warnOnAuthUrlMismatch(authUrl: string | undefined, appUrl: string | undefined): void {
+  if (process.env.NODE_ENV !== 'production') return;
+  if (!authUrl || !appUrl) return;
+  try {
+    const authHost = new URL(authUrl).host;
+    const appHost = new URL(appUrl).host;
+    if (authHost !== appHost) {
+      console.warn(
+        `[env] BETTER_AUTH_URL host (${authHost}) does not match NEXT_PUBLIC_APP_URL host (${appHost}). ` +
+          'This will cause session cookies to be set for the wrong domain → P0 auth outage.',
+      );
+    }
+  } catch {
+    // URLs already validated by zod; defensive only
+  }
+}
+
 export const env = loadEnv();
+warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL);

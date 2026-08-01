@@ -29,7 +29,7 @@ export function ReviewsSection({ productSlug }: ReviewsSectionProps) {
   const { data, isLoading } = trpc.reviews.list.useQuery({ productSlug });
   const createReview = trpc.reviews.create.useMutation();
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     await createReview.mutateAsync({
       productSlug,

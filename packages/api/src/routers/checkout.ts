@@ -14,13 +14,7 @@ import { z } from 'zod';
 import { cartItems, products, orders, lineItems, customers } from '@maison/db';
 import { stripe } from '@maison/payments';
 
-import { router, protectedProcedure } from '../trpc';
-
-// NOTE: Rate limiting on payment mutations is deferred to v12 — tRPC v11's
-// type system doesn't preserve session narrowing through .use(rateLimitMiddleware).
-// The rateLimitMiddleware would need to be refactored to use a context-preserving
-// pattern (e.g. t.procedure.use() instead of t.middleware()). See REMEDIATION_PLAN_v11
-// Task 5 for details.
+import { router, protectedProcedure, protectedRateLimitedProcedure } from '../trpc';
 
 const SHIPPING_COSTS: Record<string, number> = {
   standard: 1500,
@@ -49,7 +43,7 @@ export const checkoutRouter = router({
    * Idempotent: if the same cartId + shippingAddress is submitted twice,
    * the second call returns the existing pending order.
    */
-  createPaymentIntent: protectedProcedure
+  createPaymentIntent: protectedRateLimitedProcedure
     .input(
       z.object({
         cartId: z.string().uuid(),
@@ -111,7 +105,13 @@ export const checkoutRouter = router({
             lastName: ctx.session.user.name?.split(' ').slice(1).join(' ') ?? null,
           })
           .returning({ id: customers.id });
-        customerId = newCustomer!.id;
+        if (!newCustomer) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create customer record',
+          });
+        }
+        customerId = newCustomer.id;
       }
 
       // 4. Create Stripe Payment Intent

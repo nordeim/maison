@@ -44,6 +44,48 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   return next({ ctx: { ...ctx, session: ctx.session } });
 });
 
+/**
+ * Tier 2 + Rate Limit — protected procedure with rate limiting applied.
+ *
+ * This builder preserves the session type narrowing from protectedProcedure
+ * because the inline .use() infers from the narrowed output context.
+ * The standalone rateLimitMiddleware (in middleware/rateLimit.ts) loses
+ * the narrowing because it's a t.middleware() with the original TRPCContext.
+ *
+ * Per REMEDIATION_PLAN_v12 Task 3.
+ */
+export const protectedRateLimitedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const identifier =
+    ctx.session.user.id ??
+    ctx.req.headers.get('x-forwarded-for') ??
+    ctx.req.headers.get('x-real-ip') ??
+    'anonymous';
+
+  // Fail open: if Redis is not configured, allow the request
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token && !url.includes('placeholder')) {
+    try {
+      const { Ratelimit } = await import('@upstash/ratelimit');
+      const { Redis } = await import('@upstash/redis');
+      const redis = new Redis({ url, token });
+      const ratelimiter = new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(10, '1 m'),
+      });
+      const { success } = await ratelimiter.limit(`tRPC:${identifier}`);
+      if (!success) {
+        throw new TRPCError({ code: 'TOO_MANY_REQUESTS' });
+      }
+    } catch (e) {
+      if (e instanceof TRPCError) throw e;
+      console.error('[rateLimit] Redis check failed, failing open:', e);
+    }
+  }
+
+  return next({ ctx });
+});
+
 /** Tier 3: Staff — staff, manager, or owner role (admin read access). */
 export const staffProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const role = ctx.session.user.role;
