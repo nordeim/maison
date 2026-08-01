@@ -35,7 +35,7 @@ export default function AccountSettingsPage() {
     }
   }, [profile]);
 
-  const handleProfileSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
     setProfileSaved(false);

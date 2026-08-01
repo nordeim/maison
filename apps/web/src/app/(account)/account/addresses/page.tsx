@@ -71,7 +71,7 @@ export default function AccountAddressesPage() {
     void utils.account.listAddresses.invalidate();
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 

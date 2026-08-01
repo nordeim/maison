@@ -32,7 +32,7 @@ export function GiftCardsForm() {
 
   const finalAmount = customAmount ? Math.round(parseFloat(customAmount) * 100) : amount * 100;
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 

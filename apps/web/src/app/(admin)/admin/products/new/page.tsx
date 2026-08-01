@@ -34,7 +34,7 @@ export default function AdminNewProductPage() {
 
   const collections = collectionsData ?? [];
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 

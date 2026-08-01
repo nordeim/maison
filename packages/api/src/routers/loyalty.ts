@@ -193,5 +193,6 @@ function formatLoyaltyAccount(account: typeof loyaltyAccounts.$inferSelect) {
 function getNextTier(current: keyof typeof TIER_THRESHOLDS): keyof typeof TIER_THRESHOLDS | null {
   const tiers: (keyof typeof TIER_THRESHOLDS)[] = ['member', 'silver', 'gold', 'platinum'];
   const idx = tiers.indexOf(current);
-  return idx < tiers.length - 1 ? tiers[idx + 1]! : null;
+  const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null;
+  return nextTier ?? null;
 }

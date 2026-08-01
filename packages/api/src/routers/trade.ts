@@ -67,9 +67,9 @@ export const tradeRouter = router({
           lastName: input.lastName,
           company: input.company,
           role: input.role,
-          website: input.website || null,
-          instagram: input.instagram || null,
-          projectTypes: input.projectTypes || null,
+          website: input.website ?? null,
+          instagram: input.instagram ?? null,
+          projectTypes: input.projectTypes ?? null,
           discountPercent: 10, // default; admin can adjust on approval
           status: 'pending',
         })

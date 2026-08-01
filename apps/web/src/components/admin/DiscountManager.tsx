@@ -40,7 +40,7 @@ export function DiscountManager({ initialDiscounts }: { initialDiscounts: Discou
   });
   const [error, setError] = useState('');
 
-  const handleCreate = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 

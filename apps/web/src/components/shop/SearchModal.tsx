@@ -68,7 +68,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   }, [isOpen]);
 
   const handleSubmit = useCallback(
-    (e: React.SyntheticEvent<HTMLFormElement>) => {
+    (e: React.SubmitEvent) => {
       e.preventDefault();
       if (query.trim()) {
         router.push(`/search?q=${encodeURIComponent(query.trim())}`);

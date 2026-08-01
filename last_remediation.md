@@ -975,3 +975,47 @@ Removed `import 'server-only'` from `packages/db/src/index.ts` ONLY. The other 6
 | `noUnusedLocals` / `noUnusedParameters` enablement | After ESLint cleanup |
 | Trigger.dev Phase 0 stubs | Intentional placeholder — wait for PRD Phase 1 |
 | Better Auth `session.user.name` nullability | Monitor upstream |
+
+---
+
+## v17 Remediation (2026-08-01) — loyalty.ts fix + React 19 SubmitEvent + lint cleanup
+
+**Plan:** `docs/REMEDIATION_PLAN_v17.md`
+**Approach:** User applied loyalty.ts fix; skill-compliance audit found React 19 SubmitEvent migration gap (11 sites) + trade.ts `||` → `??` bug + email template escaping. TDD-driven fixes.
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | loyalty.ts:196 residual `tiers[idx + 1]!` (user-applied) | `const nextTier = ... ?? null` | `non-null-assertion-cleanup.contract.test.ts` (6 tests, pre-existing) |
+| 2 | 11 sites using deprecated `React.SyntheticEvent<HTMLFormElement>` | Migrated to `React.SubmitEvent` (skill REACT-1) | `react-submit-event.contract.test.ts` (1 test) |
+| 3 | trade.ts:70-72 `||` instead of `??` (empty-string bug) | Changed to `??` (skill §14.2 nullish coalescing) | (no test — mechanical) |
+| 4 | 5 unescaped apostrophes in email templates | Replaced `'` with `&apos;` in OrderConfirmation.tsx (4) + WelcomeMember.tsx (1) | (no test — mechanical) |
+
+### Validation report status
+
+The `SESSION_LOG_3_VALIDATION_REPORT.md` identified 6 discrepancies:
+- #5 (loyalty.ts:196) — ✅ RESOLVED (Task 1)
+- #1-4, #6 — cosmetic doc-count drift (invariants hold, no code defects)
+
+### Verification gates — post-v17
+
+| Gate | Pre-v17 | Post-v17 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ (91 warnings) | 12/12 ✅ (83 warnings — eliminated 8 via SubmitEvent + escaping + nullish coalescing) |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 390 / 9 pkgs ✅ | 391 / 9 pkgs ✅ (+1 react-submit-event contract test) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+### Deferred to v18
+
+| Item | Reason |
+|---|---|
+| React Compiler config flag | Blocked on Next.js 16.3+ types |
+| ESLint deferral block rule-by-rule promotion | 83 warnings remain; needs dedicated sprint |
+| `require-await` cleanup (8 sites) | Most are stub senders awaiting Trigger.dev Phase 1 |
+| `no-unnecessary-condition` cleanup (13 sites) | Needs case-by-case verification |
+| `noUnusedLocals` / `noUnusedParameters` | Paired with code-cleanup sprint |
+| Trigger.dev Phase 0 stubs | Wait for PRD Phase 1 |
+| Better Auth `session.user.name` nullability | Requires DB migration or upstream fix |

@@ -168,12 +168,12 @@ export function CheckoutFlow() {
     );
   }
 
-  const handleShippingSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleShippingSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     setStep('payment');
   };
 
-  const handlePaymentSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handlePaymentSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     setStep('review');
   };

@@ -72,8 +72,9 @@ export function OrderConfirmationEmail({
           margin: '0 0 24px',
         }}
       >
-        Your order <strong>{orderNumber}</strong> has been confirmed. We're preparing your pieces
-        with care — you'll receive a shipping notification when they're on their way.
+        Your order <strong>{orderNumber}</strong> has been confirmed. We&apos;re preparing your
+        pieces with care — you&apos;ll receive a shipping notification when they&apos;re on their
+        way.
       </p>
 
       <table
@@ -186,8 +187,8 @@ export function OrderConfirmationEmail({
           lineHeight: 1.65,
         }}
       >
-        If you have any questions, reply to this email or write to hello@maison-living.com. We're
-        here Mon–Fri, 9am–6pm CET.
+        If you have any questions, reply to this email or write to hello@maison-living.com.
+        We&apos;re here Mon–Fri, 9am–6pm CET.
       </p>
     </EmailLayout>
   );

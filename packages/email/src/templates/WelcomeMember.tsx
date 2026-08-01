@@ -44,9 +44,9 @@ export function WelcomeEmail({ name, shopUrl }: WelcomeEmailProps) {
           margin: '0 0 16px',
         }}
       >
-        Thank you for creating a Maison account. You're now part of a small community of people who
-        believe that the objects we live with should be made with care, age gracefully, and bring
-        quiet joy to daily rituals.
+        Thank you for creating a Maison account. You&apos;re now part of a small community of people
+        who believe that the objects we live with should be made with care, age gracefully, and
+        bring quiet joy to daily rituals.
       </p>
       <p
         style={{

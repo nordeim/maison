@@ -18,7 +18,7 @@ export function NewsletterForm() {
 
   const subscribe = trpc.newsletter.subscribe.useMutation();
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setStatus('error');
