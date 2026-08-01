@@ -1019,3 +1019,46 @@ The `SESSION_LOG_3_VALIDATION_REPORT.md` identified 6 discrepancies:
 | `noUnusedLocals` / `noUnusedParameters` | Paired with code-cleanup sprint |
 | Trigger.dev Phase 0 stubs | Wait for PRD Phase 1 |
 | Better Auth `session.user.name` nullability | Requires DB migration or upstream fix |
+
+---
+
+## v18 Remediation (2026-08-01) — getNextTier Option B lookup map (optimal fix)
+
+**Plan:** `docs/REMEDIATION_PLAN_v18.md`
+**Approach:** 3 independent code reviews (`docs/analysis-1.md`, `analysis-2.md`, `analysis-3-feedback.md`) all recommended Option B (lookup map) as the optimal fix for the `getNextTier` latent bug.
+
+### The latent bug (identified by all 3 analyses)
+
+The v17 fix (`const nextTier = ... ?? null`) was behaviorally equivalent to the original — a stylistic refactor, not a bug fix. The real latent bug was `indexOf === -1`: if an unknown tier is passed, `idx = -1`, `-1 < 3` is true, and both versions silently return `'member'` instead of `null`.
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Tests |
+|---|---|---|---|
+| 1 | `getNextTier` latent bug: `indexOf === -1` returns `'member'` for unknown tiers | Replaced `indexOf`-based implementation with Option B lookup map (`NEXT_TIER` Record) — O(1), self-documenting, eliminates `indexOf` entirely, naturally returns `null` for unknown keys | `loyalty.test.ts` (6 tests) |
+| 2 | `formatLoyaltyAccount` unsafe `as keyof typeof TIER_THRESHOLDS` cast | Added runtime validation: check tier string against `TIER_THRESHOLDS` keys before casting; default to `'member'` if invalid | (covered by Task 1 tests) |
+
+### Option B implementation
+
+```ts
+const NEXT_TIER: Record<keyof typeof TIER_THRESHOLDS, keyof typeof TIER_THRESHOLDS | null> = {
+  member: 'silver',
+  silver: 'gold',
+  gold: 'platinum',
+  platinum: null,
+};
+
+function getNextTier(current: keyof typeof TIER_THRESHOLDS): keyof typeof TIER_THRESHOLDS | null {
+  return NEXT_TIER[current] ?? null;
+}
+```
+
+### Verification gates — post-v18
+
+| Gate | Pre-v18 | Post-v18 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 391 / 9 pkgs ✅ | 397 / 9 pkgs ✅ (+6 loyalty tests) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |

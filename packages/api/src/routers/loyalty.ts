@@ -167,7 +167,14 @@ export const loyaltyRouter = router({
 });
 
 function formatLoyaltyAccount(account: typeof loyaltyAccounts.$inferSelect) {
-  const currentTier = account.tier as keyof typeof TIER_THRESHOLDS;
+  // Validate the tier string against TIER_THRESHOLDS keys before casting.
+  // If the DB contains an invalid tier (e.g. from a migration or manual edit),
+  // default to 'member' instead of passing an unknown value to getNextTier.
+  // Per analysis-1/2/3-feedback §6 (upstream cast safety).
+  const tierKeys = Object.keys(TIER_THRESHOLDS) as (keyof typeof TIER_THRESHOLDS)[];
+  const currentTier = tierKeys.includes(account.tier as keyof typeof TIER_THRESHOLDS)
+    ? (account.tier as keyof typeof TIER_THRESHOLDS)
+    : 'member';
   const nextTier = getNextTier(currentTier);
   const pointsToNextTier = nextTier ? TIER_THRESHOLDS[nextTier] - account.lifetimePoints : 0;
 
@@ -190,9 +197,20 @@ function formatLoyaltyAccount(account: typeof loyaltyAccounts.$inferSelect) {
   };
 }
 
+/**
+ * Lookup map for tier progression. O(1) lookup, self-documenting,
+ * eliminates indexOf entirely. Returns null for unknown keys at runtime
+ * (the latent bug fix from analysis-1/2/3-feedback — Option B).
+ *
+ * Per REMEDIATION_PLAN_v18 Task 1.
+ */
+const NEXT_TIER: Record<keyof typeof TIER_THRESHOLDS, keyof typeof TIER_THRESHOLDS | null> = {
+  member: 'silver',
+  silver: 'gold',
+  gold: 'platinum',
+  platinum: null,
+};
+
 function getNextTier(current: keyof typeof TIER_THRESHOLDS): keyof typeof TIER_THRESHOLDS | null {
-  const tiers: (keyof typeof TIER_THRESHOLDS)[] = ['member', 'silver', 'gold', 'platinum'];
-  const idx = tiers.indexOf(current);
-  const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null;
-  return nextTier ?? null;
+  return NEXT_TIER[current] ?? null;
 }
