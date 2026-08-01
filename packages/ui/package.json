@@ -37,6 +37,8 @@
     "dev": "tsc --build --watch",
     "clean": "rm -rf dist .turbo",
     "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -44,6 +46,7 @@
     "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "eslint": "^9.39.4",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.9"
   }
 }
