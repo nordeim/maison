@@ -70,6 +70,8 @@ The codebase is **production-healthy**: all 4 quality gates green, 320 tests pas
 2. **GREEN** — replace each `!` with explicit `if (!x) throw new TRPCError(...)`.
 3. **REFACTOR** — promote `@typescript-eslint/no-non-null-assertion` from `warn` → `error`.
 
+**Post-v16 follow-up (validation-driven, 2026-08-02):** the session-log validation audit (`docs/SESSION_LOG_3_VALIDATION_REPORT.md`) found the cleanup had missed one residual array-index assertion at `loyalty.ts:196` (`tiers[idx + 1]!` — the v16 sweep pattern only covered destructured-`.returning()` style). Fixed via TDD: RED contract test `packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts` (6 tests) audits the 6 cleanup routers (loyalty/admin/account/reviews/discounts/trade) for residual postfix `!` and locks the invariant — it excludes the intentional Drizzle `or()`/`and()` sites in `products.ts` (lines 75, 83, 92, 106, 110 — `SQL<unknown> | undefined` type necessity). GREEN rewrote `getNextTier` to `const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null; return nextTier ?? null;`. Net api test count 20 → 26; api lint warnings 39 → 40 (net +1, all `restrict-template-expressions` in the new test — same accepted class as `no-unknown-cast.contract.test.ts`). `no-non-null-assertion` remains at `warn` (deferred per §Deferred to v17).
+
 ### Task 3 — React Compiler Enablement (MEDIUM)
 
 **Issue:** React Compiler not enabled. Skill 2 §9.9 Gotcha 11 + Lesson 23 document the procedure.
