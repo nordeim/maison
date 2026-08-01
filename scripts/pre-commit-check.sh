@@ -16,6 +16,9 @@ echo "→ Type-check (TypeScript)…"
 pnpm check-types
 
 echo "→ Lint (ESLint)…"
-pnpm lint
+# Use --concurrency=1 to avoid OOM when type-aware ESLint runs on large
+# packages (e.g. @maison/studio with Sanity schemas) in parallel with
+# other packages. Serial execution adds ~10s but is reliable.
+pnpm turbo lint --concurrency=1
 
 echo "── ✓ Pre-commit checks passed ───────────────────────────────────"
