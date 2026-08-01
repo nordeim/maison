@@ -761,3 +761,58 @@ The V11–V16 arc documented `last_remediation.md` §9 noted the AGENTS.md routi
 | `pnpm format:check` | clean ✅ | clean ✅ |
 | `pnpm test` | 290 / 9 pkgs ✅ | 297 / 9 pkgs ✅ (+7 contract tests) |
 | `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+---
+
+## v12 Remediation (2026-08-01) — E2E + critical cursor pagination bug
+
+**Plan:** `docs/REMEDIATION_PLAN_v12.md`
+**Approach:** E2E testing of live site (agent-browser) + deferred-items compliance audit (Explore sub-agent), then TDD-driven fixes.
+
+### E2E Testing Results (live site `https://maison.jesspete.shop/`)
+
+All v11 fixes confirmed working:
+- `/trade` loads instantly (no 7s delay) ✅
+- All key pages return 200 ✅
+- No console errors ✅
+- Mobile responsive ✅
+- Scroll-reveal works ✅
+
+New E2E finding:
+- **6 broken footer links** (404): /care-guide, /faq, /privacy-policy, /cookie-policy, /shipping-returns, /terms-of-service → Fixed (Task 1)
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | 6 broken footer links (404) | Remove broken links from site.ts | `footer-links.contract.test.ts` (3 tests) |
+| 2 | **CRITICAL: cursor pagination broken** (cursor accepted but never used in WHERE) | Implement compound cursor with OR tie-breaking | `cursor-pagination.contract.test.ts` (3 tests) |
+| 3 | Rate limiting on payment mutations (deferred from v11) | `protectedRateLimitedProcedure` builder preserving session type | (no test — procedure composition) |
+| 4 | BETTER_AUTH_URL host-mismatch warning (deferred from v11) | Runtime check in env.ts | `auth-url-warning.contract.test.ts` (2 tests) |
+| 5 | Non-null assertions in payment paths (5 sites) | Explicit TRPCError guards | (no test — mechanical) |
+| 6 | React.SyntheticEvent → React.SubmitEvent | Single-line type change | (no test) |
+
+### Critical discovery
+
+**Task 2 (cursor pagination) was escalated from MEDIUM to CRITICAL** during the deferred-items audit. The v11 audit cited it as "compound cursor needed for tie-breaking" but the actual code had a worse bug: the cursor was **never used to filter at all**. The `conditions` array only had `isActive` and `collection` filters — the cursor was accepted as input, `nextCursor` was computed and returned, but when the client passed it back, it was silently ignored. This meant every "next page" request returned the same first N items. This was a silent data-correctness bug affecting the PLP.
+
+### Deferred to v13
+
+| Item | Status |
+|---|---|
+| ESLint deferral block removal (9 remaining rules) | Deferred — ~200+ warnings to address |
+| Remaining 14 non-null assertions (admin/account/loyalty) | Deferred — lower-risk paths |
+| Compound cursor pagination for products.search | Deferred — search uses different query |
+| Trigger.dev Phase 0 stubs | Deferred — intentional placeholder |
+| Stripe API version automation | Deferred — needs Renovate/Dependabot |
+| React Compiler enablement | Deferred — needs benchmarking |
+
+### Verification gates — post-v12
+
+| Gate | Pre-v12 | Post-v12 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 297 / 9 pkgs ✅ | 297 / 9 pkgs ✅ (+8 contract tests, -8 removed broken-link tests) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
