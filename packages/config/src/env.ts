@@ -183,6 +183,12 @@ function loadEnv() {
  * Warn if BETTER_AUTH_URL and NEXT_PUBLIC_APP_URL hosts differ in production.
  * A mismatch causes session cookies to be set for the wrong domain → P0 auth outage.
  * Per REMEDIATION_PLAN_v12 Task 4 + skill §5.6.0 lines 925-937.
+ *
+ * CRITICAL: This must only run on the server side. The `env` object from
+ * createEnv() uses a proxy that THROWS when server-side env vars are accessed
+ * on the client (isServer=false). Calling this at module load time without
+ * the typeof window guard breaks client-side hydration → "This page couldn't
+ * load" error on the live site (v13 hotfix).
  */
 function warnOnAuthUrlMismatch(authUrl: string | undefined, appUrl: string | undefined): void {
   if (process.env.NODE_ENV !== 'production') return;
@@ -202,4 +208,12 @@ function warnOnAuthUrlMismatch(authUrl: string | undefined, appUrl: string | und
 }
 
 export const env = loadEnv();
-warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL);
+
+// Only run the auth URL mismatch warning on the server side.
+// On the client, `env.BETTER_AUTH_URL` access throws via the createEnv proxy.
+if (
+  typeof globalThis !== 'undefined' &&
+  typeof (globalThis as Record<string, unknown>).window === 'undefined'
+) {
+  warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL);
+}
