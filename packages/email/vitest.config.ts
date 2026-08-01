@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
@@ -11,5 +12,11 @@ export default defineConfig({
     // "No test files found" and blocks `turbo test`. Matches the Stillwater
     // reference pattern (services/workers, packages/email, payments, ui).
     passWithNoTests: true,
+  },
+
+  resolve: {
+    alias: {
+      'server-only': resolve(__dirname, '../../scripts/server-only-stub.js'),
+    },
   },
 });

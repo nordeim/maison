@@ -10,9 +10,12 @@ import { NextResponse } from 'next/server';
 
 import { env } from '@maison/config';
 
-const webhookSecret = env.SANITY_WEBHOOK_SECRET;
-
 export async function POST(req: Request) {
+  // Read env var lazily inside the handler (not at module load) to avoid
+  // the v12-style createEnv proxy throw on client-side evaluation.
+  // Per REMEDIATION_PLAN_v13 Task 3.
+  const webhookSecret = env.SANITY_WEBHOOK_SECRET;
+
   if (!webhookSecret) {
     console.error('[sanity-webhook] SANITY_WEBHOOK_SECRET not set');
     return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });

@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -9,5 +10,11 @@ export default defineConfig({
     // and blocks `turbo test`. Matches the Stillwater reference pattern
     // (packages/email, packages/auth, packages/payments).
     passWithNoTests: true,
+  },
+
+  resolve: {
+    alias: {
+      'server-only': resolve(__dirname, '../../scripts/server-only-stub.js'),
+    },
   },
 });

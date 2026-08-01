@@ -816,3 +816,41 @@ New E2E finding:
 | `pnpm format:check` | clean ✅ | clean ✅ |
 | `pnpm test` | 297 / 9 pkgs ✅ | 297 / 9 pkgs ✅ (+8 contract tests, -8 removed broken-link tests) |
 | `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+---
+
+## v13 Remediation (2026-08-01) — CRITICAL hotfix + server-only guards
+
+**Plan:** `docs/REMEDIATION_PLAN_v13.md`
+**Approach:** E2E testing of live site (agent-browser) found a CRITICAL hydration crash; root cause traced to v12 env.ts accessing server-side env var at module load without a server-side guard. Hotfix pushed immediately, then skill-compliance audit found the same pattern class in 7 other modules.
+
+### CRITICAL defect: Client-side hydration crash (hotfixed)
+
+**Symptom:** Live site `https://maison.jesspete.shop/` showed "This page couldn't load" — server returned HTTP 200 with correct HTML, but React failed to hydrate.
+
+**Root cause:** `packages/config/src/env.ts` called `warnOnAuthUrlMismatch(env.BETTER_AUTH_URL, env.NEXT_PUBLIC_APP_URL)` at module load time. The `createEnv()` proxy from `@t3-oss/env-core` throws when server-side env vars are accessed on the client (`isServer=false`). Since `env.ts` is imported by `site.ts` → root layout, this broke client-side hydration of the entire app.
+
+**Hotfix (commit `43d07d2e`):** Wrapped the call in `if (typeof globalThis !== 'undefined' && typeof globalThis.window === 'undefined')` so it only runs on the server. Locked by `env-server-only.contract.test.ts` (3 tests).
+
+### Tasks completed (TDD)
+
+| Task | Issue | Fix | Contract test |
+|---|---|---|---|
+| 1 | CRITICAL: env.ts hydration crash | Server-side guard on warnOnAuthUrlMismatch call | `env-server-only.contract.test.ts` (3 tests) |
+| 2 | 7 server-only modules missing `import 'server-only'` guard | Added `import 'server-only'` to auth/config, db/index, payments/client, email/send, auth/resend-client, api/context, api/trpc | `server-only-guards.contract.test.ts` (7 tests) |
+| 3 | Webhook routes access env.SERVER_VAR at module load (v12-pattern) | Moved env reads inside POST handler (lazy) in sanity + stripe webhook routes | (no test — mechanical) |
+| 4 | Vitest configs missing `server-only` stub alias | Added `server-only` stub alias to all 9 vitest configs + installed `server-only` package as devDep | (no test — config) |
+
+### Skill-compliance audit results
+
+Audited against 3 skills (`nextjs16-react19-tailwindv4-trpcv11-drizzle-better-auth`, `nextjs-typescript-patterns` v1.5, `nextjs16-react19-tailwind4-better-auth-monorepo`). Found the v12 bug was an instance of a broader pattern: **server-only code running at module load time in client-importable modules**. Fixed all instances.
+
+### Verification gates — post-v13
+
+| Gate | Pre-v13 | Post-v13 |
+|---|---|---|
+| `pnpm check-types` | 10/10 ✅ | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ | clean ✅ |
+| `pnpm test` | 299 / 9 pkgs ✅ | 313 / 9 pkgs ✅ (+14 contract tests) |
+| `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |

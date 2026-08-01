@@ -1,3 +1,4 @@
+import 'server-only';
 /**
  * Maison — tRPC router factory, context type, and procedure tiers
  *

@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
@@ -32,7 +34,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/src',
+      '@': resolve(__dirname, 'src'),
+      // Stub `server-only` so tests can transitively import server-only
+      // modules without throwing. Per skill §13.3 + Lesson 89.
+      'server-only': resolve(__dirname, '..', '..', 'scripts', 'server-only-stub.js'),
     },
   },
 });

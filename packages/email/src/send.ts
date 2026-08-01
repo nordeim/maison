@@ -1,3 +1,4 @@
+import 'server-only';
 /**
  * Maison — Send email helper
  *
