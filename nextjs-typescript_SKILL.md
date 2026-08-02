@@ -1735,7 +1735,7 @@ React.FormEvent<HTMLFormElement>
 Fix:
 
 ```ts
-React.SubmitEvent<HTMLFormElement>
+React.SubmitEvent
 ```
 
 Why:
@@ -3164,7 +3164,7 @@ function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 Better:
 
 ```ts
-function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+function onSubmit(e: React.SubmitEvent) {
   e.preventDefault();
 }
 ```
@@ -5876,7 +5876,7 @@ This supplement documents 8 lessons from the v15-v18 remediation arc.
 1. Add `tsconfig.config.json` to each package with `"include": ["*.config.ts", "*.config.tsx"]`.
 2. Update `check-types` script to run both: `"tsc -p tsconfig.config.json --noEmit && tsc --noEmit"`.
 
-**Contract test:** `tsconfig-include.contract.test.ts` — 9 tests, asserts all root configs are included and type-check clean.
+**Contract test:** `tsconfig-include.contract.test.ts` — 9 tests, asserts tsconfig.config.json include globs cover every root config file. Type-check cleanliness is enforced by the per-package `check-types` script, not this test.
 
 **Lesson:**
 > A green `check-types` can hide latent errors if include globs are too narrow. Always add a `tsconfig.config.json` + dual-check script for root config files.
@@ -5888,7 +5888,7 @@ This supplement documents 8 lessons from the v15-v18 remediation arc.
 **Root cause:** ESLint flat config requires each package to have its own config file that imports the shared config directly (no `FlatCompat`). The shared config (`@maison/eslint-config`) must export a flat array with proper `exports`.
 
 **Fix:**
-1. Create `eslint.config.mjs` in each of 10 consumer packages (7 `@maison/*` + `services/workers` + `apps/web` + `apps/studio`).
+1. Create `eslint.config.mjs` in each of 11 consumer packages (7 `@maison/*` + `tooling/tailwind` + `services/workers` + `apps/web` + `apps/studio`).
 2. Import shared config directly: `import sharedConfig from '@maison/eslint-config'; export default [...sharedConfig];`
 3. Add per-package override blocks downgrading noisy type-aware rules to `warn` (Drizzle `or()`/`and()` false positives, `@typescript-eslint/no-unnecessary-condition` on nullish coalescing, etc.).
 
@@ -5897,7 +5897,7 @@ This supplement documents 8 lessons from the v15-v18 remediation arc.
 
 ## 16.4 TS-12: Zod v4 native API migration — systematic pattern
 
-**Symptom:** 43 deprecated `z.string().uuid()` / `.url()` / `.email()` / `.datetime()` calls across 12 files; Zod v4 mandates native top-level forms.
+**Symptom:** Pre-migration inventory showed 40 deprecated `z.string().uuid()` / `.url()` / `.email()` / `.datetime()` calls across 12 files; Zod v4 mandates native top-level forms. Post-migration state: zero deprecated calls, 40 v4-native API sites across 12 files.
 
 **Root cause:** Zod v4 deprecated the chained-string methods in favor of native string-format validators: `z.uuid()`, `z.url()`, `z.email()`, `z.iso.datetime()`.
 
@@ -5937,7 +5937,7 @@ const x = value;
 
 ## 16.6 REACT-7: `||` → `??` for empty-string preservation in form fields
 
-**Symptom:** 3 sites in `trade.ts` used `input.field || null` where `field` was `z.url().optional().or(z.literal(''))` — empty string `''` is a valid input, but `||` coerces it to `null`.
+**Symptom:** 3 sites in `trade.ts` used `input.field || null` where `field` was an optional string (`z.string().optional()` for instagram/projectTypes, `z.url().optional().or(z.literal(''))` for website) — empty string `''` is a valid input, but `||` coerces it to `null`.
 
 **Root cause:** JavaScript's `||` treats `''` as falsy. The nullish coalescing operator `??` only falls through on `null`/`undefined`, preserving `''`.
 
@@ -5948,18 +5948,18 @@ const x = value;
 
 ## 16.7 SECURITY-3: Email template apostrophe escaping + PII-redacted logging
 
-**Symptom:** 5 unescaped apostrophes in `OrderConfirmation.tsx` / `WelcomeMember.tsx` (JSX `react/no-unescaped-entities` violations). Separately, 13 production sites logged PII (email, message body, Stripe payload).
+**Symptom:** 5 unescaped apostrophes in `OrderConfirmation.tsx` / `WelcomeMember.tsx` were remediated (now use `&apos;`). Separately, 3 production runtime sites logged PII (email, message body, Stripe payload) — remediated to `console.warn` with `(PII redacted)` markers.
 
 **Fix:**
 1. Replace `'` → `&apos;` in all JSX text nodes (mechanical).
 2. Adopt `(PII redacted)` logging pattern:
    ```ts
    // Contact form
-   console.log('[contact] Submission received (PII redacted)');
+   console.warn('[contact] Submission received (PII redacted)');
    // Newsletter
-   console.log('[newsletter] New subscriber from ${source} (PII redacted)');
+   console.warn('[newsletter] New subscriber from ${input.source} (PII redacted)');
    // Stripe webhook
-   console.log('[stripe-webhook] Order ${order.orderNumber} confirmed + email sent (PII redacted)');
+   console.warn('[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)');
    ```
 
 **Lesson:**
@@ -5969,7 +5969,7 @@ const x = value;
 
 **Symptom:** 11 form handlers used deprecated `React.FormEvent<HTMLFormElement>` (or `React.SyntheticEvent<HTMLFormElement>`).
 
-**Fix:** Migrate to `React.SubmitEvent<HTMLFormElement>` — matches the `onSubmit` handler type exactly and retains `.preventDefault()`.
+**Fix:** Migrate to `React.SubmitEvent` — matches the `onSubmit` handler type exactly and retains `.preventDefault()`.
 
 **Contract test:** `react-submit-event.contract.test.ts` — 1 test, asserts zero `React.SyntheticEvent<HTMLFormElement>` in `apps/web/src` production code. (Note: test only asserts absence; a positive-presence assertion for `React.SubmitEvent` is a future enhancement.)
 
@@ -6004,7 +6004,7 @@ const x = value;
 |---|---|---|
 | Unescaped apostrophe in JSX | `We've` in JSX text | Replace `'` → `&apos;` |
 | PII in structured logs | `console.log(user.email, message)` | Use `(PII redacted)` pattern; log only IDs/types/source |
-| Deprecated `FormEvent` | React 19 warns on `React.FormEvent<HTMLFormElement>` | Use `React.SubmitEvent<HTMLFormElement>` |
+| Deprecated `FormEvent` | React 19 warns on `React.FormEvent<HTMLFormElement>` | Use `React.SubmitEvent` |
 
 ## 17.4 Security Anti-Patterns
 
@@ -6086,11 +6086,11 @@ const website = input.website || null;
 ### Pattern: PII-redacted logging (Skill §13.10)
 ```ts
 // Contact form
-console.log('[contact] Submission received (PII redacted)');
+console.warn('[contact] Submission received (PII redacted)');
 // Newsletter
-console.log('[newsletter] New subscriber from ${source} (PII redacted)');
+console.warn('[newsletter] New subscriber from ${input.source} (PII redacted)');
 // Stripe webhook
-console.log('[stripe-webhook] Order ${order.orderNumber} confirmed + email sent (PII redacted)');
+console.warn('[stripe] Order ${order.orderNumber} confirmed + email sent (PII redacted)');
 ```
 
 ### Pattern: JSON-LD XSS prevention
@@ -6104,7 +6104,7 @@ import { escapeForScriptContext } from '@/lib/utils';
 ### Pattern: React 19 handler-specific event types
 ```ts
 // Good
-const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.SubmitEvent) => {
   e.preventDefault();
   // ...
 };

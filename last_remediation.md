@@ -1062,3 +1062,31 @@ function getNextTier(current: keyof typeof TIER_THRESHOLDS): keyof typeof TIER_T
 | `pnpm format:check` | clean ✅ | clean ✅ |
 | `pnpm test` | 391 / 9 pkgs ✅ | 397 / 9 pkgs ✅ (+6 loyalty tests) |
 | `pnpm build` | 10/10 ✅ (42 routes) | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
+
+---
+
+## v19 Remediation (2026-08-01) — nextjs-typescript_SKILL.md v1.6 prose corrections
+
+**Plan:** `docs/REMEDIATION_PLAN_v19.md`
+**Approach:** The user's `status.md` validation report validated the v1.6 SKILL.md diff (commit `f56ccc8a`) against the codebase and found 6 prose-inaccuracy classes. This commit applies all 6 corrections.
+
+### Corrections applied (per status.md validation report)
+
+| # | Section | Issue | Fix |
+|---|---|---|---|
+| 1 | §16.2 | "asserts all root configs are type-check clean" — test only asserts inclusion coverage, doesn't run tsc | Changed to: "asserts tsconfig.config.json include globs cover every root config file. Type-check cleanliness is enforced by the per-package check-types script, not this test." |
+| 2 | §16.3 | "10 consumer packages" — actual is 11 (omitted tooling/tailwind) | Changed to "11 consumer packages" + added tooling/tailwind to list |
+| 3 | §16.4 | "43 deprecated calls" — conflates pre-migration inventory with post-migration state (actual: 40 sites, zero deprecated) | Reframed as pre-migration inventory + stated post-state as "zero deprecated, 40 native-API sites across 12 files" |
+| 4 | §16.6 | "field was z.url().optional().or(z.literal(''))" — only website uses that type; instagram + projectTypes are z.string().optional() | Reframed to distinguish the 3 fields with their actual types |
+| 5 | §16.7 | Example log strings used console.log (actual: console.warn), [stripe-webhook] (actual: [stripe]), ${source} (actual: ${input.source}); "5 unescaped" / "13 PII sites" framed as current violations (actual: already remediated) | Fixed all 3 log strings to console.warn + correct prefixes/variables; reframed counts as historical scope |
+| 6 | §16.8/§17.3/§18.4 | "React.SubmitEvent<HTMLFormElement>" — @types/react@19.2.17 doesn't export this generic type; production code uses bare React.SubmitEvent | Replaced all 5 instances of React.SubmitEvent<HTMLFormElement> with bare React.SubmitEvent |
+
+### Verification gates — post-v19
+
+| Gate | Post-v19 |
+|---|---|
+| `pnpm check-types` | 10/10 ✅ |
+| `pnpm lint` | 12/12 ✅ |
+| `pnpm format:check` | clean ✅ |
+| `pnpm test` | 9/9 pkgs ✅ |
+| `pnpm build` | 10/10 ✅ (42 routes: 16○ + 26ƒ) |
