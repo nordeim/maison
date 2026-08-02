@@ -1,97 +1,117 @@
+Two strong findings: DEP-9's "10 consumer packages" is wrong (actually 11, omitting tooling/tailwind), and the historical framing is misleading. Now verifying the Zod v4 migration claim (the most numerically specific — 43 sites, 167 tests).
+✓General Task — Verify TS-12 Zod v4 migration claims
+↳ 14 toolcalls · 44m 59s
+ctrl+x down view subagents
+TS-12 largely holds — 167 tests, 4 email files, 4 patterns all exact matches. Only the headline "43 calls across 12 files" conflates pre-migration inventory with post-migration state (actual: 40 v4-native sites across 12 files, zero deprecated). Now verifying §16.5 (non-null assertions) and §16.6 (||→??).
+✓General Task — Verify TS-13 non-null assertion claims
+↳ 12 toolcalls · 58m 5s
+ctrl+x down view subagents
+Substantive finding on TS-13: the regex itself doesn't exclude Drizzle )! — that exclusion is via file-list omission of products.ts. The prose claims the regex does it. Otherwise numbers (6 tests, 6 files) hold. Now §16.6 (||→?? in trade.ts) and §16.7 (PII logging + apostrophes).
+✓General Task — Verify REACT-7 || vs ?? in trade.ts
+↳ 5 toolcalls · 40m 39s
+ctrl+x down view subagents
+Δ(v): the "3 sites with z.url().optional().or(z.literal(''))" framing is wrong — only website uses that type; instagram + projectTypes are z.string().optional(). All 3 are correctly migrated to ?? null, so the substance holds. Now §16.7 (PII + apostrophes) and §16.8 (SubmitEvent).
+✓General Task — Verify SECURITY-3 PII logging + apostrophe escaping
+↳ 17 toolcalls · 49m 36s
+ctrl+x down view subagents
+Several discrepancies captured for §16.7. Now the final verification of §16.8 (React 19 SubmitEvent) and the pattern/anti-pattern spot-checks.
+✓General Task — Verify REACT-8 SubmitEvent migration + pattern snippets
+↳ 11 toolcalls · 20m 36s
+ctrl+x down view subagents
+Δ found for §16.8: the React.SubmitEvent<HTMLFormElement> prose is type-syntax wrong (React 19's SubmitEvent is non-generic — actual code uses bare React.SubmitEvent with 11 files / 12 handlers). Substantive: copying the <HTMLFormElement> suffix from the deprecated FormEvent type without adjusting for the API change. The "11 migrated" count is corroborated. Now the final pattern/anti-pattern cross-checks via parallel reads.
+✓General Task — Verify §17/§18 patterns match codebase
+↳ 11 toolcalls · 30m 22s
+ctrl+x down view subagents
+Final confirmations: escapeForScriptContext is exactly 5-char canonical — accurate. But §17.3's React.SubmitEvent<HTMLFormElement> proposed replacement is a phantom: @types/react@19.2.17 doesn't export React.SubmitEvent at all — the production code actually uses bare React.SubmitEvent from the global DOM lib. Now compiling the validation report.
 # Todos
-[✓] Catalog all concrete code-change claims from session_log_3.md (v10-v16) into verifiable assertions
-[✓] Verify v10 claims: SortSelect Suspense, 38 unused deps removed, tsconfig.config.json in 7 pkgs, eslint.config.mjs in 11 pkgs, @maison/ui vitest config
-[✓] Verify v11 claims: TradeForm useSession/ClientOnly, webhook 200-on-error, atomic checkout txn, Stripe idempotency key, console.log cleanup
-[✓] Verify v12 claims: footer links fixed, compound cursor pagination in products.list, rate-limited procedure builder, BETTER_AUTH_URL warning, non-null cleanup
-[✓] Verify v13 claims: server-only guards in 7 modules, vitest stub aliases, env.ts server-side guard
-[✓] Verify v14 claim: server-only guard removed from db client
-[✓] Verify v15 claims: search cursor pagination, useSearchParams Suspense boundary
-[✓] Verify v16 claims: Zod v4 migration across 9 files, non-null cleanup, Dependabot config, react-compiler devDep
-[✓] Verify contract test files exist and lock the claims
-[✓] Run validation gates (check-types, lint, test, build) and document discrepancies vs session-log claims
-[✓] Produce final validation report listing each claim: CONFIRMED / DISCREPANCY / UNVERIFIABLE with file:line evidence
-Validation complete. Full report written to docs/SESSION_LOG_3_VALIDATION_REPORT.md.
-Validation Summary
-42 claims from docs/session_log_3.md (v10–v16 remediation cycles) verified against codebase at HEAD f0fb616 (local skills/ stub excluded as instructed):
-Verdict	Count	Pattern
-CONFIRMED	35	Code matches log exactly, locked by passing contract tests
-DISCREPANCY	6	Loose-count overreach or wording imprecision (invariant still holds)
-MISSING	0	None of the claimed final-state invariants are absent
-Live gates at HEAD: check-types 10/10 · lint 12/12 (0 errors) · format clean · test 487 (9 pkgs, web=389 exactly matches) · build 10/10 with 42 routes = 16 ○ + 26 ƒ — confirmed against the v10 routing-drift fix.
-The six discrepancies (all minor, none break invariants):
-1. V10 #2 — "38 unused deps" wording loose (commit=38, contract-asserts=37, diff=43 incl. transitive-dep reverts). Live: 37 unique avoided.
-2. V11 #5 — "13 console.log → console.warn" overreach. ~19 console.log remain in CLI/script files (packages/db/src/{scripts,seed}, services/workers/src) that were never in the v11 scope (the scoped runtime-PII sites in webhooks.ts and stub senders are properly redacted to console.warn).
-3. V13 #5 — "7 tests" for server-only-guards was accurate at v13-boundary; V14 intentionally dropped db from the loop → test now generates 6 cases (documented in test source comments at lines 28-32).
-4. V16 #2a — products.ts Drizzle-necessary ! count is 5 (lines 75, 83, 92, 106, 110), not the claimed 4.
-5. V16 #2b — loyalty.ts:196 retains one residual tiers[idx + 1]! array-index non-null assertion not swept by the cleanup pattern. The genuine "log-implied live defect" of all six.
-6. V16 #4 — babel-plugin-react-compiler devDep lives in apps/web/package.json:54 (not the root package.json implied by the commit-message wording); the "flag reverted/deferred" half of the claim is CONFIRMED (apps/web/next.config.ts:40-43).
-Bottom line: session log is substantially accurate — every locked invariant holds at HEAD and all gates pass. No claim is fabricated/missing. The discrepancies are count/locus/wording imprecision, mostly already self-documented in the test source or commit messages.
-
----
-
-Yes — outstanding issues from the validation:
-Genuine Defects (log-implied, code-present)
-1. loyalty.ts:196 residual non-null assertion — tiers[idx + 1]! remains. V16 claimed all 5 loyalty ! were replaced with TRPCError guards; this array-index one was missed. Should be tiers[idx + 1] ?? null with a downstream guard, or a TRPCError(INTERNAL_SERVER_ERROR) throw matching the cleanup pattern. (Other 5 file paths in V16 #2b are clean; only loyalty leaks one.)
-2. products.ts under-counted ! in v16 commit message (claimed 4, actual 5 at lines 75, 83, 92, 106, 110). Not a code defect but a doc-accuracy issue — the v16 commit message could be amended to read "...(4 intentional Drizzle-or()/and() )! ... (1 intentional and(...))! push)".
-Loose-Wording Items (cosmetic, no live defect)
-3. ~19 console.log remain in CLI/seed stubs (packages/db/src/{scripts,seed}/*, services/workers/src/*) — these were never in v11's scope but the log's "13 production-code sites replaced" wording makes it sound like a sweep. Either restrict the wording to "13 runtime-PII logging sites" in last_remediation.md, or extend the sweep to CLI scripts (low value — these are dev-only paths).
-4. Server-only-guards contract test now reports 6 tests (v14 dropped db intentionally). Log line 379 + commit-message still claims "7 tests". Doc-count drift; the test source itself correctly documents the v14 decision — only the summary docs (session-log transcript, last_remediation.md) need updating to reflect "6 tests today".
-5. Lint warning count drift — log claims "108 warnings" at v16; current rg of @maison/api alone shows 39. Likely accumulated drift across 76f9caf, 2e5c7b2, 043c254 (v13-15 hotfix commits that post-date v10-v16 work) added warnings. Worth a fresh pnpm lint 2>&1 | rg -c warning if the warning count is tracked as a metric in docs.
-Logosed-Items Already Documented as Deferred in Repo
-From the session log itself (lines 122, 228, 457):
-- React Compiler flag — installed as devDep, but reactCompiler: true flag deferred until Next.js 16.3+ types add it (v17 candidate).
-- Rate-limiting on all mutations — v11 unblocked in v12 (protectedRateLimitedProcedure builder), but only wired into 3 payment mutations; other protected mutations still use plain protectedProcedure.
-- ESLint deferral block removal — per-package overrides downgrade 16 noisy type-aware rules to warn; not yet upgraded back to error (low value — would re-introduce noise).
-Recommendation
-The only one I'd act on now is #1 (loyalty.ts:196), since it's the literal log-vs-code disagreement and is a 2-line TDD fix that mirrors the documented cleanup pattern. Items 2–5 are wording/doc-count cosmetics that can be folded into the next doc-alignment pass. Want me to apply the loyalty.ts fix via TDD?
-
----
-
-Goal
-- Validate docs/session_log_3.md claims (remediation v10–v16) against the Maison codebase; fix the one genuine outstanding defect found (residual non-null assertion in loyalty.ts:196) via TDD, then update related documentation.
-Constraints & Preferences
-- Skip the local skills/ folder entirely (removed locally for disk space; still tracked in git — git operations will show those deletions).
-- Follow strict TDD: RED → GREEN → REFACTOR.
-- Apply the fix meticulously, then update documentation (user's explicit final requirement).
-- Repo remote is SSH: origin git@github.com:nordeim/maison; do not push unless requested.
-Progress
-Done
-- Full validation of session_log_3.md at HEAD f0fb616: 42 claims → 35 CONFIRMED, 6 DISCREPANCY, 0 MISSING.
-- Validation report written to docs/SESSION_LOG_3_VALIDATION_REPORT.md (records all 6 discrepancies and live gate state).
-- Live gates verified pre-fix: check-types 10/10 (cached), lint 12/12 (0 errors, api=39 warnings), format clean, test 487 (web=389, api=20, auth=35, db=17, payments=18, config=3, workers=5, email=0, ui=0), build 10/10 (42 routes = 16 ○ + 26 ƒ).
-- Identified 6 discrepancies; user asked which were outstanding; recommended fixing loyalty.ts:196 as the only genuine log-vs-code defect.
-- TDD RED: wrote packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts (audits 6 v16-cleanup files: loyalty, admin, account, reviews, discounts, trade; regex /[\w)\]]\s*!\s*[^=\s]|[\w)\]]!\s*$/; REPO_ROOT = 4 .. up from packages/api/src/routers/). RED confirmed: 1 failure exactly at loyalty.ts:196, 25 sibling cases pass.
-- TDD GREEN: fixed loyalty.ts:196 — tiers[idx + 1]! → const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null; return nextTier ?? null;. Contract test now 26/26 pass.
-- Api gates green: check-types ✓, full api test suite = 26 tests (was 20, +6 new), lint 40 warnings / 0 errors (net +1 vs pre-fix 39: +2 from new test template-literal warnings at lines 111/118, −1 from removed ! warning).
-- Confirmed parity: pre-existing no-unknown-cast.contract.test.ts also emits the same restrict-template-expressions warnings (lines 75, 86) — convention accepted.
-- Confirmed products.ts Drizzle-necessity ! sites at lines 75, 83, 92, 106, 110 (intentional, excluded from new contract test).
-In Progress
-- Last command incomplete/verify: ran git stash; pnpm --silent --filter @maison/api lint 2>&1 | rg "✖|loyalty.ts:"; git stash pop to compare pre-change warning counts — output was truncated mid-stash (showed many deleted: skills/... entries). Must verify the pop succeeded and working tree still contains the loyalty.ts fix + contract test.
-Blocked
-- Documentation updates NOT yet done (user's requirement): docs/last_remediation.md v16 section and docs/SESSION_LOG_3_VALIDATION_REPORT.md discrepancy #5 still need updating.
-- Commit not yet made.
-Key Decisions
-- Only genuine defect to fix: loyalty.ts:196 residual tiers[idx + 1]! (array-index non-null assertion missed by v16 cleanup). Others were wording/doc-count drifts deferred to next doc pass.
-
----
-
-All work is complete and verified. Here's the final state:
-Summary
-Fix (applied + verified):
-- packages/api/src/routers/loyalty.ts:196 — tiers[idx + 1]! rewritten to const nextTier = idx < tiers.length - 1 ? tiers[idx + 1] : null; return nextTier ?? null; (behavior-identical, no !)
-- New packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts (6 tests) — locks the invariant across the 6 v16-cleanup routers, excluding intentional Drizzle or()/and() sites in products.ts. RED confirmed the residual first (1 failure exactly at loyalty.ts:196), now GREEN 6/6.
-Gates (full re-run): check-types 10/10 · lint 12/12 (0 errors; api 40 warnings, net +1 from the new test's template literals) · format:check clean · test 493 total (api 20 → 26) · build unaffected (TS-only change).
-Docs updated:
-- docs/SESSION_LOG_3_VALIDATION_REPORT.md — V16 #2b row → RESOLVED, gate table (493 tests, 40 warnings), roll-up #5, verdict, new §Post-Validation Fix (TDD table)
-- docs/REMEDIATION_PLAN_v16.md — Task 2 "Post-v16 follow-up" note
-- AGENTS.md — api contract-test list now includes the new test; counts corrected to 6 files, 26 tests
-- Contract-test comment fixed to reference docs/REMEDIATION_PLAN_v16.md (the last_remediation.md it cited doesn't exist)
-Working tree verified clean after the earlier stash/pop interruption — no leftover stashes; skills/ deletions and your status.md / docs/status_18.md changes left untouched.
-→1 answered
-+ Thought: 401ms
-Understood — leaving everything uncommitted in the working tree:
-- M packages/api/src/routers/loyalty.ts (the fix)
-- ?? packages/api/src/routers/non-null-assertion-cleanup.contract.test.ts (new contract test)
-- M docs/SESSION_LOG_3_VALIDATION_REPORT.md, M docs/REMEDIATION_PLAN_v16.md, M AGENTS.md (docs)
-All gates pass (check-types 10/10, lint 12/12, format clean, 493 tests). Ready to commit whenever you want.
+[✓] Read full diff to enumerate every verifiable claim
+[✓] Verify §16.1 DEP-7
+[✓] Verify §16.2 DEP-8
+[✓] Verify §16.3 DEP-9
+[✓] Verify §16.4 TS-12
+[✓] Verify §16.5 TS-13
+[✓] Verify §16.6 REACT-7
+[✓] Verify §16.7 SECURITY-3
+[✓] Verify §16.8 REACT-8
+[✓] Verify §17 / §18 patterns
+[•] Compile validation report with discrepancies
+Validation Report: docs/skill_diff_out.txt vs. Maison Codebase
+The diff proposes upgrading nextjs-typescript_SKILL.md from v1.5 → v1.6, adding §16–§20 (8 new lessons, anti-pattern tables, pattern snippets, a 34-item field card). I verified every substantively falsifiable claim against the codebase. Headline numbers largely hold; prose framings and a few type-syntax claims are wrong.
+Severity legend
+- ✅ Accurate — codebase corroborates exactly
+- ⚠️ Misleading framing — true in spirit but prose distorts facts
+- ❌ Wrong — codebase contradicts the claim
+Findings by section
+§16.1 DEP-7 — Dependency hygiene contract test
+- ✅ Test count (37) — verified exactly. apps/web/src/lib/__tests__/deps-hygiene.contract.test.ts (37 tests, loop-generated: api×1, db×2, payments×1, email×3, web×30 = 37; auth/zod deliberately commented out).
+- ⚠️ "Parses package.json + scans src for imports" — WRONG description. The test only reads package.json; it contains no source-scanning logic (no readdir, no import regex). Declared "unused" deps are hardcoded literals sourced from AUDIT_REPORT.md, locked as a negative allowlist (expect(...includes(dep)).toBe(false) — i.e. "this known-unused dep must NOT be re-declared"). It does not assert "declared==used" in either direction.
+- ✅ Transitive type dep (zod in @maison/auth) is documented — in the test file's comment block (lines 39–49), not in package.json (JSON can't hold comments).
+§16.2 DEP-8 — tsconfig.config.json for root configs
+- ✅ 7 tsconfig.config.json files exist (packages/* + services/workers), all with "include": ["*.config.ts", "*.config.tsx"] (verbatim).
+- ✅ Contract test count (9) — verified by running vitest run: 9 passed. Path: apps/web/src/lib/__tests__/tsconfig-include.contract.test.ts.
+- ⚠️ "Updated check-types script" — the literal string tsc -p tsconfig.config.json --noEmit && tsc --noEmit lives in 7 per-package package.json files, NOT the repo root (which is just "turbo check-types"). True at package level; misleading at the level the prose implies.
+- ❌ "Asserts all root configs are type-check clean" — the test only asserts inclusion coverage (regex-extracts include globs, asserts each *.config.ts matches). It never invokes tsc; type-check cleanliness comes only from the per-package script, not this test. The test header itself acknowledges this gap.
+§16.3 DEP-9 — ESLint flat config per package
+- ✅ 11 consumer eslint.config.mjs files all import @maison/eslint-config and spread with the claimed pattern export default [...sharedConfig, {...}] (apps/web, apps/studio, packages/{api,auth,config,db,email,payments,ui}, services/workers — plus the shared config itself uses @eslint/js).
+- ❌ "10 consumer packages" is a miscount; it's 11. The prose's math (7 @maison/* + services/web/studio = 10) omits tooling/tailwind (@maison/tailwind-config), which is also a consumer with a full override block. The lint-scripts.contract.test.ts PACKAGES array confirms 11.
+- ✅ 33 test count for lint-scripts.contract.test.ts — verified (11 packages × 3 tests, all loop-generated).
+- ⚠️ "Drizzle or()/and() false positives" — there is no Drizzle-specific carve-out. The override block is a single generic 15-rule blanket downgrade applied identically to all packages (incl. @maison/ui, which has no Drizzle). The Drizzle )! false positives are covered by the blanket no-unnecessary-condition: "warn" downgrade, not by a scoped rule. apps/web deliberately omits the override block entirely.
+§16.4 TS-12 — Zod v4 native API migration
+- ✅ 4 email-validating files + 4 tests for zod-email.contract.test.ts — exact (contact.ts, newsletter.ts, gift-cards.ts, config/env.ts).
+- ✅ 167 tests for zod-v4-native-api.contract.test.ts — exact (independently reproduced twice: via Vitest and via rg --files | wc -l).
+- ✅ All 4 deprecated regex patterns verbatim; mechanical mappings match scripts/migrate-zod-v4.py.
+- ✅ Zero residual deprecated calls in production source (verified by rg).
+- ⚠️ "43 deprecated calls across 12 files" — conflates pre-migration inventory with post-remediation state. Current state is 40 v4-native usages across 12 files, zero deprecated. The repo's own VALIDATION_REPORT_session_log_3.md flags this: "actual 40/12". The premise count (43) is also under-sourced (the file scan yields 40, the historical log yields 36). Headline number doesn't match either measurement.
+§16.5 TS-13 — Non-null assertion cleanup
+- ✅ 6 tests, 6 audited files (loyalty, admin, account, reviews, discounts, trade) — verified by running vitest: 6 passed. v16 set; cart was a v12 target, cleanly excluded.
+- ✅ All 7 router files (incl. cart) currently clean of postfix ! — verified by rg.
+- ✅ The 7-vs-6 split reconciles cleanly: v12 (checkout/gift-cards/cart) + v16 (the 6 audited) = combined cleanup footprint; contract test locks only the v16 subset.
+- ❌/⚠️ "Regex catches postfix ! (excluding Drizzle or()/and() intentional )!)" — the regex [\w)\]]\s*!\s*[^=\s]|[\w)\]]!\s*$ DOES match )! if applied to products.ts (verified: it returns 5 hits at lines 75, 83, 92, 106, 110). Drizzle exclusion is achieved by omitting products.ts from AUDITED_FILES, not by regex behavior. The prose attributes the exclusion to the wrong mechanism.
+§16.6 REACT-7 — ||→?? in trade.ts
+- ✅ All 3 claimed sites migrated to ?? null (trade.ts:70 website, :71 instagram, :72 projectTypes). Zero residual || null.
+- ❌ "3 sites where field was z.url().optional().or(z.literal(''))" — only 1 of 3 fields (website) uses that type. instagram and projectTypes are plain z.string().optional() (not URL-typed). The remediation logic (|| coerces '' to null) is valid for all 3 (none enforce .min(1)), but tying all 3 to the URL+literal type is a type-attribution error. The skill conflates "field accepts ''" (3 fields) with "field is z.url().optional().or(z.literal(''))" (1 field).
+§16.7 SECURITY-3 — Apostrophe escaping + PII logging
+- ⚠️ "5 unescaped apostrophes" — the count (5) matches but renders the claim as a present-tense violation ("Fix: Replace ' → '"). Reality: all 5 sites already use ' — the remediation shipped. Premise-violation framing is stale.
+- ⚠️ "13 production sites logged PII" — overstated against the literal marker count: only 3 console.* calls contain (PII redacted) today (contact, newsletter, stripe). The "13" conflates cleanup scope with marker-string count.
+- ❌ "console.log ... [contact] ... [newsletter] ... [stripe-webhook]" — three inaccuracies in the example log strings:
+1. All 3 actually use console.warn, not console.log.
+2. The Stripe log uses prefix [stripe], not [stripe-webhook].
+3. The newsletter log interpolates ${input.source}, not ${source}.
+§16.8 REACT-8 — SubmitEvent migration
+- ✅ 1 test for react-submit-event.contract.test.ts — exact; test uses String.includes('React.SyntheticEvent<HTMLFormElement>') (not a regex) and asserts absence of SyntheticEvent only, as the claim's footnote acknowledges.
+- ✅ Zero residual React.FormEvent<HTMLFormElement> or React.SyntheticEvent in production apps/web/src (verified by rg).
+- ✅ "11 migrated" corroborated — actual state shows 11 files / 12 handlers using bare React.SubmitEvent (CheckoutFlow has 2 handlers → counts as 1 file).
+- ❌ "Migrate to React.SubmitEvent<HTMLFormElement>" — type-syntax error. @types/react@19.2.17 exports no React.SubmitEvent at all (the FormEvent @deprecated JSDoc only {@link}-references the global DOM SubmitEvent, which is unparameterized). The production code uses bare React.SubmitEvent with no generic. Copy-pasting the <HTMLFormElement> suffix from the deprecated FormEvent/SyntheticEvent signature without adjusting for the API difference renders the prose technically wrong as written.
+§17 — Anti-patterns tables
+- ✅ §17.4 "Raw JSON.stringify in dangerouslySetInnerHTML" + §18.3 pattern — both accurate. escapeForScriptContext at apps/web/src/lib/utils.ts:108-115 escapes exactly the "5-char canonical" (<, >, &, U+2028, U+2029) — no more, no "/'. JSON-LD usage at apps/web/src/app/(shop)/products/[slug]/page.tsx:107 matches §18.3 verbatim.
+- ❌ §17.3 React row again repeats the React.SubmitEvent<HTMLFormElement> phantom (see §16.8 above).
+- ✅ §17.2 Zod and non-null patterns accurate; || → ?? row accurate.
+§18 / §19 — Patterns + field card
+- §18.4 React pattern code block (React.SubmitEvent<HTMLFormElement>) repeats the same phantom — would not compile as written.
+- §19 field card items 26–34 are accurate summaries of the other sections; any downstream inaccuracies cascade from the parent-lesson discrepancies above.
+Summary: should the diff land?
+Acceptable to merge with patch-level fixes; do not merge verbatim. The structural skeleton (§16–§20, numbering, lesson/handbook framing) is sound, and the test counts (37, 9, 33, 167, 4, 6, 1) all match — meaning the regression locks are real. But 6 substantive prose inaccuracy classes must be corrected before a future agent trusts this as canonical:
+§	Claim	Required correction
+16.1	"Scans src for imports; asserts declared==used"	Replace with: "Negative allowlist asserting known-unused deps (per AUDIT_REPORT.md) stay removed; dep lists hardcoded, no source scan at test time."
+16.2	"Contract test asserts type-check clean"	Replace with: "Asserts tsconfig.config.json include globs cover every root config file. Type-check cleanliness is enforced by the per-package check-types script, not this test."
+16.3	"10 consumer packages"	Change to "11 consumer packages" (add tooling/tailwind); drop the "Drizzle or()/and() carve-out" language — it's a blanket 15-rule downgrade, no scoped Drizzle rule; apps/web omits the override block.
+16.4	"43 deprecated calls"	Frame as pre-migration inventory; state post-state as "zero deprecated, 40 native-API sites across 12 files" (matches repo's own VALIDATION_REPORT_session_log_3.md).
+16.6	"3 sites where field was z.url().optional().or(z.literal(''))"	Only website uses that type; instagram + projectTypes are z.string().optional(). Reframe as "fields that admit ''" not "URL-or-empty fields".
+16.7	Example log strings	Switch console.log → console.warn; [stripe-webhook] → [stripe]; ${source} → ${input.source}. Reframe "5 unescaped apostrophes" / "13 PII sites" as historical scope, not current residual.
+16.8 / 17.3 / 18.4	React.SubmitEvent<HTMLFormElement>	Change to bare React.SubmitEvent (global DOM, non-generic). Drop the <HTMLFormElement> suffix — that type doesn't exist in @types/react@19.2.17 and would not compile.
+16.5	"Regex excludes Drizzle )!"	Correct to: "Exclusion of products.ts (5 intentional Drizzle or()/and() postfix assertions) is via file-list omission from AUDITED_FILES, not regex behavior — the regex itself matches )!."
+Bonus minor: the react-submit-event.contract.test.ts header comments reference "§REACT-1 / REMEDIATION_PLAN_v17", not the §16.8 "REACT-8" identifier the diff proposes. If the diff is merged, either update the test header doc string for cross-doc consistency, or relabel §16.8 as REACT-1 to match what's locked in code.
+# Todos
+[✓] Read full diff to enumerate every verifiable claim
+[✓] Verify §16.1 DEP-7
+[✓] Verify §16.2 DEP-8
+[✓] Verify §16.3 DEP-9
+[✓] Verify §16.4 TS-12
+[✓] Verify §16.5 TS-13
+[✓] Verify §16.6 REACT-7
+[✓] Verify §16.7 SECURITY-3
+[✓] Verify §16.8 REACT-8
+[✓] Verify §17 / §18 patterns
+[✓] Compile validation report with discrepancies
+Validation complete. Verdict: merge conditionally — the diff is structurally sound and all numeric test-count claims (37, 9, 33, 167, 4, 6, 1) exactly match the codebase, but 6 prose-inaccuracy classes must be patched before a future agent treats this as canonical (most consequential: React.SubmitEvent<HTMLFormElement> doesn't exist and won't compile; "33 tests" actually means "11 packages × 3" not "10 packages"; DEP-7's test doesn't scan src; DEP-8's contract test doesn't run tsc; SECURITY-3 example log strings use wrong console level + prefix). Full per-section findings above.
 

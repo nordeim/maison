@@ -3,8 +3,6 @@ $ rm -rf .next */.next */*/.next
 $ pnpm install
 pnpm db:migrate
 pnpm db:seed
-pnpm build
-pnpm start
 
 Scope: all 14 workspace projects
 Already up to date
@@ -77,6 +75,7 @@ $ turbo db:seed --filter=@maison/db
 Cached:    0 cached, 2 total
   Time:    3.817s 
 
+$ pnpm build
 $ turbo build
 ╭───────────────────────────────────────────────────────────────────────────╮
 │                                                                           │
@@ -92,37 +91,37 @@ $ turbo build
    • Running build in 13 packages
    • Remote caching disabled
 
-@maison/db:build: cache hit, replaying logs fd2d42735500b12c
-@maison/db:build: $ tsc --build
-@maison/email:build: cache miss, executing e48f27bb832e2951
 @maison/config:build: cache hit, replaying logs 5bcba2640c3692b7
 @maison/config:build: $ tsc --build
+@maison/ui:build: cache hit, replaying logs b63f381cf7638610
+@maison/ui:build: $ tsc --build
+@maison/db:build: cache hit, replaying logs fd2d42735500b12c
+@maison/db:build: $ tsc --build
 @maison/studio:build: cache hit, replaying logs 6518e28584c69e83
+@maison/email:build: cache hit, replaying logs e48f27bb832e2951
 @maison/studio:build: $ sanity build
 ✔ Clean output folder (75ms)
 ✔ Build Sanity Studio (4702ms)
-@maison/studio:build: 
-@maison/ui:build: cache hit, replaying logs b63f381cf7638610
-@maison/auth:build: cache hit, replaying logs 641bf02c6f66c472
-@maison/ui:build: $ tsc --build
-@maison/auth:build: $ tsc
 @maison/email:build: $ tsc --build
-@maison/workers:build: cache miss, executing 4323c92df78465c0
-@maison/payments:build: cache miss, executing 25e45cbfd56ae175
+@maison/studio:build: 
+@maison/auth:build: cache hit, replaying logs 641bf02c6f66c472
+@maison/auth:build: $ tsc
+@maison/workers:build: cache hit, replaying logs 4323c92df78465c0
 @maison/workers:build: $ tsc --build
+@maison/payments:build: cache hit, replaying logs 25e45cbfd56ae175
 @maison/payments:build: $ tsc --build
-@maison/api:build: cache miss, executing cfd06c4969519f6b
+@maison/api:build: cache miss, executing 22251783ffcc7a2d
 @maison/api:build: $ tsc --build
-@maison/web:build: cache miss, executing ecab10787de36d49
+@maison/web:build: cache miss, executing d824d61480dc7cbe
 @maison/web:build: $ next build
 @maison/web:build: ▲ Next.js 16.2.12 (Turbopack)
 @maison/web:build: - Environments: .env.local
 @maison/web:build: 
 @maison/web:build:   Creating an optimized production build ...
-@maison/web:build: ✓ Compiled successfully in 19.8s
-@maison/web:build: ✓ Finished TypeScript in 14.0s 
+@maison/web:build: ✓ Compiled successfully in 14.6s
+@maison/web:build: ✓ Finished TypeScript in 15.7s 
 ⚠ Using edge runtime on a page currently disables static generation for that page
-@maison/web:build: ✓ Collecting page data using 3 workers in 2.6s 
+@maison/web:build: ✓ Collecting page data using 3 workers in 3.2s 
 [account orders] Failed to fetch: Error: Dynamic server usage: Route /account/orders couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
 @maison/web:build:     at y (.next/server/chunks/ssr/0m8i_next_dist_0b_i2de._.js:1:12426)
 @maison/web:build:     at m (.next/server/chunks/ssr/_1jb81jv._.js:1:15871)
@@ -231,8 +230,8 @@ $ turbo build
 @maison/web:build:   description: "Route /admin/trade couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
 @maison/web:build:   digest: 'DYNAMIC_SERVER_USAGE'
 @maison/web:build: }
-@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 862ms
-@maison/web:build: ✓ Finalizing page optimization in 37ms 
+@maison/web:build: ✓ Generating static pages using 3 workers (37/37) in 863ms
+@maison/web:build: ✓ Finalizing page optimization in 12ms 
 @maison/web:build: 
 @maison/web:build: Route (app)
 @maison/web:build: ┌ ○ /
@@ -285,13 +284,15 @@ $ turbo build
 @maison/web:build: 
 
  Tasks:    10 successful, 10 total
-Cached:    5 cached, 10 total
-  Time:    54.096s 
+Cached:    8 cached, 10 total
+  Time:    43.805s 
 
+(venv) pete@pop-os:/home/project/maison
+$ pnpm start
 $ pnpm --filter=@maison/web start
 $ next start
 ▲ Next.js 16.2.12
 - Local:         http://localhost:3000
 - Network:       http://192.168.2.132:3000
-✓ Ready in 187ms
+✓ Ready in 196ms
 
