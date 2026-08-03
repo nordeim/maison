@@ -42,7 +42,7 @@
     "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
-    "@types/pg": "^8.11.10",
+    "@types/pg": "^8.20.1",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
