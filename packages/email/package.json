@@ -23,14 +23,14 @@
   },
   "dependencies": {
     "react": "^19.2.7",
-    "resend": "^6.17.0"
+    "resend": "^6.18.1"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
-    "@types/react": "^19.2.17",
-    "@vitejs/plugin-react": "^6.0.4",
+    "@types/react": "^19.2.18",
+    "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^9.39.4",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"
