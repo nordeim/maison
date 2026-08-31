@@ -17,17 +17,17 @@
   "dependencies": {
     "@maison/db": "workspace:*",
     "@maison/email": "workspace:*",
-    "@trigger.dev/sdk": "^4.0.0",
+    "@trigger.dev/sdk": "^4.5.13",
     "drizzle-orm": "^0.45.2",
-    "zod": "^4.4.3"
+    "zod": "^4.5.1"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
     "eslint": "^9.39.4",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.12",
     "typescript": "^5.9.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   }
 }

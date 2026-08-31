@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
-    "@trigger.dev/sdk": "^4.5.7",
-    "zod": "^4.4.3"
+    "@trigger.dev/sdk": "^4.5.13",
+    "zod": "^4.5.1"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
@@ -44,6 +44,6 @@
     "@types/node": "^22.19.15",
     "eslint": "^9.39.4",
     "typescript": "^5.9.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   }
 }

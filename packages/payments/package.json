@@ -26,7 +26,7 @@
     "@maison/db": "workspace:*",
     "@maison/email": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "stripe": "^22.3.0"
+    "stripe": "^22.6.0"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
@@ -34,6 +34,6 @@
     "@types/node": "^26.1.0",
     "eslint": "^9.39.4",
     "typescript": "^5.9.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   }
 }
