@@ -27,10 +27,10 @@
   },
   "dependencies": {
     "@maison/db": "workspace:*",
-    "better-auth": "^1.6.23",
-    "drizzle-orm": "^0.45.2",
-    "resend": "^6.17.0",
-    "zod": "^4.4.3"
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "^0.45.3",
+    "resend": "^6.30.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
