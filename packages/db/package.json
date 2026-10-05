@@ -34,19 +34,19 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
-    "drizzle-orm": "^0.45.2",
-    "pg": "^8.13.1"
+    "@neondatabase/serverless": "^1.2.0",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@maison/eslint-config": "workspace:*",
     "@maison/typescript-config": "workspace:*",
     "@types/node": "^26.1.0",
-    "@types/pg": "^8.11.10",
+    "@types/pg": "^8.23.1",
     "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.31.10",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9.39.4",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"
   }
